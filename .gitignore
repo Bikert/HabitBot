@@ -1,0 +1,30 @@
+# Go build output
+/bin/
+/build/
+/out/
+
+# Go dependencies
+/vendor/
+
+# IDE configs (GoLand, JetBrains)
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# Test coverage files
+coverage.out
+
+# Compiled binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
