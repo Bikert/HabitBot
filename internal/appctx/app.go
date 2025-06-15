@@ -43,7 +43,7 @@ func BuildApp() *AppContext {
 	fmt.Println("bot is worked Token = ", botAPI.Token)
 
 	fmt.Println("connecting to db ...")
-	database, err := db.InitDB("habitbot.db")
+	database, err := db.InitDB("HabitMuseDB.db")
 	if err != nil {
 		fmt.Println("not connected to db", err)
 		log.Panic(err)

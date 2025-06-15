@@ -19,18 +19,18 @@ func InitSessionService(db *sql.DB) *SessionService {
 func (m *SessionService) GetOrCreate(userID int64) *Session {
 	ctx := context.Background()
 
-	row := m.DB.QueryRowContext(ctx, `SELECT scenario, step, data FROM sessions WHERE user_id = $1`, userID)
+	row := m.DB.QueryRowContext(ctx, `SELECT next_step, previous_step, data FROM sessions WHERE user_id = $1`, userID)
 
-	var scenario, step string
+	var next_step, previous_step string
 	var dataJSON []byte
 
-	err := row.Scan(&scenario, &step, &dataJSON)
+	err := row.Scan(&next_step, &previous_step, &dataJSON)
 	if err == sql.ErrNoRows {
 		sess := &Session{
-			UserID:   userID,
-			Scenario: "welcome",
-			Step:     "new_user",
-			Data:     map[string]string{},
+			UserID:       userID,
+			NextStep:     "new_user",
+			PreviousStep: "",
+			Data:         map[string]string{},
 		}
 		m.Save(sess)
 		return sess
@@ -46,10 +46,10 @@ func (m *SessionService) GetOrCreate(userID int64) *Session {
 	}
 
 	return &Session{
-		UserID:   userID,
-		Scenario: scenario,
-		Step:     step,
-		Data:     data,
+		UserID:       userID,
+		NextStep:     next_step,
+		PreviousStep: previous_step,
+		Data:         data,
 	}
 }
 
@@ -63,11 +63,11 @@ func (m *SessionService) Save(sess *Session) {
 	}
 
 	_, err = m.DB.ExecContext(ctx, `
-        INSERT INTO sessions (user_id, scenario, step, data)
+        INSERT INTO sessions (user_id, next_step, previous_step, data)
         VALUES ($1, $2, $3, $4)
         ON CONFLICT (user_id)
-        DO UPDATE SET scenario = $2, step = $3, data = $4
-    `, sess.UserID, sess.Scenario, sess.Step, dataJSON)
+        DO UPDATE SET next_step = $2, previous_step = $3, data = $4
+    `, sess.UserID, sess.NextStep, sess.PreviousStep, dataJSON)
 
 	if err != nil {
 		log.Println("Ошибка при сохранении сессии:", err)

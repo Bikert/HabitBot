@@ -9,7 +9,7 @@ type User struct {
 	UserID    int64
 	UserName  string
 	FirstName string
-	LastMane  string
+	LastName  string
 	CreateAt  time.Time
 }
 
@@ -33,13 +33,13 @@ func (userManager *Service) SaveOrCreate(user User) (User, error) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.UserID, user.UserName, user.FirstName, user.LastMane, time.Now())
+	_, err = stmt.Exec(user.UserID, user.UserName, user.FirstName, user.LastName, time.Now())
 	return user, err
 }
 
 func (userManager *Service) Get(id int64) (User, error) {
 	row := userManager.db.QueryRow("SELECT id, username, first_name, last_name FROM users WHERE id = ?", id)
 	var user User
-	err := row.Scan(&user.UserID, &user.UserName, &user.FirstName, &user.LastMane)
+	err := row.Scan(&user.UserID, &user.UserName, &user.FirstName, &user.LastName)
 	return user, err
 }

@@ -1,10 +1,10 @@
 package session
 
 type Session struct {
-	UserID   int64
-	Step     string
-	Scenario string
-	Data     map[string]string
+	UserID       int64
+	NextStep     string
+	PreviousStep string
+	Data         map[string]string
 }
 
 type Repository interface {

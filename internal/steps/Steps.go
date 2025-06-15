@@ -2,27 +2,23 @@ package steps
 
 import (
 	"HabitMuse/internal/appctx"
-	"fmt"
+	"HabitMuse/internal/constants"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type StepFunc func(ctx *appctx.BotContext) error
 
-var defaultStep = "welcome"
-
-var scenarios = map[string]map[string]StepFunc{
-	"welcome": {
-		"welcome":      Welcome,
-		"regestration": newUser,
-	},
-	"creatingNewHabit": {
-		"askHabitName":           askHabitName,
-		"receiveAndSaveNewHabit": receiveAndSaveNewHabit,
-	},
+var stepsMap = map[string]StepFunc{
+	constants.MainMenu:                         MainMenu,
+	constants.Registration.VerifyProfile:       verifyUserProfile,
+	constants.Registration.LastNameReceive:     lastNameReceive,
+	constants.Registration.FirstNameReceive:    firsNameReceive,
+	constants.HabitCreation.AskTitle:           askHabitName,
+	constants.HabitCreation.ReceiveNameAndSave: receiveAndSaveNewHabit,
 }
 
 var callBackMap = map[string]StepFunc{
-	"create_habit": askHabitName,
+	constants.HabitCreation.AskTitle: askHabitName,
 }
 
 func GetStepFuncByCallBack(callback string) StepFunc {
@@ -32,40 +28,20 @@ func GetStepFuncByCallBack(callback string) StepFunc {
 	return Fallback
 }
 
-func GetStepFunc(scenario, step string) StepFunc {
-	stepsMap, ok := scenarios[scenario]
-	if !ok {
-		return Welcome
-	}
+func GetStepFunc(step string) StepFunc {
 	if step == "" {
-		return stepsMap[defaultStep]
+		return MainMenu
 	}
 	if fn, ok := stepsMap[step]; ok {
 		return fn
 	}
-	return Welcome
-}
-
-func Welcome(ctx *appctx.BotContext) error {
-	buttons := [][]tgbotapi.InlineKeyboardButton{
-		{
-			tgbotapi.NewInlineKeyboardButtonData("Создать привычку", "create_habit"),
-			tgbotapi.NewInlineKeyboardButtonData("Заполнить трекер", "fill_tracker"),
-		},
-	}
-	markup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
-	text := fmt.Sprintf(GetResponse("welcomeMessage"), ctx.Message.From.FirstName)
-	msg := tgbotapi.NewMessage(ctx.Message.Chat.ID, text)
-	msg.ReplyMarkup = markup
-	ctx.BotAPI.Send(msg)
-	ctx.Session.Step = ""
-	return nil
+	return Fallback
 }
 
 func MainMenu(ctx *appctx.BotContext) error {
 	buttons := [][]tgbotapi.InlineKeyboardButton{
 		{
-			tgbotapi.NewInlineKeyboardButtonData("Создать привычку", "create_habit"),
+			tgbotapi.NewInlineKeyboardButtonData("Создать привычку", constants.HabitCreation.AskTitle),
 			tgbotapi.NewInlineKeyboardButtonData("Заполнить трекер", "fill_tracker"),
 		},
 	}
@@ -74,7 +50,8 @@ func MainMenu(ctx *appctx.BotContext) error {
 	msg := tgbotapi.NewMessage(ctx.Message.Chat.ID, text)
 	msg.ReplyMarkup = markup
 	ctx.BotAPI.Send(msg)
-	ctx.Session.Step = ""
+	ctx.Session.NextStep = ""
+	ctx.Session.PreviousStep = constants.MainMenu
 
 	return nil
 }
@@ -83,7 +60,6 @@ func Fallback(ctx *appctx.BotContext) error {
 	text := "Что-то пошло не так, начнём сначала."
 	msg := tgbotapi.NewMessage(ctx.Message.Chat.ID, text)
 	ctx.BotAPI.Send(msg)
-	ctx.Session.Scenario = "registration"
-	ctx.Session.Step = "greeting"
+	ctx.Session.NextStep = constants.MainMenu
 	return nil
 }

@@ -18,16 +18,6 @@ func Start(app *appctx.AppContext) {
 
 		userId := getUser(update).ID
 		user, _ := app.UserService.Get(userId)
-		//if err != nil {
-		//	u := getUser(update)
-		//	newUser := &users.User{
-		//		UserID:    u.ID,
-		//		UserName:  u.UserName,
-		//		FirstName: u.FirstName,
-		//		LastMane:  u.LastName,
-		//	}
-		//	user, _ = app.UserService.SaveOrCreate(*newUser)
-		//}
 
 		sess := app.SessionService.GetOrCreate(userId)
 		message := getMessage(update)
@@ -44,7 +34,7 @@ func Start(app *appctx.AppContext) {
 		if ifCallBack {
 			stepFunc = steps.GetStepFuncByCallBack(update.CallbackQuery.Data)
 		} else {
-			stepFunc = steps.GetStepFunc(sess.Scenario, sess.Step)
+			stepFunc = steps.GetStepFunc(sess.NextStep)
 		}
 
 		if err := stepFunc(botCtx); err != nil {
