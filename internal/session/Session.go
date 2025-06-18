@@ -6,8 +6,3 @@ type Session struct {
 	PreviousStep string
 	Data         map[string]string
 }
-
-type Repository interface {
-	GetOrCreate(userID int64) *Session
-	Save(sess *Session)
-}

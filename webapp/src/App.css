@@ -1,0 +1,57 @@
+:root {
+    --blue: #a8d0ff;
+    --green: #b2f2bb;
+    --white: #ffffff;
+    --purple: #c77dff;
+    --orange: #ffa94d;
+    --turquoise: #63e6be;
+    --red: #fa5252;
+    --ivory: #fff3bf;
+    --gray: #868e96;
+    --pink: #f06595;
+}
+
+.habit-form-component {
+    overflow-y: auto;
+    background-color: var(--blue);
+    padding: 20px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+    .habit-form {
+        background-color: #d6e4ff;
+        border-radius: 20px;
+        padding: 20px;
+        max-width: 400px;
+        margin: auto;
+        box-shadow: 0 6px 10px rgba(0,0,0,0.1);
+    }
+
+    .title {
+        text-align: center;
+        margin-bottom: 20px;
+
+        .emoji {
+            font-size: 48px;
+            cursor: pointer;
+        }
+
+        h2 {
+            margin: 8px 0
+        }
+        small {
+            color: #666
+        }
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+}
