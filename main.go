@@ -5,6 +5,7 @@ import (
 	"HabitMuse/internal/db"
 	"HabitMuse/internal/habits"
 	"HabitMuse/internal/http"
+	"HabitMuse/internal/router"
 	"HabitMuse/internal/session"
 	"HabitMuse/internal/users"
 	"context"
@@ -22,6 +23,7 @@ func main() {
 	ctx := context.Background()
 	app := fx.New(
 		fx.Provide(db.NewDB),
+		fx.Provide(router.SetupRouter),
 		users.Module,
 		habits.Module,
 		session.Module,
@@ -29,6 +31,7 @@ func main() {
 			bot.NewBot,
 			bot.NewHandler,
 		),
+
 		fx.Invoke(
 			http.NewHttpServer,
 			bot.RunBot,

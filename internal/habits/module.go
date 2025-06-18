@@ -8,5 +8,7 @@ var Module = fx.Module("habits",
 	fx.Provide(
 		NewRepository,
 		NewService,
+		NewHandler,
 	),
+	fx.Invoke(RegisterRoutes),
 )
