@@ -12,8 +12,7 @@
 # production
 /build
 
-DB
-HabitMuseDB.db
+
 # misc
 .DS_Store
 .env.local
