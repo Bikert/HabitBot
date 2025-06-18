@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/webapp/node_modules
 /.pnp
 .pnp.js
 
@@ -11,6 +12,8 @@
 # production
 /build
 
+DB
+HabitMuseDB.db
 # misc
 .DS_Store
 .env.local
