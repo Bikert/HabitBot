@@ -1,3 +1,42 @@
+@import "tailwindcss";
+
+html {
+  --tg-color-scheme: dark;
+  --tg-theme-accent-text-color: #6ab2f2;
+  --tg-theme-bg-color: #17212b;
+  --tg-theme-bottom-bar-bg-color: #17212b;
+  --tg-theme-button-color: #5288c1;
+  --tg-theme-button-text-color: #ffffff;
+  --tg-theme-destructive-text-color: #ec3942;
+  --tg-theme-header-bg-color: #17212b;
+  --tg-theme-hint-color: #708499;
+  --tg-theme-link-color: #6ab3f3;
+  --tg-theme-secondary-bg-color: #232e3c;
+  --tg-theme-section-bg-color: #17212b;
+  --tg-theme-section-header-text-color: #6ab3f3;
+  --tg-theme-section-separator-color: #111921;
+  --tg-theme-subtitle-text-color: #708499;
+  --tg-theme-text-color: #f5f5f5;
+}
+
+@theme {
+  --color-tg-accent-text: var(--tg-theme-accent-text-color);
+  --color-tg-bg: var(--tg-theme-bg-color);
+  --color-tg-bottom-bar-bg: var(--tg-theme-bottom-bar-bg-color);
+  --color-tg-button: var(--tg-theme-button-color);
+  --color-tg-button-text: var(--tg-theme-button-text-color);
+  --color-tg-destructive-text: var(--tg-theme-destructive-text-color);
+  --color-tg-header-bg: var(--tg-theme-header-bg-color);
+  --color-tg-hint: var(--tg-theme-hint-color);
+  --color-tg-link: var(--tg-theme-link-color);
+  --color-tg-secondary-bg: var(--tg-theme-secondary-bg-color);
+  --color-tg-section-bg: var(--tg-theme-section-bg-color);
+  --color-tg-section-header-text: var(--tg-theme-section-header-text-color);
+  --color-tg-section-separator: var(--tg-theme-section-separator-color);
+  --color-tg-subtitle-text: var(--tg-theme-subtitle-text-color);
+  --color-tg-text: var(--tg-theme-text-color);
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

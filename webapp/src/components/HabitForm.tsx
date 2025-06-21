@@ -1,0 +1,169 @@
+import { type FormEvent, useActionState, useCallback, useState } from 'react'
+import { TelegramWebApp } from '../telegram'
+
+const daysOfWeek = Object.freeze(['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'] as const)
+type DayOfWeek = (typeof daysOfWeek)[number]
+
+const repeatTypes = ['daily', 'weekly'] as const
+type RepeatType = (typeof repeatTypes)[number]
+
+const colors = ['#b2f2bb', '#c77dff', '#ffa94d', '#63e6be', '#fa5252', '#fff3bf', '#868e96', '#f06595'] as const
+
+type CreateHabitPayload = {
+  title: string
+  description: string
+  color: string
+} & (
+  | {
+      repeatType: 'daily'
+    }
+  | {
+      repeatType: 'weekly'
+      selectedDays: DayOfWeek[]
+    }
+)
+
+export default function HabitForm() {
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [color, setColor] = useState<(typeof colors)[number]>(colors[0])
+  const [repeatType, setRepeatType] = useState<RepeatType>('daily')
+  const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
+
+  const toggleDay = (day: DayOfWeek) => {
+    setSelectedDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]))
+  }
+
+  const handleSubmit = useCallback(
+    (e: FormEvent) => {
+      if (repeatType === 'weekly' && selectedDays.length === 0) {
+        e.preventDefault()
+        TelegramWebApp.showAlert('Please select at least one day')
+      }
+    },
+    [repeatType, selectedDays],
+  )
+
+  const [, formAction, pending] = useActionState(
+    async (previousState: Partial<CreateHabitPayload>, formData: FormData) => {
+      const title = formData.get('title') as string
+      const description = (formData.get('description') ?? '') as string
+      const data: CreateHabitPayload =
+        repeatType === 'weekly'
+          ? {
+              repeatType,
+              color,
+              description,
+              title,
+              selectedDays,
+            }
+          : {
+              repeatType,
+              color,
+              description,
+              title,
+            }
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      TelegramWebApp.showAlert(JSON.stringify(data, null, 2))
+      return data
+    },
+    {} as Partial<CreateHabitPayload>,
+  )
+
+  return (
+    <form autoComplete="off" className="m-5 overflow-y-auto" onSubmit={handleSubmit} action={formAction}>
+      <div className="bg-tg-secondary-bg mx-auto max-w-md rounded-3xl p-5 shadow-lg">
+        <div className="mb-5 text-center">
+          <div
+            className={`${pending ? 'animate-spin [animation-duration:1000ms]' : ''} cursor-pointer text-5xl duration-75`}
+          >
+            ⭐
+          </div>
+          <h2 className="my-2">{title === '' ? 'Привычка' : title}</h2>
+        </div>
+
+        <input
+          type="text"
+          name="title"
+          placeholder="Name your new task"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          className="bg-tg-bg outline-tg-accent-text mb-3 w-full rounded-xl p-3 text-base"
+        />
+
+        <input
+          type="text"
+          name="description"
+          placeholder="Describe it"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="outline-tg-accent-text bg-tg-bg mb-3 w-full rounded-xl p-3 text-base"
+        />
+
+        <div className="mb-5">
+          <b>Card Color</b>
+          <div className="mt-2 flex justify-center-safe gap-2">
+            {colors.map((c) => (
+              <div
+                key={c}
+                onClick={() => setColor(c)}
+                className={`border-tg-secondary-bg outline-tg-accent-text box-border h-7 w-7 cursor-pointer rounded-full ${color === c ? 'outline-4' : 'border-2'}`}
+                style={{
+                  backgroundColor: c,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-5">
+          <b>Repeat</b>
+
+          <div className="mt-2 flex overflow-hidden rounded-xl select-none">
+            {repeatTypes.map((type) => (
+              <div
+                key={type}
+                onClick={() => setRepeatType(type)}
+                className={`flex-1 cursor-pointer py-2.5 text-center font-semibold transition-colors ${repeatType === type ? 'bg-tg-button text-tg-button-text' : 'bg-tg-bg text-tg-link'}`}
+              >
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </div>
+            ))}
+          </div>
+
+          <div
+            className="mt-3 grid overflow-y-hidden duration-250"
+            style={{
+              gridTemplateRows: repeatType === 'weekly' ? '1fr' : '0fr',
+            }}
+          >
+            <div className="flex justify-center gap-1 overflow-y-hidden">
+              {daysOfWeek.map((day) => (
+                <div
+                  key={day}
+                  onClick={() => toggleDay(day)}
+                  className={`cursor-pointer rounded-full px-2 py-0.5 font-medium select-none ${
+                    selectedDays.includes(day)
+                      ? 'bg-tg-button border-transparent text-white'
+                      : 'bg-tg-bg border-gray-400 text-gray-600'
+                  }`}
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <button
+          disabled={pending}
+          type="submit"
+          className="bg-tg-button text-tg-button-text w-full cursor-pointer rounded-3xl py-3.5 text-lg font-bold transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Add
+        </button>
+      </div>
+    </form>
+  )
+}

@@ -4,9 +4,10 @@
     "jsx": "preserve",
     "types": [
       "vite/client",
-      "some-other-global-lib"
     ],
-    "module": "commonjs",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
     "noEmit": true,
     "isolatedModules": true,
     "esModuleInterop": true,
