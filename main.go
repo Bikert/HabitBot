@@ -24,6 +24,7 @@ func main() {
 	app := fx.New(
 		fx.Provide(db.NewDB),
 		fx.Provide(router.SetupRouter),
+		fx.Provide(NewUserRegisteredCh),
 		users.Module,
 		habits.Module,
 		session.Module,
@@ -42,4 +43,8 @@ func main() {
 		fmt.Print(err)
 	}
 	<-app.Done()
+}
+
+func NewUserRegisteredCh() chan int64 {
+	return make(chan int64)
 }

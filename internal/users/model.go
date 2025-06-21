@@ -17,3 +17,10 @@ type UserDTO struct {
 	LastName  string
 	CreateAt  time.Time
 }
+
+type UserTGDTO struct {
+	UserID    int64  `json:"userId"`
+	UserName  string `json:"userName"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}

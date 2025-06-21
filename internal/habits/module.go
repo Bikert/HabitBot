@@ -10,5 +10,5 @@ var Module = fx.Module("habits",
 		NewService,
 		NewHandler,
 	),
-	fx.Invoke(RegisterRoutes),
+	fx.Invoke(RegisterRoutes, UserRegistrationListener),
 )

@@ -2,7 +2,9 @@ package habits
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"strings"
 )
 
 type Repository interface {
@@ -12,6 +14,7 @@ type Repository interface {
 
 	Save(habit *Habit)
 	SaveHabitByUser(userID int64, habitID int64)
+	SaveHabitsByUser(userID int64, habitIds []int64)
 }
 
 type repository struct {
@@ -113,6 +116,30 @@ func (r *repository) SaveHabitByUser(userId int64, habitId int64) {
 	if err != nil {
 		log.Println("Save error:", err)
 		return
+	}
+}
+
+func (r *repository) SaveHabitsByUser(userId int64, habitIds []int64) {
+	if len(habitIds) == 0 {
+		return
+	}
+
+	placeholders := make([]string, 0, len(habitIds))
+	args := make([]interface{}, 0, len(habitIds)*2)
+
+	for _, habitId := range habitIds {
+		placeholders = append(placeholders, "(?, ?)")
+		args = append(args, userId, habitId)
+	}
+
+	query := fmt.Sprintf(
+		"INSERT INTO user_habits (user_id, habit_id) VALUES %s",
+		strings.Join(placeholders, ", "),
+	)
+
+	_, err := r.db.Exec(query, args...)
+	if err != nil {
+		log.Println("Save error:", err)
 	}
 }
 
