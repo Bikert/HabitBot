@@ -31,6 +31,15 @@ func (h *Handler) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, "Good")
 }
 
+// Registration godoc
+// @Summary Регистрация пользователя
+// @Description Создает нового пользователя
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body UserTGDTO true "Информация о пользователе"
+// @Success 200 {object} User
+// @Router /api/user/registration [get]
 func (h *Handler) Registration(c *gin.Context) {
 
 	var req UserTGDTO

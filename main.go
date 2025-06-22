@@ -1,5 +1,11 @@
 package main
 
+// @title HabitMuse API
+// @version 1.0
+// @description API для управления привычками и пользователями
+// @host localhost:8080
+// @BasePath /api
+
 import (
 	"HabitMuse/internal/bot"
 	"HabitMuse/internal/db"
