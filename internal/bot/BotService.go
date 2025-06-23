@@ -53,11 +53,19 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 					UserId:         userId,
 				}
 
-				stepFunc := GetStepFunc(sess.NextStep)
-				if err := stepFunc(&botCtx); err != nil {
-					log.Println("Ошибка в шаге:", err)
+				switch message.Command() {
+				case "open":
+					err := SendOpenAppButton(&botCtx)
+					if err != nil {
+						return err
+					}
+				default:
+					stepFunc := GetStepFunc(sess.NextStep)
+					if err := stepFunc(&botCtx); err != nil {
+						log.Println("Ошибка в шаге:", err)
+					}
+					sessionService.Save(botCtx.Session)
 				}
-				sessionService.Save(botCtx.Session)
 			}
 			return nil
 		},
@@ -70,7 +78,7 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 	return nil
 }
 
-func MainMenu(botCtx *appctx.BotContext) error {
+func SendOpenAppButton(botCtx *appctx.BotContext) error {
 	buttons := [][]tgbotapi.InlineKeyboardButton{
 		{
 			tgbotapi.InlineKeyboardButton{
