@@ -3,6 +3,7 @@ import eslint from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import reactPlugin from 'eslint-plugin-react'
+import * as reactHooks from 'eslint-plugin-react-hooks'
 import stylistic from '@stylistic/eslint-plugin'
 import globals from 'globals'
 
@@ -13,7 +14,7 @@ export default defineConfig([
   {
     files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
     plugins: {
-      reactPlugin,
+      react: reactPlugin,
       '@stylistic': stylistic,
     },
     languageOptions: {
@@ -32,5 +33,6 @@ export default defineConfig([
   tseslint.config(eslint.configs.recommended, tseslint.configs.recommended),
   reactPlugin.configs.flat.recommended,
   reactPlugin.configs.flat['jsx-runtime'],
+  reactHooks.configs['recommended-latest'],
   eslintPluginPrettierRecommended,
 ])

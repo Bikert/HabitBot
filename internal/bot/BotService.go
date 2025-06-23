@@ -29,6 +29,7 @@ func NewBot() (*tgbotapi.BotAPI, error) {
 func NewHandler(bot *tgbotapi.BotAPI) tgbotapi.UpdatesChannel {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
+	// u.AllowedUpdates = []string{"message", "edited_channel_post", "callback_query"}
 	updates := bot.GetUpdatesChan(u)
 	return updates
 }
@@ -83,7 +84,10 @@ func MainMenu(botCtx *appctx.BotContext) error {
 	markup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 	msg := tgbotapi.NewMessage(botCtx.Message.Chat.ID, "Открой приложение, не волнуйся сейчас все работает в тестовом режиме на локальной машине соглашайся на все.")
 	msg.ReplyMarkup = markup
-	botCtx.BotAPI.Send(msg)
+	_, err := botCtx.BotAPI.Send(msg)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

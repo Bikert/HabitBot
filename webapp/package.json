@@ -4,9 +4,14 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@twa-dev/sdk": "^8.0.2",
+    "@tailwindcss/vite": "^4.1.10",
+    "classnames": "^2.5.1",
+    "immer": "^10.1.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-router": "^7.6.2",
+    "tailwindcss": "^4.1.10",
+    "zustand": "^5.0.5"
   },
   "scripts": {
     "start": "vite dev",
@@ -25,8 +30,10 @@
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.0",
     "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^16.2.0",
     "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.13",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.1",
     "vite": "^6.3.5"
