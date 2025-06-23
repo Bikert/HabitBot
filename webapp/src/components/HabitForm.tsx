@@ -36,6 +36,9 @@ export default function HabitForm() {
 
   const handleSubmit = useCallback(
     (e: FormEvent) => {
+      TelegramWebApp.BiometricManager.init()
+      TelegramWebApp.BiometricManager.openSettings()
+      TelegramWebApp.BiometricManager.requestAccess({ reason: '124' })
       if (repeatType === 'weekly' && selectedDays.length === 0) {
         e.preventDefault()
         TelegramWebApp.showAlert('Please select at least one day')
@@ -64,7 +67,19 @@ export default function HabitForm() {
               title,
             }
       await new Promise((resolve) => setTimeout(resolve, 2000))
-      TelegramWebApp.showAlert(JSON.stringify(data, null, 2))
+      TelegramWebApp.showAlert(
+        JSON.stringify(
+          {
+            data,
+            bm: {
+              isInited: TelegramWebApp.BiometricManager.isInited,
+              isBiometricAvailable: TelegramWebApp.BiometricManager.isBiometricAvailable,
+            },
+          },
+          null,
+          2,
+        ),
+      )
       return data
     },
     {} as Partial<CreateHabitPayload>,
@@ -107,7 +122,10 @@ export default function HabitForm() {
             {colors.map((c) => (
               <div
                 key={c}
-                onClick={() => setColor(c)}
+                onClick={() => {
+                  setColor(c)
+                  TelegramWebApp.HapticFeedback.selectionChanged()
+                }}
                 className={`border-tg-secondary-bg outline-tg-accent-text box-border h-7 w-7 cursor-pointer rounded-full ${color === c ? 'outline-4' : 'border-2'}`}
                 style={{
                   backgroundColor: c,
@@ -124,7 +142,10 @@ export default function HabitForm() {
             {repeatTypes.map((type) => (
               <div
                 key={type}
-                onClick={() => setRepeatType(type)}
+                onClick={() => {
+                  setRepeatType(type)
+                  TelegramWebApp.HapticFeedback.selectionChanged()
+                }}
                 className={`flex-1 cursor-pointer py-2.5 text-center font-semibold transition-colors ${repeatType === type ? 'bg-tg-button text-tg-button-text' : 'bg-tg-bg text-tg-link'}`}
               >
                 {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -142,7 +163,10 @@ export default function HabitForm() {
               {daysOfWeek.map((day) => (
                 <div
                   key={day}
-                  onClick={() => toggleDay(day)}
+                  onClick={() => {
+                    toggleDay(day)
+                    TelegramWebApp.HapticFeedback.selectionChanged()
+                  }}
                   className={`cursor-pointer rounded-full px-2 py-0.5 font-medium select-none ${
                     selectedDays.includes(day)
                       ? 'bg-tg-button border-transparent text-white'

@@ -1,14 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useLocation, useSearchParams } from 'react-router'
 import { BackButton, MainButton, SecondaryButton } from './telegram/components'
 import { TelegramWebApp } from './telegram'
 import { Debug } from './components/Debug'
 import { useDebugStore } from './stores/useDebugStore'
 import { useHeaderVisibility } from './stores/useHeaderVisibility'
+import { useViewportHeight } from './utils/useViewportHeight'
+import classNames from 'classnames'
 
 function App() {
-  const [searchParams] = useSearchParams()
-  const showAdditionalButtons = searchParams.get('debug') === 'true'
+  const [searchParams, setSearchParams] = useSearchParams()
+  const showDebugButtons = searchParams.get('debug') === 'true'
+  const toggleDebugButtons = useCallback(() => {
+    setSearchParams((prev) => ({ debug: prev.get('debug') === 'true' ? 'false' : 'true' }))
+  }, [setSearchParams])
   const toggleDebug = useDebugStore((state) => state.toggle)
   const toggleHeader = useHeaderVisibility((state) => state.toggle)
   const showHeader = useHeaderVisibility((state) => state.visible)
@@ -18,14 +23,14 @@ function App() {
     TelegramWebApp.expand()
     TelegramWebApp.ready()
   }, [])
+  const viewportHeight = useViewportHeight()
+  const navFixed = viewportHeight && viewportHeight > 600
 
   return (
-    <div>
+    <div className="max-h-svh">
       {showHeader && <h1 className="p-3 text-center text-3xl font-bold">HabitBot {location.pathname}</h1>}
-
       <Outlet />
-
-      {showAdditionalButtons && (
+      {showDebugButtons && (
         <div className="text-tg-button-text flex w-full justify-center gap-2">
           <button className="bg-tg-button rounded-l-xl p-2" onClick={() => setShowDemoButtons((show) => !show)}>
             toggle buttons
@@ -38,8 +43,6 @@ function App() {
           </button>
         </div>
       )}
-      <Debug />
-
       {showDemoButtons && (
         <>
           <MainButton text="submit" />
@@ -47,6 +50,29 @@ function App() {
           <BackButton />
         </>
       )}
+      <Debug />
+      <div
+        className={classNames('right-0 left-0 mx-auto flex w-fit gap-3', navFixed ? 'fixed bottom-4' : 'static pb-4')}
+      >
+        <button
+          onClick={() => (window.location.href = '/habit')}
+          className="bg-tg-button text-tg-button-text ring-tg-bg flex h-14 w-14 items-center justify-center rounded-full text-2xl ring-2"
+        >
+          ➕
+        </button>
+        <button
+          onClick={() => (window.location.href = '/')}
+          className="bg-tg-button text-tg-button-text ring-tg-bg flex h-14 w-14 items-center justify-center rounded-full text-2xl ring-2"
+        >
+          📋
+        </button>
+        <button
+          onClick={toggleDebugButtons}
+          className="bg-tg-button text-tg-button-text ring-tg-bg flex h-14 w-14 items-center justify-center rounded-full text-2xl ring-2"
+        >
+          🐛
+        </button>
+      </div>
     </div>
   )
 }
