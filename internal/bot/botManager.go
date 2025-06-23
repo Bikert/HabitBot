@@ -18,7 +18,13 @@ func GetStepFunc(step string) StepFunc {
 		return MainMenu
 	}
 	if fn, ok := stepsMap[step]; ok {
-		return fn
+		return func(ctx *appctx.BotContext) error {
+			err := MainMenu(ctx)
+			if err != nil {
+				return err
+			}
+			return fn(ctx)
+		}
 	}
 	return Fallback
 }
