@@ -12,6 +12,7 @@ import (
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(http.LogRequestBody())
+	//router.Use(http.ValidationToken())
 	router.Use(http.ErrorHandler())
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return router

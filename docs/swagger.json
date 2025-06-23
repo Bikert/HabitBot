@@ -7,10 +7,9 @@
         "version": "1.0"
     },
     "host": "localhost:8080",
-    "basePath": "/api",
     "paths": {
         "/api/user/registration": {
-            "get": {
+            "post": {
                 "description": "Создает нового пользователя",
                 "consumes": [
                     "application/json"

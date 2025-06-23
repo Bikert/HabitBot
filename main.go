@@ -4,7 +4,6 @@ package main
 // @version 1.0
 // @description API для управления привычками и пользователями
 // @host localhost:8080
-// @BasePath /api
 
 import (
 	"HabitMuse/internal/bot"
@@ -22,6 +21,14 @@ import (
 )
 
 func main() {
+	//file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	//if err != nil {
+	//	log.Fatalf("Ошибка открытия лог-файла: %v", err)
+	//}
+	//defer file.Close()
+
+	// Перенаправляем стандартный логгер на файл
+	//log.SetOutput(file)
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
 	}

@@ -14,5 +14,5 @@ type BotContext struct {
 	BotAPI         *tgBotAPI.BotAPI
 	Message        *tgBotAPI.Message
 	Session        *session.Session
-	User           *users.User
+	UserId         int64
 }

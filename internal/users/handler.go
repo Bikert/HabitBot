@@ -20,7 +20,7 @@ func RegisterRoutes(router *gin.Engine, h *Handler) {
 	api := router.Group("/api/user")
 	{
 		api.GET("/", h.GetUser)
-		api.GET("/registration", h.Registration)
+		api.POST("/registration", h.Registration)
 	}
 }
 
@@ -39,7 +39,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 // @Produce json
 // @Param user body UserTGDTO true "Информация о пользователе"
 // @Success 200 {object} User
-// @Router /api/user/registration [get]
+// @Router /api/user/registration [post]
 func (h *Handler) Registration(c *gin.Context) {
 
 	var req UserTGDTO

@@ -24,6 +24,7 @@ func NewHttpServer(lc fx.Lifecycle, router *gin.Engine) *http.Server {
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
+			log.Println("Stopping HTTP server on :8080")
 			return server.Shutdown(ctx)
 		},
 	})
