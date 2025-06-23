@@ -15,16 +15,10 @@ var stepsMap = map[string]StepFunc{
 
 func GetStepFunc(step string) StepFunc {
 	if step == "" {
-		return MainMenu
+		return Fallback
 	}
 	if fn, ok := stepsMap[step]; ok {
-		return func(ctx *appctx.BotContext) error {
-			err := MainMenu(ctx)
-			if err != nil {
-				return err
-			}
-			return fn(ctx)
-		}
+		return fn
 	}
 	return Fallback
 }
