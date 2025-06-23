@@ -25,6 +25,7 @@ func NewBot() (*tgbotapi.BotAPI, error) {
 func NewHandler(bot *tgbotapi.BotAPI) tgbotapi.UpdatesChannel {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
+	// u.AllowedUpdates = []string{"message", "edited_channel_post", "callback_query"}
 	updates := bot.GetUpdatesChan(u)
 	return updates
 }
@@ -49,6 +50,29 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 }
 
 func MainMenu(message *tgbotapi.Message, api *tgbotapi.BotAPI) error {
+	markup := tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButtonWebApp(
+				"Open WebApp with keyboard",
+				tgbotapi.WebAppInfo{
+					URL: os.Getenv("WEB_APP_URL"),
+				},
+			)))
+	keyboardMessage := tgbotapi.MessageConfig{
+		BaseChat: tgbotapi.BaseChat{
+			ChatID:           message.Chat.ID,
+			ReplyToMessageID: 0,
+			ReplyMarkup:      markup,
+		},
+		DisableWebPagePreview: false,
+		Text: "send keyboard",
+	}
+	keyboardMessage.ReplyMarkup = markup
+	_, err := api.Send(keyboardMessage)
+	if err != nil {
+		return err
+	}
+
 	buttons := [][]tgbotapi.InlineKeyboardButton{
 		{
 			tgbotapi.InlineKeyboardButton{
@@ -59,10 +83,14 @@ func MainMenu(message *tgbotapi.Message, api *tgbotapi.BotAPI) error {
 			},
 		},
 	}
-	markup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
+	inlineMarkup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
+
 	msg := tgbotapi.NewMessage(message.Chat.ID, "Открой приложение, не волнуйся сейчас все работает в тестовом режиме на локальной машине соглашайся на все.")
-	msg.ReplyMarkup = markup
-	api.Send(msg)
+	msg.ReplyMarkup = inlineMarkup
+	_, err = api.Send(msg)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

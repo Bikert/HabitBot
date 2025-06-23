@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
 export default {
   server: {
@@ -11,5 +12,5 @@ export default {
       },
     },
   },
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
 }
