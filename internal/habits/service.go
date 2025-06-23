@@ -3,6 +3,7 @@ package habits
 import (
 	"context"
 	"go.uber.org/fx"
+	"log"
 )
 
 type Service interface {
@@ -32,6 +33,7 @@ func UserRegistrationListener(lc fx.Lifecycle, s Service, userRegisteredCh chan 
 					case newUserID := <-userRegisteredCh:
 						s.SaveDefaultHabitForUser(newUserID)
 					case <-ctx.Done():
+						log.Println("user registration listener stopped")
 						return
 					}
 				}

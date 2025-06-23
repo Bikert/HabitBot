@@ -3,11 +3,13 @@ package http
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	tgBotAPI "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"io"
 	"log"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"os"
 )
 
 func ErrorHandler() gin.HandlerFunc {
@@ -71,6 +73,28 @@ func LogRequestBody() gin.HandlerFunc {
 
 		log.Printf("Request Body: %s", string(bodyBytes))
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+		c.Next()
+	}
+}
+
+func ValidationToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		path := c.Request.URL.Path
+		fmt.Println("Path = ", path)
+
+		var token, telegramInitData string
+		token = os.Getenv("TG_TOKEN")
+		telegramInitData = c.Request.Header.Get("telegram-init-data")
+		if telegramInitData == "" {
+			log.Println("Telegram Init Data is empty")
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Telegram Init Data is empty"})
+		}
+		isValid, err := tgBotAPI.ValidateWebAppData(token, telegramInitData)
+		if !isValid || err != nil {
+			log.Println("Invalid token err = %w", err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			return
+		}
 		c.Next()
 	}
 }

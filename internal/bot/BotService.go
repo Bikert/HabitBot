@@ -1,6 +1,10 @@
 package bot
 
 import (
+	"HabitMuse/internal/appctx"
+	"HabitMuse/internal/habits"
+	"HabitMuse/internal/session"
+	"HabitMuse/internal/users"
 	"context"
 	"go.uber.org/fx"
 	"log"
@@ -30,13 +34,30 @@ func NewHandler(bot *tgbotapi.BotAPI) tgbotapi.UpdatesChannel {
 	return updates
 }
 
-func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel) error {
+func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel, userService users.Service, sessionService session.Service, habitService habits.Service) error {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			log.Println("bot started")
 			for update := range updates {
+				userId := getUserId(update)
 				message := getMessage(update)
-				MainMenu(message, bot)
+				sess := sessionService.GetOrCreate(userId)
+
+				botCtx := appctx.BotContext{
+					SessionService: sessionService,
+					UserService:    userService,
+					HabitService:   habitService,
+					BotAPI:         bot,
+					Message:        message,
+					Session:        sess,
+					UserId:         userId,
+				}
+
+				stepFunc := GetStepFunc(sess.NextStep)
+				if err := stepFunc(&botCtx); err != nil {
+					log.Println("Ошибка в шаге:", err)
+				}
+				sessionService.Save(botCtx.Session)
 			}
 			return nil
 		},
@@ -49,30 +70,7 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 	return nil
 }
 
-func MainMenu(message *tgbotapi.Message, api *tgbotapi.BotAPI) error {
-	markup := tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButtonWebApp(
-				"Open WebApp with keyboard",
-				tgbotapi.WebAppInfo{
-					URL: os.Getenv("WEB_APP_URL"),
-				},
-			)))
-	keyboardMessage := tgbotapi.MessageConfig{
-		BaseChat: tgbotapi.BaseChat{
-			ChatID:           message.Chat.ID,
-			ReplyToMessageID: 0,
-			ReplyMarkup:      markup,
-		},
-		DisableWebPagePreview: false,
-		Text: "send keyboard",
-	}
-	keyboardMessage.ReplyMarkup = markup
-	_, err := api.Send(keyboardMessage)
-	if err != nil {
-		return err
-	}
-
+func MainMenu(botCtx *appctx.BotContext) error {
 	buttons := [][]tgbotapi.InlineKeyboardButton{
 		{
 			tgbotapi.InlineKeyboardButton{
@@ -83,11 +81,10 @@ func MainMenu(message *tgbotapi.Message, api *tgbotapi.BotAPI) error {
 			},
 		},
 	}
-	inlineMarkup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
-
-	msg := tgbotapi.NewMessage(message.Chat.ID, "Открой приложение, не волнуйся сейчас все работает в тестовом режиме на локальной машине соглашайся на все.")
-	msg.ReplyMarkup = inlineMarkup
-	_, err = api.Send(msg)
+	markup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
+	msg := tgbotapi.NewMessage(botCtx.Message.Chat.ID, "Открой приложение, не волнуйся сейчас все работает в тестовом режиме на локальной машине соглашайся на все.")
+	msg.ReplyMarkup = markup
+	_, err := botCtx.BotAPI.Send(msg)
 	if err != nil {
 		return err
 	}
@@ -99,4 +96,11 @@ func getMessage(update tgbotapi.Update) *tgbotapi.Message {
 		return update.CallbackQuery.Message
 	}
 	return update.Message
+}
+
+func getUserId(update tgbotapi.Update) int64 {
+	if update.CallbackQuery != nil {
+		return update.CallbackQuery.From.ID
+	}
+	return update.Message.From.ID
 }

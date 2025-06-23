@@ -1,0 +1,24 @@
+[
+  {
+    "id": "name",
+    "text": "Как вас зовут?",
+    "type": "text",
+    "next": "age",
+    "prev": ""
+  },
+  {
+    "id": "age",
+    "text": "Сколько вам лет?",
+    "type": "number",
+    "next": "gender",
+    "prev": "name"
+  },
+  {
+    "id": "gender",
+    "text": "Ваш пол?",
+    "type": "choice",
+    "options": ["Мужской", "Женский", "Другой"],
+    "next": "",
+    "prev": "age"
+  }
+]

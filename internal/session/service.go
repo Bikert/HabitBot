@@ -1,5 +1,7 @@
 package session
 
+import "HabitMuse/internal/constants"
+
 type Service interface {
 	GetOrCreate(userID int64) *Session
 	Save(sess *Session)
@@ -18,7 +20,7 @@ func (s *service) GetOrCreate(userID int64) *Session {
 	if sess == nil {
 		sess = &Session{
 			UserID:       userID,
-			NextStep:     "new_user",
+			NextStep:     constants.Registration.Title,
 			PreviousStep: "",
 			Data:         map[string]string{},
 		}
