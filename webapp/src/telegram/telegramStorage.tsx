@@ -1,9 +1,11 @@
 import { TelegramWebApp } from './index'
 import { StateStorage } from 'zustand/middleware'
 import { promisify } from '../utils/promisify'
+import type { DeviceStorage } from './types'
+
+const preferLocalStorage = true as boolean
 
 export const tgStorage = TelegramWebApp.DeviceStorage
-console.log('window.Telegram.WebApp.DeviceStorage', tgStorage)
 const TelegramDeviceStorage: StateStorage = tgStorage
   ? {
       getItem: promisify(tgStorage.getItem),
@@ -12,4 +14,5 @@ const TelegramDeviceStorage: StateStorage = tgStorage
     }
   : localStorage
 
-export { TelegramDeviceStorage as DeviceStorage }
+const DeviceStorage = preferLocalStorage ? window.localStorage : TelegramDeviceStorage
+export { DeviceStorage }

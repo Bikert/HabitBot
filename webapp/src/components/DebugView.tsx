@@ -1,9 +1,9 @@
 import { TelegramWebApp } from '../telegram'
-import { useDebugStore } from '../stores/useDebugStore'
+import { useDebugInformationVisibility } from '../stores/visibilityStores'
 
-export function Debug() {
+export function DebugView() {
   const user = TelegramWebApp.initDataUnsafe?.user
-  const debug = useDebugStore((state) => state.enabled)
+  const debug = useDebugInformationVisibility((state) => state.visible)
   if (!debug) return null
   return (
     <div className="max-w-screen overflow-x-hidden whitespace-nowrap">
