@@ -1,18 +1,18 @@
 import { type FormEvent, useActionState, useCallback, useState } from 'react'
 import { TelegramWebApp } from '../telegram'
-
-const daysOfWeek = Object.freeze(['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'] as const)
-type DayOfWeek = (typeof daysOfWeek)[number]
-
-const repeatTypes = ['daily', 'weekly'] as const
-type RepeatType = (typeof repeatTypes)[number]
-
-const colors = ['#b2f2bb', '#c77dff', '#ffa94d', '#63e6be', '#fa5252', '#fff3bf', '#868e96', '#f06595'] as const
+import {
+  colors,
+  type DayOfWeek,
+  daysOfWeek,
+  type HabitColor,
+  type RepeatType,
+  repeatTypes,
+} from '../constants/HabitOptions'
 
 type CreateHabitPayload = {
   title: string
   description: string
-  color: string
+  color: HabitColor
 } & (
   | {
       repeatType: 'daily'

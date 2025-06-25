@@ -84,7 +84,7 @@ func ValidationToken() gin.HandlerFunc {
 
 		var token, telegramInitData string
 		token = os.Getenv("TG_TOKEN")
-		telegramInitData = c.Request.Header.Get("telegram-init-data")
+		telegramInitData = c.Request.Header.Get("x-telegram-init-data")
 		if telegramInitData == "" {
 			log.Println("Telegram Init Data is empty")
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Telegram Init Data is empty"})
