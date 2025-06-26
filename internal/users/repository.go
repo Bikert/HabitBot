@@ -1,7 +1,7 @@
 package users
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"time"
 )
 
@@ -11,10 +11,10 @@ type Repository interface {
 }
 
 type repository struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func NewRepository(db *sql.DB) Repository {
+func NewRepository(db *sqlx.DB) Repository {
 	return &repository{db: db}
 }
 

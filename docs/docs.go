@@ -16,9 +16,8 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/user/registration": {
-            "post": {
-                "description": "Создает нового пользователя",
+        "/api/user/": {
+            "get": {
                 "consumes": [
                     "application/json"
                 ],
@@ -28,18 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Регистрация пользователя",
-                "parameters": [
-                    {
-                        "description": "Информация о пользователе",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/users.UserTGDTO"
-                        }
-                    }
-                ],
+                "summary": "Получить Пользователя из контекста",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -49,9 +37,176 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/habits": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Creates a new habit for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "habits"
+                ],
+                "summary": "Create a new habit and Update",
+                "parameters": [
+                    {
+                        "description": "Habit data",
+                        "name": "habit",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/habits.HabitDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/habits.Habit"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/habits/habit/{id}": {
+            "get": {
+                "description": "Retrieves a habit by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "habits"
+                ],
+                "summary": "Get habit by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Habit ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/habits.Habit"
+                        }
+                    },
+                    "404": {
+                        "description": "Habit not found or invalid ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "habits.Habit": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "days_of_week": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "group_id": {
+                    "description": "UUID в виде строки",
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repeat_type": {
+                    "description": "\"daily\" или \"weekly\"",
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "habits.HabitDto": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "days_of_week": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repeat_type": {
+                    "type": "string"
+                }
+            }
+        },
         "users.User": {
             "type": "object",
             "properties": {
@@ -65,23 +220,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "userID": {
-                    "type": "integer"
-                },
-                "userName": {
-                    "type": "string"
-                }
-            }
-        },
-        "users.UserTGDTO": {
-            "type": "object",
-            "properties": {
-                "firstName": {
-                    "type": "string"
-                },
-                "lastName": {
-                    "type": "string"
-                },
-                "userId": {
                     "type": "integer"
                 },
                 "userName": {

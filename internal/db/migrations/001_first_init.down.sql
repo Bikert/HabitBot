@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS user_habits;
-DROP TABLE IF EXISTS habits;
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS sessions;
+DROP TABLE habit_completions;
+DROP TABLE habits;
+DROP TABLE users;
+DROP TABLE sessions;
