@@ -4,6 +4,7 @@ import (
 	"HabitMuse/internal/session"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -22,22 +23,6 @@ type FormQuestion struct {
 	questionsMap map[string]Question
 }
 
-func InitFormQuestion(questions []Question) FormQuestion {
-	questionsMap := make(map[string]Question)
-	for _, q := range questions {
-		questionsMap[q.ID] = q
-	}
-	return FormQuestion{questionsMap: questionsMap}
-}
-
-func (f *FormQuestion) getQuestionByID(id string) *Question {
-	q, ok := f.questionsMap[id]
-	if !ok {
-		return nil
-	}
-	return &q
-}
-
 func loadQuestions(filename string) ([]Question, error) {
 	data, err := os.ReadFile("internal/bot/questions/" + filename + ".json")
 	if err != nil {
@@ -49,6 +34,45 @@ func loadQuestions(filename string) ([]Question, error) {
 		return nil, err
 	}
 	return qs, nil
+}
+
+func InitFormQuestion(questions []Question) FormQuestion {
+	questionsMap := make(map[string]Question)
+	for _, q := range questions {
+		questionsMap[q.ID] = q
+	}
+	return FormQuestion{questionsMap: questionsMap}
+}
+
+func (f *FormQuestion) isLastQuestion(session session.Session) bool {
+	return session.PreviousStep != "" && session.NextStep == ""
+}
+func (f *FormQuestion) getQuestion(session *session.Session) *Question {
+	log.Println("getQuestion started", session.NextStep)
+	if session.PreviousStep == "" {
+		return f.getFirstQuestion()
+	}
+	if session.NextStep == "" {
+		return nil
+	}
+	return f.getQuestionByID(session.NextStep)
+}
+
+func (f *FormQuestion) getFirstQuestion() *Question {
+	for _, q := range f.questionsMap {
+		if q.Prev == "" {
+			return &q
+		}
+	}
+	return nil
+}
+
+func (f *FormQuestion) getQuestionByID(id string) *Question {
+	q, ok := f.questionsMap[id]
+	if !ok {
+		return nil
+	}
+	return &q
 }
 
 func (f *FormQuestion) handleAnswer(session session.Session, answer string) error {

@@ -2,6 +2,7 @@ package bot
 
 import (
 	"HabitMuse/internal/appctx"
+	"HabitMuse/internal/bot/scenaries"
 	"HabitMuse/internal/habits"
 	"HabitMuse/internal/session"
 	"HabitMuse/internal/users"
@@ -34,7 +35,7 @@ func NewHandler(bot *tgbotapi.BotAPI) tgbotapi.UpdatesChannel {
 	return updates
 }
 
-func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel, userService users.Service, sessionService session.Service, habitService habits.Service) error {
+func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel, userService users.Service, sessionService session.Service, habitService habits.Service, scenarioFactory scenaries.ScenarioFactory) error {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			log.Println("bot started")
@@ -42,6 +43,7 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 				userId := getUserId(update)
 				message := getMessage(update)
 				sess := sessionService.GetOrCreate(userId)
+				scenarios := scenarioFactory.GetScenarios()
 
 				botCtx := appctx.BotContext{
 					SessionService: sessionService,
@@ -49,7 +51,7 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 					HabitService:   habitService,
 					BotAPI:         bot,
 					Message:        message,
-					Session:        sess,
+					Session:        &sess,
 					UserId:         userId,
 				}
 
@@ -60,11 +62,14 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 						return err
 					}
 				default:
-					stepFunc := GetStepFunc(sess.NextStep)
-					if err := stepFunc(&botCtx); err != nil {
-						log.Println("Ошибка в шаге:", err)
+					if scenario, ok := scenarios[sess.Scenario]; ok {
+						if err := scenario.Process(&sess, message); err != nil {
+							log.Println("Ошибка в сценарии:", err)
+						}
+						sessionService.Save(sess)
+					} else {
+						log.Println("Сценарий не найден:", sess.Scenario)
 					}
-					sessionService.Save(botCtx.Session)
 				}
 			}
 			return nil

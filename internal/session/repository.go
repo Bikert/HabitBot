@@ -10,7 +10,7 @@ import (
 )
 
 type Repository interface {
-	Save(sess *Session)
+	Save(sess Session)
 	Get(userID int64) *Session
 }
 
@@ -23,13 +23,13 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (r *repository) Get(userID int64) *Session {
-	query := "SELECT next_step, previous_step, data FROM sessions WHERE user_id = $1"
+	query := "SELECT user_id, next_step, previous_step, data, scenario FROM sessions WHERE user_id = $1"
 	// TODO вынести контекст наверх
 	ctx := context.Background()
 	row := r.DB.QueryRowContext(ctx, query, userID)
 	var sess Session
 	var dataJSON []byte
-	if err := row.Scan(&sess.NextStep, &sess.PreviousStep, &dataJSON); err != nil {
+	if err := row.Scan(&sess.UserID, &sess.NextStep, &sess.PreviousStep, &dataJSON, &sess.Scenario); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil
 		}
@@ -46,7 +46,7 @@ func (r *repository) Get(userID int64) *Session {
 	return &sess
 }
 
-func (r *repository) Save(sess *Session) {
+func (r *repository) Save(sess Session) {
 	// TODO вынести контекст наверх
 	ctx := context.Background()
 
@@ -57,13 +57,14 @@ func (r *repository) Save(sess *Session) {
 	}
 
 	_, err = r.DB.ExecContext(ctx, `
-        INSERT INTO sessions (user_id, next_step, previous_step, data)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO sessions (user_id, next_step, previous_step, data, scenario)
+        VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (user_id)
-        DO UPDATE SET next_step = $2, previous_step = $3, data = $4
-    `, sess.UserID, sess.NextStep, sess.PreviousStep, dataJSON)
+        DO UPDATE SET next_step = $2, previous_step = $3, data = $4, scenario = $5
+    `, sess.UserID, sess.NextStep, sess.PreviousStep, dataJSON, sess.Scenario)
 
 	if err != nil {
 		log.Println("Ошибка при сохранении сессии:", err)
 	}
+	log.Println("Session saved successfully sess = ", sess)
 }

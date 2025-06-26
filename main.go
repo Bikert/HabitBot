@@ -41,14 +41,9 @@ func main() {
 		users.Module,
 		habits.Module,
 		session.Module,
-		fx.Provide(
-			bot.NewBot,
-			bot.NewHandler,
-		),
-
+		bot.Module,
 		fx.Invoke(
 			http.NewHttpServer,
-			bot.RunBot,
 		),
 	)
 
