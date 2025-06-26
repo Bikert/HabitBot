@@ -1,5 +1,4 @@
--- Создаём таблицу sessions
-CREATE TABLE IF NOT EXISTS sessions
+CREATE TABLE sessions
 (
     user_id       INTEGER PRIMARY KEY,
     next_step     TEXT,
@@ -7,8 +6,7 @@ CREATE TABLE IF NOT EXISTS sessions
     data          TEXT
 );
 
--- Создаём таблицу users
-CREATE TABLE IF NOT EXISTS users
+CREATE TABLE users
 (
     id         INTEGER PRIMARY KEY,
     username   TEXT,
@@ -17,19 +15,28 @@ CREATE TABLE IF NOT EXISTS users
     created_at DATETIME
 );
 
--- Создаём таблицу habits
-CREATE TABLE IF NOT EXISTS habits
+CREATE TABLE habits
 (
-    id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    title     TEXT,
-    isDefault INTEGER DEFAULT 0
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL,
+    group_id     TEXT    NOT NULL, -- UUID в формате TEXT
+    version      INTEGER NOT NULL,
+    name         TEXT    NOT NULL,
+    description  TEXT,
+    color        TEXT,
+    icon         TEXT,
+    is_active    BOOLEAN NOT NULL DEFAULT 1,
+    repeat_type  TEXT    NOT NULL DEFAULT 'daily',
+    days_of_week TEXT,
+    isDefault    INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Создаём таблицу user_habits с внешними ключами
-CREATE TABLE IF NOT EXISTS user_habits
+CREATE TABLE habit_completions
 (
-    user_id  INTEGER,
-    habit_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (habit_id) REFERENCES habits (id)
+    habit_id INTEGER NOT NULL,
+    date     DATE    NOT NULL,
+    completed BOOLEAN NOT NULL DEFAULT 1,
+    PRIMARY KEY (habit_id, date),
+    FOREIGN KEY (habit_id) REFERENCES habits (id) ON DELETE CASCADE
 );

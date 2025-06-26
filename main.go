@@ -36,7 +36,6 @@ func main() {
 	ctx := context.Background()
 	app := fx.New(
 		fx.Provide(db.NewDB),
-		fx.Provide(router.SetupRouter),
 		fx.Provide(NewUserRegisteredCh),
 		users.Module,
 		habits.Module,
@@ -45,6 +44,7 @@ func main() {
 			bot.NewBot,
 			bot.NewHandler,
 		),
+		fx.Provide(router.SetupRouter),
 
 		fx.Invoke(
 			http.NewHttpServer,
