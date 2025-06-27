@@ -18,7 +18,15 @@
     "text": "Ваш пол?",
     "type": "choice",
     "options": ["Мужской", "Женский", "Другой"],
-    "next": "",
+    "next": "last",
     "prev": "age"
+  },
+  {
+    "id": "last",
+    "text": "Спасибо анкета заполнена",
+    "type": "text",
+    "next": "",
+    "prev": "last"
   }
+
 ]

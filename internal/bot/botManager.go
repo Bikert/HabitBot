@@ -2,16 +2,13 @@ package bot
 
 import (
 	"HabitMuse/internal/appctx"
-	"HabitMuse/internal/bot/scenaries"
 	"HabitMuse/internal/constants"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type StepFunc func(ctx *appctx.BotContext) error
 
-var stepsMap = map[string]StepFunc{
-	constants.Registration.Title: scenaries.Registration,
-}
+var stepsMap = map[string]StepFunc{}
 
 func GetStepFunc(step string) StepFunc {
 	if step == "" {

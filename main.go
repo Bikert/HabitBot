@@ -7,6 +7,7 @@ package main
 
 import (
 	"HabitMuse/internal/bot"
+	"HabitMuse/internal/channels"
 	"HabitMuse/internal/db"
 	"HabitMuse/internal/habits"
 	"HabitMuse/internal/http"
@@ -16,11 +17,11 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
 	"go.uber.org/fx"
+	"log"
 )
 
 func main() {
@@ -40,19 +41,16 @@ func main() {
 	ctx := context.Background()
 	app := fx.New(
 		fx.Provide(db.NewDB),
-		fx.Provide(NewUserRegisteredCh),
+		fx.Provide(channels.NewInitChannels),
 		users.Module,
 		habits.Module,
 		session.Module,
-		fx.Provide(
-			bot.NewBot,
-			bot.NewHandler,
-		),
+		bot.Module,
+
 		fx.Provide(
 			router.SetupRouter,
 			router.NewProtectedGroup,
 		),
-
 		fx.Invoke(
 			http.NewHttpServer,
 			bot.RunBot,
@@ -63,8 +61,4 @@ func main() {
 		fmt.Print(err)
 	}
 	<-app.Done()
-}
-
-func NewUserRegisteredCh() chan int64 {
-	return make(chan int64)
 }

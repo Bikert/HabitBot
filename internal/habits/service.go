@@ -1,6 +1,7 @@
 package habits
 
 import (
+	"HabitMuse/internal/channels"
 	"HabitMuse/internal/users"
 	"context"
 	"errors"
@@ -30,13 +31,13 @@ func NewService(repo Repository) Service {
 	}
 }
 
-func UserRegistrationListener(lc fx.Lifecycle, s Service, userRegisteredCh chan int64) {
+func UserRegistrationListener(lc fx.Lifecycle, s Service, channels channels.InitChannels) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			go func() {
 				for {
 					select {
-					case newUserID := <-userRegisteredCh:
+					case newUserID := <-channels.AddDefaultHabitsCh:
 						s.CreateBaseHabitsForNewUser(newUserID)
 					case <-ctx.Done():
 						log.Println("user registration listener stopped")
