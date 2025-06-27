@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
 import { createBrowserRouter, redirect, replace, RouterProvider } from 'react-router'
-import HabitForm from './components/HabitForm'
-import { ConfigForm } from './components/ConfigForm'
+import HabitPage from './components/HabitPage'
+import { ConfigPage } from './components/ConfigPage'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { getCurrentDate } from './utils/date'
 import { dayDataLoader, DayView } from './components/DayView'
@@ -16,15 +16,15 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: HabitForm,
+        loader: async () => replace('/habit' + window.location.hash),
       },
       {
         path: 'habit/:id?',
-        Component: HabitForm,
+        Component: HabitPage,
       },
       {
         path: 'config',
-        Component: ConfigForm,
+        Component: ConfigPage,
       },
       {
         path: 'day',
