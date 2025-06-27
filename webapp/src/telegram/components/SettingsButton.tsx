@@ -2,11 +2,11 @@ import { FC, useEffect } from 'react'
 import { TelegramWebApp } from '../index'
 import { create } from 'zustand/index'
 
-interface BackButtonProps {
+interface SettingsButtonProps {
   onClick?: VoidFunction
 }
 
-const backButton = TelegramWebApp.BackButton
+const settingsButton = TelegramWebApp.SettingsButton
 
 type GlobalButtonTrackerState = {
   openedButtonsCount: number
@@ -14,7 +14,7 @@ type GlobalButtonTrackerState = {
   decrement: () => void
 }
 
-const backButtonTrackedStore = create<GlobalButtonTrackerState>()((set) => ({
+const settingsButtonTrackedStore = create<GlobalButtonTrackerState>()((set) => ({
   openedButtonsCount: 0,
   increment: () => {
     set((state) => ({ openedButtonsCount: state.openedButtonsCount + 1 }))
@@ -24,22 +24,22 @@ const backButtonTrackedStore = create<GlobalButtonTrackerState>()((set) => ({
   },
 }))
 
-export const BackButton: FC<BackButtonProps> = ({ onClick = () => {} }) => {
+export const SettingsButton: FC<SettingsButtonProps> = ({ onClick = () => {} }) => {
   useEffect(() => {
-    backButtonTrackedStore.getState().increment()
-    backButton.show()
+    settingsButtonTrackedStore.getState().increment()
+    settingsButton.show()
     return () => {
-      backButtonTrackedStore.getState().decrement()
-      if (backButtonTrackedStore.getState().openedButtonsCount === 0) {
-        backButton.hide()
+      settingsButtonTrackedStore.getState().decrement()
+      if (settingsButtonTrackedStore.getState().openedButtonsCount === 0) {
+        settingsButton.hide()
       }
     }
   }, [])
 
   useEffect(() => {
-    TelegramWebApp.onEvent('backButtonClicked', onClick)
+    TelegramWebApp.onEvent('settingsButtonClicked', onClick)
     return () => {
-      TelegramWebApp.offEvent('backButtonClicked', onClick)
+      TelegramWebApp.offEvent('settingsButtonClicked', onClick)
     }
   }, [onClick])
 

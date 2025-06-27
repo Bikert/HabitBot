@@ -10,6 +10,10 @@ export default {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
+      '/swagger': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
   plugins: [react(), tailwindcss()],
