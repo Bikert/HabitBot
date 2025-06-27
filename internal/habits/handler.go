@@ -1,13 +1,13 @@
 package habits
 
 import (
-	"HabitMuse/internal/constants"
-	"HabitMuse/internal/users"
+	"HabitMuse/internal/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type Handler struct {
@@ -18,9 +18,9 @@ func NewHandler(s Service) *Handler {
 	return &Handler{service: s}
 }
 
-func RegisterRoutes(router *gin.Engine, h *Handler) {
+func RegisterRoutes(auth *gin.RouterGroup, h *Handler) {
 	fmt.Println("RegisterRoutes")
-	api := router.Group("/habits")
+	api := auth.Group("/habits")
 	{
 		api.POST("/", h.CreateHabit)
 		api.GET("/:date", h.GetByDate)
@@ -39,14 +39,14 @@ func RegisterRoutes(router *gin.Engine, h *Handler) {
 // @Failure      400    {object}  map[string]string  "Invalid input"
 // @Failure      500    {object}  map[string]string  "Internal server error"
 // @Security     ApiKeyAuth
-// @Router       /habits [post]
+// @Router       /api/habits [post]
 func (h *Handler) CreateHabit(c *gin.Context) {
 	var dto *HabitDto
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
 		return
 	}
-	user := getUserByCtx(c)
+	user := utils.GetUserByCtx(c)
 	created, err := h.service.CreateHabit(dto, user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create habit"})
@@ -63,7 +63,7 @@ func (h *Handler) CreateHabit(c *gin.Context) {
 // @Param        id   path      int64  true  "Habit ID"
 // @Success      200  {object}  Habit
 // @Failure      404  {object}  map[string]string  "Habit not found or invalid ID"
-// @Router       /habits/habit/{id} [get]
+// @Router       /api/habits/habit/{id} [get]
 func (h *Handler) GetHabitById(c *gin.Context) {
 	habitId, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -74,21 +74,29 @@ func (h *Handler) GetHabitById(c *gin.Context) {
 	c.JSON(http.StatusOK, habit)
 }
 
+// GetByDate  godoc
+// @Summary      Get habit by date for current user
+// @Tags         habits
+// @Produce      json
+// @Param date query string true "Date in YYYY-MM-DD format" format(date) example(2025-06-27)
+// @Success      200  {object}  Habit[]
+// @Failure      404  {object}  map[string]string  "Habit not found or invalid ID"
+// @Router       /api/habits/{date} [get]
 func (h *Handler) GetByDate(c *gin.Context) {
+	dateStr := c.Param("date") // например, ?date=2025-06-27
+	log.Println("dateStr:", dateStr)
 
-}
-
-func getUserByCtx(c *gin.Context) *users.User {
-	rawUser, exists := c.Get(constants.UserContextKey)
-	if !exists {
-		log.Println("user not found in context")
-		return nil
+	layout := "2006-01-02"
+	date, err := time.Parse(layout, dateStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format"})
+		return
 	}
-
-	user, ok := rawUser.(*users.User)
-	if !ok {
-		log.Println("failed to cast user from context")
-		return nil
+	user := utils.GetUserByCtx(c)
+	habits, err := h.service.GetHabitsForUserByDate(user, date)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get habits"})
+		return
 	}
-	return user
+	c.JSON(http.StatusOK, habits)
 }

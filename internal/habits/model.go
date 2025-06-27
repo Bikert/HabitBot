@@ -38,11 +38,13 @@ type HabitCompletion struct {
 }
 
 type HabitDto struct {
-	Id         int64  `json:"id"`
-	Name       string `json:"name"`
-	Desc       string `json:"desc"`
-	Icon       string `json:"icon"`
-	Color      string `json:"color"`
-	RepeatType string `json:"repeat_type"`
-	DaysOfWeek string `json:"days_of_week"`
+	Id           int64  `json:"id"`
+	Name         string `json:"name"`
+	Desc         string `json:"desc"`
+	Icon         string `json:"icon"`
+	Color        string `json:"color"`
+	RepeatType   string `json:"repeat_type"`
+	DaysOfWeek   string `json:"days_of_week"`
+	Completed    bool   `json:"completed"`
+	CompletedDay string `json:"completed_day"`
 }
