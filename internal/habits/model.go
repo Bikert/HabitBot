@@ -48,3 +48,7 @@ type HabitDto struct {
 	Completed    bool   `json:"completed"`
 	CompletedDay string `json:"completed_day"`
 }
+
+type CompletionRequest struct {
+	Completed bool `json:"completed"`
+}
