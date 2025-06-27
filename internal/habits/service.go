@@ -16,6 +16,7 @@ type Service interface {
 	GetHabitsByUser(userId int64) (*[]Habit, error)
 	CreateBaseHabitsForNewUser(userId int64)
 	GetHabitById(id int64) *Habit
+	GetHabitsForUserByDate(user *users.User, date time.Time) ([]*HabitDto, error)
 }
 
 type service struct {
@@ -61,6 +62,42 @@ func (s *service) CreateBaseHabitsForNewUser(userId int64) {
 		}
 
 	}
+}
+
+func (s *service) GetHabitsForUserByDate(user *users.User, date time.Time) ([]*HabitDto, error) {
+	habit := s.repo.GetHabitsByUserID(user.UserID)
+	compareHabits := s.repo.GetCompletedHabitsByUserIdAndDate(user.UserID, date)
+	habitsMap := make(map[int64]*HabitDto)
+
+	for _, h := range *habit {
+		if h.RepeatType == RepeatTypeDaily {
+			habitsMap[h.ID] = buildDtoByModel(h)
+			continue
+		}
+		if h.RepeatType == RepeatTypeWeekly {
+			dayOfWeek := date.Weekday()
+			shortDay := strings.ToLower(dayOfWeek.String()[:3])
+
+			allowedDays := make(map[string]struct{})
+			for _, day := range strings.Split(h.DaysOfWeek, ",") {
+				allowedDays[strings.ToLower(strings.TrimSpace(day))] = struct{}{}
+			}
+			_, ok := allowedDays[shortDay]
+			if ok {
+				habitsMap[h.ID] = buildDtoByModel(h)
+				continue
+			}
+		}
+	}
+	for _, ch := range *compareHabits {
+		if habitsMap[ch.ID] != nil {
+			habitsMap[ch.ID].CompletedDay = date.Format("2006-01-02")
+			habitsMap[ch.ID].Completed = true
+			continue
+		}
+	}
+
+	return GetValues(habitsMap), nil
 }
 
 func (s *service) CreateHabit(dto *HabitDto, user *users.User) (*Habit, error) {
@@ -127,6 +164,20 @@ func updateModelFromDTO(dto *HabitDto, habit *Habit) {
 	habit.CreatedAt = time.Now()
 }
 
+func buildDtoByModel(model Habit) *HabitDto {
+	return &HabitDto{
+		Id:           model.ID,
+		Name:         model.Name,
+		Desc:         model.Description,
+		Color:        model.Color,
+		Icon:         model.Icon,
+		RepeatType:   model.RepeatType,
+		DaysOfWeek:   model.DaysOfWeek,
+		Completed:    false,
+		CompletedDay: "",
+	}
+}
+
 func (s *service) GetHabitById(id int64) *Habit {
 	return s.repo.GetHabitByID(id)
 }
@@ -175,4 +226,12 @@ func isValidDaysOfWeek(days string) bool {
 
 func GetUuid() string {
 	return uuid.New().String()
+}
+
+func GetValues(m map[int64]*HabitDto) []*HabitDto {
+	values := make([]*HabitDto, 0, len(m))
+	for _, v := range m {
+		values = append(values, v)
+	}
+	return values
 }

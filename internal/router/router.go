@@ -10,12 +10,18 @@ import (
 	_ "HabitMuse/docs"
 )
 
-func SetupRouter(userService users.Service) *gin.Engine {
+func SetupRouter() *gin.Engine {
 	router := gin.Default()
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	auth := router.Group("/api")
-	auth.Use(middleware.LogRequestBody())
-	auth.Use(middleware.ValidationToken(userService))
-	auth.Use(middleware.ErrorHandler())
 	return router
+}
+
+func NewProtectedGroup(router *gin.Engine, userService users.Service) *gin.RouterGroup {
+	auth := router.Group("/api")
+	auth.Use(
+		middleware.LogRequestBody(),
+		middleware.ValidationToken(userService),
+		middleware.ErrorHandler(),
+	)
+	return auth
 }

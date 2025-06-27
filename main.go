@@ -48,7 +48,10 @@ func main() {
 			bot.NewBot,
 			bot.NewHandler,
 		),
-		fx.Provide(router.SetupRouter),
+		fx.Provide(
+			router.SetupRouter,
+			router.NewProtectedGroup,
+		),
 
 		fx.Invoke(
 			http.NewHttpServer,
