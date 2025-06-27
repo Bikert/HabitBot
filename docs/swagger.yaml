@@ -1,4 +1,61 @@
 definitions:
+  habits.CompletionRequest:
+    properties:
+      completed:
+        type: boolean
+    type: object
+  habits.Habit:
+    properties:
+      color:
+        type: string
+      created_at:
+        type: string
+      days_of_week:
+        type: string
+      description:
+        type: string
+      group_id:
+        description: UUID в виде строки
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      is_default:
+        type: boolean
+      name:
+        type: string
+      repeat_type:
+        description: '"daily" или "weekly"'
+        type: string
+      user_id:
+        type: integer
+      version:
+        type: integer
+    type: object
+  habits.HabitDto:
+    properties:
+      color:
+        type: string
+      completed:
+        type: boolean
+      completed_day:
+        type: string
+      days_of_week:
+        type: string
+      desc:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      repeat_type:
+        type: string
+    type: object
   users.User:
     properties:
       createAt:
@@ -12,17 +69,6 @@ definitions:
       userName:
         type: string
     type: object
-  users.UserTGDTO:
-    properties:
-      firstName:
-        type: string
-      lastName:
-        type: string
-      userId:
-        type: integer
-      userName:
-        type: string
-    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -30,18 +76,162 @@ info:
   title: HabitMuse API
   version: "1.0"
 paths:
-  /api/user/registration:
+  /api/habits:
     post:
       consumes:
       - application/json
-      description: Создает нового пользователя
+      description: Creates a new habit for the authenticated user
       parameters:
-      - description: Информация о пользователе
+      - description: Habit data
         in: body
-        name: user
+        name: habit
         required: true
         schema:
-          $ref: '#/definitions/users.UserTGDTO'
+          $ref: '#/definitions/habits.HabitDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/habits.Habit'
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new habit and Update
+      tags:
+      - habits
+  /api/habits/{date}:
+    get:
+      description: Returns list of habits for the authenticated user on the given
+        date
+      parameters:
+      - description: Date in YYYY-MM-DD format
+        example: "2025-06-27"
+        format: date
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/habits.Habit'
+            type: array
+        "400":
+          description: Invalid date format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not get habits
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get habits by date for current user
+      tags:
+      - habits
+  /api/habits/habit/{id}:
+    get:
+      description: Retrieves a habit by its ID
+      parameters:
+      - description: Habit ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/habits.Habit'
+        "404":
+          description: Habit not found or invalid ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get habit by ID
+      tags:
+      - habits
+  /api/habits/habit/{id}/{date}:
+    patch:
+      consumes:
+      - application/json
+      description: Marks a habit as completed or not completed for the specified date
+        for the current user
+      parameters:
+      - description: Habit ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Date in YYYY-MM-DD format
+        example: "2025-06-27"
+        format: date
+        in: path
+        name: date
+        required: true
+        type: string
+      - description: Completion status
+        in: body
+        name: completion
+        required: true
+        schema:
+          $ref: '#/definitions/habits.CompletionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Habit not found or invalid ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Toggle habit completion status for a given date
+      tags:
+      - habits
+  /api/user/:
+    get:
+      consumes:
+      - application/json
       produces:
       - application/json
       responses:
@@ -49,7 +239,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/users.User'
-      summary: Регистрация пользователя
+      summary: Получить Пользователя из контекста
       tags:
       - users
 swagger: "2.0"

@@ -8,8 +8,10 @@ import {
   type RepeatType,
   repeatTypes,
 } from '../constants/HabitOptions'
+import { EmojiInput } from './EmojiInput'
 
 type CreateHabitPayload = {
+  emoji: string
   title: string
   description: string
   color: HabitColor
@@ -23,9 +25,10 @@ type CreateHabitPayload = {
     }
 )
 
-export default function HabitForm() {
+export default function HabitPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [emoji, setEmoji] = useState('⭐')
   const [color, setColor] = useState<(typeof colors)[number]>(colors[0])
   const [repeatType, setRepeatType] = useState<RepeatType>('daily')
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
@@ -36,9 +39,6 @@ export default function HabitForm() {
 
   const handleSubmit = useCallback(
     (e: FormEvent) => {
-      TelegramWebApp.BiometricManager.init()
-      TelegramWebApp.BiometricManager.openSettings()
-      TelegramWebApp.BiometricManager.requestAccess({ reason: '124' })
       if (repeatType === 'weekly' && selectedDays.length === 0) {
         e.preventDefault()
         TelegramWebApp.showAlert('Please select at least one day')
@@ -54,6 +54,7 @@ export default function HabitForm() {
       const data: CreateHabitPayload =
         repeatType === 'weekly'
           ? {
+              emoji,
               repeatType,
               color,
               description,
@@ -61,6 +62,7 @@ export default function HabitForm() {
               selectedDays,
             }
           : {
+              emoji,
               repeatType,
               color,
               description,
@@ -71,10 +73,6 @@ export default function HabitForm() {
         JSON.stringify(
           {
             data,
-            bm: {
-              isInited: TelegramWebApp.BiometricManager.isInited,
-              isBiometricAvailable: TelegramWebApp.BiometricManager.isBiometricAvailable,
-            },
           },
           null,
           2,
@@ -92,7 +90,7 @@ export default function HabitForm() {
           <div
             className={`${pending ? 'animate-spin [animation-duration:1000ms]' : ''} cursor-pointer text-5xl duration-75`}
           >
-            ⭐
+            <EmojiInput value={emoji} setValue={setEmoji} />
           </div>
           <h2 className="my-2">{title === '' ? 'Привычка' : title}</h2>
         </div>

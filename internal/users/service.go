@@ -4,11 +4,12 @@ import (
 	"HabitMuse/internal/http"
 	"database/sql"
 	"errors"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 )
 
 type Service interface {
-	RegistrationUser(user UserTGDTO) (User, error)
+	RegistrationUser(user tgbotapi.User) (User, error)
 	Get(id int64) (User, error)
 }
 
@@ -24,13 +25,13 @@ func NewService(repo Repository, userRegisteredCh chan int64) Service {
 	}
 }
 
-func (s service) RegistrationUser(userTg UserTGDTO) (User, error) {
+func (s service) RegistrationUser(userTg tgbotapi.User) (User, error) {
 	log.Println("RegistrationUser")
-	if userTg.UserID == 0 {
+	if userTg.ID == 0 {
 		return User{}, http.ErrBadRequest("RegistrationUser: User ID should not be empty", nil)
 	}
-	log.Println("RegistrationUser UserID = ", userTg.UserID)
-	user, err := s.repo.Get(userTg.UserID)
+	log.Println("RegistrationUser UserID = ", userTg.ID)
+	user, err := s.repo.Get(userTg.ID)
 	if err == nil {
 		log.Println("User already exists")
 		return user, nil
@@ -42,7 +43,7 @@ func (s service) RegistrationUser(userTg UserTGDTO) (User, error) {
 	}
 	log.Println("RegistrationUser SaveOrCreate started ")
 	user, err = s.repo.SaveOrCreate(User{
-		UserID:    userTg.UserID,
+		UserID:    userTg.ID,
 		UserName:  userTg.UserName,
 		FirstName: userTg.FirstName,
 		LastName:  userTg.LastName,

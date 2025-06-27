@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"github.com/jmoiron/sqlx"
 	"log"
 )
 
@@ -15,10 +16,10 @@ type Repository interface {
 }
 
 type repository struct {
-	DB *sql.DB
+	DB *sqlx.DB
 }
 
-func NewRepository(db *sql.DB) Repository {
+func NewRepository(db *sqlx.DB) Repository {
 	return &repository{DB: db}
 }
 

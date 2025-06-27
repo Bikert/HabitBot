@@ -1,7 +1,11 @@
-package http
+package middleware
 
 import (
+	"HabitMuse/internal/constants"
+	myHttp "HabitMuse/internal/http"
+	"HabitMuse/internal/users"
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -9,6 +13,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 )
 
@@ -21,7 +26,7 @@ func ErrorHandler() gin.HandlerFunc {
 			return
 		}
 
-		var httpErr *HTTPError
+		var httpErr *myHttp.HTTPError
 		if ok := ginErrorAs(err, &httpErr); ok {
 			log.Printf("Handled error: %s (code=%d)", httpErr.Message, httpErr.Code)
 			c.JSON(httpErr.Code, gin.H{"error": httpErr.Message})
@@ -39,8 +44,8 @@ func ginErrorAs(err *gin.Error, target interface{}) bool {
 
 func errorAs(err error, target interface{}) bool {
 	switch t := target.(type) {
-	case **HTTPError:
-		var e *HTTPError
+	case **myHttp.HTTPError:
+		var e *myHttp.HTTPError
 		if errors.As(err, &e) {
 			*t = e
 			return true
@@ -77,7 +82,7 @@ func LogRequestBody() gin.HandlerFunc {
 	}
 }
 
-func ValidationToken() gin.HandlerFunc {
+func ValidationToken(userService users.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		path := c.Request.URL.Path
 		fmt.Println("Path = ", path)
@@ -85,9 +90,11 @@ func ValidationToken() gin.HandlerFunc {
 		var token, telegramInitData string
 		token = os.Getenv("TG_TOKEN")
 		telegramInitData = c.Request.Header.Get("x-telegram-init-data")
+		log.Println("telegramInitData = ", telegramInitData)
 		if telegramInitData == "" {
 			log.Println("Telegram Init Data is empty")
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Telegram Init Data is empty"})
+			return
 		}
 		isValid, err := tgBotAPI.ValidateWebAppData(token, telegramInitData)
 		if !isValid || err != nil {
@@ -95,6 +102,33 @@ func ValidationToken() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			return
 		}
+		tgUser, err := getUserFromTgInitData(telegramInitData)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Init User exception"})
+		}
+		user, err := userService.Get(tgUser.ID)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		}
+
+		c.Set(constants.UserContextKey, user)
 		c.Next()
 	}
+}
+
+func getUserFromTgInitData(telegramInitData string) (*tgBotAPI.User, error) {
+	initData, err := url.ParseQuery(telegramInitData)
+	if err != nil {
+		return nil, err
+	}
+	userStr := initData.Get("user")
+	if userStr == "" {
+		return nil, errors.New("telegram init data is empty")
+	}
+	var user tgBotAPI.User
+	err = json.Unmarshal([]byte(userStr), &user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

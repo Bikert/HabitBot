@@ -1,10 +1,9 @@
 package habits
 
 import (
-	"database/sql"
-	"fmt"
+	"github.com/jmoiron/sqlx"
 	"log"
-	"strings"
+	"time"
 )
 
 type Repository interface {
@@ -12,140 +11,187 @@ type Repository interface {
 	GetHabitByID(id int64) *Habit
 	GetHabitsByUserID(userID int64) *[]Habit
 
-	Save(habit *Habit)
-	SaveHabitByUser(userID int64, habitID int64)
-	SaveHabitsByUser(userID int64, habitIds []int64)
+	Save(habit *Habit) error
+	GetCompletedHabitsByUserIdAndDate(userId int64, date time.Time) *[]Habit
+	HasCompletions(habitID int64) bool
+	GetCompletedHabitByHabitIdAndDate(id int64, date time.Time) (*HabitCompletion, error)
+	SaveOrUpdateCompletion(id int64, date time.Time) error
+	DeleteCompletion(id int64, date time.Time) error
 }
 
 type repository struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func NewRepository(db *sql.DB) Repository {
+func NewRepository(db *sqlx.DB) Repository {
 	return &repository{
 		db: db,
 	}
 }
 
 func (r *repository) GetHabitByID(id int64) *Habit {
-
-	row := r.db.QueryRow("SELECT id, title, isDefault FROM habits WHERE id = ?", id)
 	var h Habit
-	if err := row.Scan(&h.ID, &h.Title); err != nil {
-		log.Println("GetHabitByID error:", err)
+	err := r.db.Get(&h, `SELECT * FROM habits WHERE id = ?`, id)
+	if err != nil {
+		log.Printf("GetHabitByID: failed to get habit with id=%d: %v", id, err)
 		return nil
 	}
 	return &h
 }
 
-func (r *repository) GetDefaultHabits() *[]Habit {
-
-	rows, err := r.db.Query(`
-        SELECT id, title, isDefault
-        FROM habits
-        WHERE isDefault = 1
-    `)
-	if err != nil {
-		log.Println("GetDefaultHabits error:", err)
-		return nil
-	}
-	defer rows.Close()
-
-	var habits []Habit
-	for rows.Next() {
-		var h Habit
-		var isDefaultInt int
-		if err := rows.Scan(&h.ID, &h.Title, &isDefaultInt); err != nil {
-			log.Println("Scan error:", err)
-			continue
-		}
-		h.IsDefault = isDefaultInt == 1
-		habits = append(habits, h)
-	}
-	return &habits
-}
-
 func (r *repository) GetHabitsByUserID(userID int64) *[]Habit {
-	query := `
-        SELECT h.id, h.title, h.isDefault
-        FROM habits h
-        INNER JOIN user_habits uh ON h.id = uh.habit_id
-        WHERE uh.user_id = ?
-    `
-
-	rows, err := r.db.Query(query, userID)
-	if err != nil {
-		log.Println("GetHabitsByUserID query error:", err)
-		return nil
-	}
-	defer rows.Close()
-
 	var habits []Habit
-	for rows.Next() {
-		var h Habit
-		var isDefaultInt int
-		if err := rows.Scan(&h.ID, &h.Title, &isDefaultInt); err != nil {
-			log.Println("Scan error:", err)
-			continue
+	err := r.db.Select(&habits, `SELECT * FROM habits WHERE user_id = ?`, userID)
+	if err != nil {
+		log.Printf("GetHabitsByUserID: failed to query for user_id=%d: %v", userID, err)
+		return &[]Habit{}
+	}
+	return &habits
+}
+
+func (r *repository) Save(h *Habit) error {
+	if h.ID == 0 {
+		res, err := r.db.NamedExec(`
+			INSERT INTO habits (
+				user_id, group_id, version, name, description,
+				color, icon, is_active, repeat_type, days_of_week,
+				isDefault, created_at
+			) VALUES (
+				:user_id, :group_id, :version, :name, :description,
+				:color, :icon, :is_active, :repeat_type, :days_of_week,
+				:isDefault, :created_at
+			)
+		`, h)
+		if err != nil {
+			log.Printf("Save: failed to insert habit: %v", err)
+			return err
 		}
-		h.IsDefault = isDefaultInt == 1
-		habits = append(habits, h)
+		lastID, err := res.LastInsertId()
+		if err == nil {
+			h.ID = lastID
+		}
+	} else {
+		_, err := r.db.NamedExec(`
+			INSERT INTO habits (
+				id, user_id, group_id, version, name, description,
+				color, icon, is_active, repeat_type, days_of_week,
+				isDefault, created_at
+			) VALUES (
+				:id, :user_id, :group_id, :version, :name, :description,
+				:color, :icon, :is_active, :repeat_type, :days_of_week,
+				:isDefault, :created_at
+			)
+			ON CONFLICT(id) DO UPDATE SET
+				user_id = excluded.user_id,
+				group_id = excluded.group_id,
+				version = excluded.version,
+				name = excluded.name,
+				description = excluded.description,
+				color = excluded.color,
+				icon = excluded.icon,
+				is_active = excluded.is_active,
+				repeat_type = excluded.repeat_type,
+				days_of_week = excluded.days_of_week,
+				isDefault = excluded.isDefault,
+				created_at = excluded.created_at
+		`, h)
+		if err != nil {
+			log.Printf("Save: failed to update habit ID=%d: %v", h.ID, err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (r *repository) GetCompletedHabitsByUserIdAndDate(userID int64, date time.Time) *[]Habit {
+	var habits []Habit
+	err := r.db.Select(&habits, `
+		SELECT h.* FROM habits h
+		JOIN habit_completions hc ON h.id = hc.habit_id
+		WHERE h.user_id = ? AND date(hc.date) = date(?)
+	`, userID, date.Format("2006-01-02"))
+
+	if err != nil {
+		log.Printf("GetCompletedHabitsByUserIdAndDate: query failed for userID=%d, date=%s: %v",
+			userID, date.Format("2006-01-02"), err)
+		return &[]Habit{}
 	}
 
 	return &habits
 }
 
-func (r *repository) Save(habit *Habit) {
-	result, err := r.db.Exec(
-		"INSERT INTO habits (title, isDefault) VALUES (?, ?)",
-		habit.Title,
-		boolToInt(habit.IsDefault),
-	)
+func (r *repository) GetCompletedHabitByHabitIdAndDate(id int64, date time.Time) (*HabitCompletion, error) {
+	var completions HabitCompletion
+	query := `
+        SELECT habit_id, date, completed
+        FROM habit_completions
+        WHERE habit_id = $1 AND date = $2
+    `
+	err := r.db.Get(&completions, query, id, date)
 	if err != nil {
-		log.Println("Save error:", err)
-		return
+		return nil, err
 	}
-	id, _ := result.LastInsertId()
-	habit.ID = id
+	return &completions, nil
 }
 
-func (r *repository) SaveHabitByUser(userId int64, habitId int64) {
-	_, err := r.db.Exec(
-		"INSERT INTO user_habits (user_id, habit_id) VALUES (?, ?)", userId, habitId,
-	)
+func (r *repository) SaveOrUpdateCompletion(habitID int64, date time.Time) error {
+	updateQuery := `
+        UPDATE habit_completions
+        SET completed = TRUE
+        WHERE habit_id = $1 AND date = $2
+    `
+	res, err := r.db.Exec(updateQuery, habitID, date)
 	if err != nil {
-		log.Println("Save error:", err)
-		return
+		return err
 	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		insertQuery := `
+            INSERT INTO habit_completions (habit_id, date, completed)
+            VALUES ($1, $2, TRUE)
+            ON CONFLICT (habit_id, date) DO NOTHING
+        `
+		_, err := r.db.Exec(insertQuery, habitID, date)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func (r *repository) SaveHabitsByUser(userId int64, habitIds []int64) {
-	if len(habitIds) == 0 {
-		return
-	}
-
-	placeholders := make([]string, 0, len(habitIds))
-	args := make([]interface{}, 0, len(habitIds)*2)
-
-	for _, habitId := range habitIds {
-		placeholders = append(placeholders, "(?, ?)")
-		args = append(args, userId, habitId)
-	}
-
-	query := fmt.Sprintf(
-		"INSERT INTO user_habits (user_id, habit_id) VALUES %s",
-		strings.Join(placeholders, ", "),
-	)
-
-	_, err := r.db.Exec(query, args...)
-	if err != nil {
-		log.Println("Save error:", err)
-	}
+func (r *repository) DeleteCompletion(habitID int64, date time.Time) error {
+	query := `DELETE FROM habit_completions WHERE habit_id = $1 AND date = $2`
+	_, err := r.db.Exec(query, habitID, date)
+	return err
 }
 
-func boolToInt(b bool) int {
-	if b {
-		return 1
+func (r *repository) HasCompletions(habitID int64) bool {
+	var count int
+	err := r.db.Get(&count, `
+		SELECT COUNT(*) FROM habit_completions
+		WHERE habit_id = ?
+	`, habitID)
+
+	if err != nil {
+		log.Printf("HasCompletions: error checking completions for habit_id=%d: %v", habitID, err)
+		return false
 	}
-	return 0
+
+	return count > 0
+}
+
+func (r *repository) GetDefaultHabits() *[]Habit {
+	var habits []Habit
+	err := r.db.Select(&habits, `SELECT * FROM habits WHERE isDefault = 1`)
+	if err != nil {
+		log.Printf("GetDefaultHabits: failed to query: %v", err)
+		return &[]Habit{}
+	}
+	return &habits
 }

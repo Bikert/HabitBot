@@ -40,9 +40,14 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 		OnStart: func(ctx context.Context) error {
 			log.Println("bot started")
 			for update := range updates {
-				userId := getUserId(update)
+				tgUser := getUserId(update)
+				user, err := userService.RegistrationUser(*tgUser)
+				if err != nil {
+					return err
+				}
+
 				message := getMessage(update)
-				sess := sessionService.GetOrCreate(userId)
+				sess := sessionService.GetOrCreate(user.UserID)
 				scenarios := scenarioFactory.GetScenarios()
 
 				botCtx := appctx.BotContext{
@@ -52,7 +57,7 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 					BotAPI:         bot,
 					Message:        message,
 					Session:        &sess,
-					UserId:         userId,
+					UserId:         user.UserID,
 				}
 
 				switch message.Command() {
@@ -70,6 +75,7 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 					} else {
 						log.Println("Сценарий не найден:", sess.Scenario)
 					}
+					sessionService.Save(*botCtx.Session)
 				}
 			}
 			return nil
@@ -111,9 +117,9 @@ func getMessage(update tgbotapi.Update) *tgbotapi.Message {
 	return update.Message
 }
 
-func getUserId(update tgbotapi.Update) int64 {
+func getUserId(update tgbotapi.Update) *tgbotapi.User {
 	if update.CallbackQuery != nil {
-		return update.CallbackQuery.From.ID
+		return update.CallbackQuery.From
 	}
-	return update.Message.From.ID
+	return update.Message.From
 }
