@@ -1,6 +1,7 @@
 package scenaries
 
 import (
+	"HabitMuse/internal/bot/utils"
 	"HabitMuse/internal/session"
 	"HabitMuse/internal/users"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -8,37 +9,40 @@ import (
 )
 
 type Registration struct {
-	sessionService      session.Service
-	userService         users.Service
-	bot                 *tgbotapi.BotAPI
-	FormQuestionService FormQuestion
-	Questions           []Question
+	sessionService session.Service
+	userService    users.Service
+	bot            *tgbotapi.BotAPI
+	QuestionsMap   map[string]Question
 }
 
 func InitRegistration(sessionService session.Service, userService users.Service, botAPI *tgbotapi.BotAPI) Registration {
 	questions, err := loadQuestions("registration")
+	questionsMap := make(map[string]Question)
+	for _, q := range questions {
+		questionsMap[q.ID] = q
+	}
+
 	if err != nil {
 		return Registration{}
 	}
-	fq := InitFormQuestion(questions)
 	return Registration{
-		sessionService:      sessionService,
-		userService:         userService,
-		bot:                 botAPI,
-		FormQuestionService: fq,
-		Questions:           questions,
+		sessionService: sessionService,
+		userService:    userService,
+		bot:            botAPI,
+		QuestionsMap:   questionsMap,
 	}
 
 }
 
-func (r Registration) Process(sess *session.Session, message *tgbotapi.Message) error {
-
-	fq := InitFormQuestion(r.Questions)
-
-	q := fq.getQuestion(sess)
-	if q == nil {
-		// lastQuestion
-		err := r.saveToDB(sess.Data)
+func (r Registration) StepResolver(sess *session.Session, update *tgbotapi.Update) error {
+	message := utils.GetMessage(update)
+	q := getQuestion(sess, r.QuestionsMap)
+	if q.ID == "last" {
+		err, done := r.SaveAnswerToSession(sess, message)
+		if done {
+			return err
+		}
+		err = r.saveToDB(sess.Data)
 		if err != nil {
 			return err
 		}
@@ -46,21 +50,35 @@ func (r Registration) Process(sess *session.Session, message *tgbotapi.Message) 
 		sess.NextStep = ""
 		sess.PreviousStep = ""
 		sess.Data = map[string]string{}
-		return nil
-	}
-
-	if sess.PreviousStep != "" {
-		sess.Data[sess.PreviousStep] = message.Text
+	} else {
+		if sess.PreviousStep != "" {
+			err, done := r.SaveAnswerToSession(sess, message)
+			if done {
+				return err
+			}
+		}
+		sess.PreviousStep = q.ID
+		sess.NextStep = q.Next
 	}
 
 	var msg tgbotapi.Chattable
 	msg = tgbotapi.NewMessage(sess.UserID, q.Text)
-
 	_, err := r.bot.Send(msg)
-	sess.NextStep = q.Next
-	sess.PreviousStep = q.ID
 	return err
 
+}
+
+func (r Registration) SaveAnswerToSession(sess *session.Session, message *tgbotapi.Message) (error, bool) {
+	pq := getQuestionByID(sess.PreviousStep, r.QuestionsMap)
+	_, err := ValidateAnswer(*pq, message.Text)
+	if err != nil {
+		log.Println(err)
+		msg := tgbotapi.NewMessage(sess.UserID, err.Error())
+		_, err = r.bot.Send(msg)
+		return err, true
+	}
+	sess.Data[sess.PreviousStep] = message.Text
+	return nil, false
 }
 
 func (r Registration) saveToDB(data map[string]string) error {

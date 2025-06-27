@@ -20,7 +20,7 @@ type scenarioFactoryImpl struct {
 }
 
 type Scenario interface {
-	Process(sess *session.Session, msg *tgbotapi.Message) error
+	StepResolver(sess *session.Session, update *tgbotapi.Update) error
 }
 
 func NewScenarioFactory(sessionService session.Service, userService users.Service, botAPI *tgbotapi.BotAPI, habitService habits.Service) ScenarioFactory {
@@ -34,9 +34,13 @@ func NewScenarioFactory(sessionService session.Service, userService users.Servic
 
 func (sf scenarioFactoryImpl) GetScenarios() map[string]Scenario {
 	return map[string]Scenario{
-		constants.Registration.Title: InitRegistration(
+		constants.ScenarioRegistration: InitRegistration(
 			sf.sessionService,
 			sf.userService,
+			sf.botAPI,
+		),
+		constants.ScenarioWelcome: InitWelcome(
+			sf.sessionService,
 			sf.botAPI,
 		),
 	}

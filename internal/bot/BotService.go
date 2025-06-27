@@ -1,8 +1,8 @@
 package bot
 
 import (
-	"HabitMuse/internal/appctx"
 	"HabitMuse/internal/bot/scenaries"
+	"HabitMuse/internal/bot/utils"
 	"HabitMuse/internal/habits"
 	"HabitMuse/internal/session"
 	"HabitMuse/internal/users"
@@ -40,42 +40,22 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 		OnStart: func(ctx context.Context) error {
 			log.Println("bot started")
 			for update := range updates {
-				tgUser := getUserId(update)
-				user, err := userService.RegistrationUser(*tgUser)
+				tgUser := utils.GetUserId(&update)
+				user, err := userService.GetOrCreateUser(*tgUser)
 				if err != nil {
 					return err
 				}
-
-				message := getMessage(update)
+				message := utils.GetMessage(&update)
 				sess := sessionService.GetOrCreate(user.UserID)
-				scenarios := scenarioFactory.GetScenarios()
-
-				botCtx := appctx.BotContext{
-					SessionService: sessionService,
-					UserService:    userService,
-					HabitService:   habitService,
-					BotAPI:         bot,
-					Message:        message,
-					Session:        &sess,
-					UserId:         user.UserID,
-				}
 
 				switch message.Command() {
 				case "open":
-					err := SendOpenAppButton(&botCtx)
+					err := SendOpenAppButton(update, bot)
 					if err != nil {
 						return err
 					}
 				default:
-					if scenario, ok := scenarios[sess.Scenario]; ok {
-						if err := scenario.Process(&sess, message); err != nil {
-							log.Println("Ошибка в сценарии:", err)
-						}
-						sessionService.Save(sess)
-					} else {
-						log.Println("Сценарий не найден:", sess.Scenario)
-					}
-					sessionService.Save(*botCtx.Session)
+					runScenario(sess, scenarioFactory, update, sessionService, bot)
 				}
 			}
 			return nil
@@ -89,7 +69,32 @@ func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChann
 	return nil
 }
 
-func SendOpenAppButton(botCtx *appctx.BotContext) error {
+func runScenario(sess session.Session, scenarioFactory scenaries.ScenarioFactory, update tgbotapi.Update, sessionService session.Service, bot *tgbotapi.BotAPI) {
+	scenarios := scenarioFactory.GetScenarios()
+	currentScenario := ""
+	for {
+		if sess.Scenario == "" || currentScenario == sess.Scenario {
+			break
+		}
+		currentScenario = sess.Scenario
+
+		if scenario, ok := scenarios[sess.Scenario]; ok {
+			if err := scenario.StepResolver(&sess, &update); err != nil {
+				log.Println("Ошибка в сценарии:", err)
+			}
+			sessionService.Save(sess)
+		} else {
+			log.Println("Сценарий не найден:", sess.Scenario)
+			err := fallback(update, bot)
+			if err != nil {
+				return
+			}
+			break
+		}
+	}
+}
+
+func SendOpenAppButton(update tgbotapi.Update, api *tgbotapi.BotAPI) error {
 	buttons := [][]tgbotapi.InlineKeyboardButton{
 		{
 			tgbotapi.InlineKeyboardButton{
@@ -101,25 +106,18 @@ func SendOpenAppButton(botCtx *appctx.BotContext) error {
 		},
 	}
 	markup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
-	msg := tgbotapi.NewMessage(botCtx.Message.Chat.ID, "Открой приложение, не волнуйся сейчас все работает в тестовом режиме на локальной машине соглашайся на все.")
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Открой приложение, не волнуйся сейчас все работает в тестовом режиме на локальной машине соглашайся на все.")
 	msg.ReplyMarkup = markup
-	_, err := botCtx.BotAPI.Send(msg)
+	_, err := api.Send(msg)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func getMessage(update tgbotapi.Update) *tgbotapi.Message {
-	if update.CallbackQuery != nil {
-		return update.CallbackQuery.Message
-	}
-	return update.Message
-}
-
-func getUserId(update tgbotapi.Update) *tgbotapi.User {
-	if update.CallbackQuery != nil {
-		return update.CallbackQuery.From
-	}
-	return update.Message.From
+func fallback(update tgbotapi.Update, api *tgbotapi.BotAPI) error {
+	text := "Что-то пошло не так, начнём сначала."
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+	api.Send(msg)
+	return nil
 }
