@@ -1,6 +1,7 @@
 package habits
 
 import (
+	"HabitMuse/internal/constants"
 	"HabitMuse/internal/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -25,12 +26,13 @@ func RegisterRoutes(auth *gin.RouterGroup, h *Handler) {
 		api.POST("/", h.CreateHabit)
 		api.GET("/:date", h.GetByDate)
 		api.GET("/habit/:id", h.GetHabitById)
+		api.PATCH("/habit/:id/:date", h.ToggleHabitCompletion)
 	}
 }
 
 // CreateHabit godoc
 // @Summary      Create a new habit and Update
-// @Description  Creates a new habit for the authenticated user
+// @Description  Creates a new habit for the authenticated user If id = 0 - Create new else Update
 // @Tags         habits
 // @Accept       json
 // @Produce      json
@@ -74,20 +76,19 @@ func (h *Handler) GetHabitById(c *gin.Context) {
 	c.JSON(http.StatusOK, habit)
 }
 
-// GetByDate  godoc
-// @Summary      Get habit by date for current user
+// GetByDate godoc
+// @Summary      Get habits by date for current user
+// @Description  Returns list of habits for the authenticated user on the given date
 // @Tags         habits
 // @Produce      json
-// @Param date query string true "Date in YYYY-MM-DD format" format(date) example(2025-06-27)
-// @Success      200  {object}  Habit[]
-// @Failure      404  {object}  map[string]string  "Habit not found or invalid ID"
+// @Param        date  path      string  true  "Date in YYYY-MM-DD format"  Format(date)  example(2025-06-27)
+// @Success      200   {array}   Habit
+// @Failure      400   {object}  map[string]string  "Invalid date format"
+// @Failure      500   {object}  map[string]string  "Could not get habits"
 // @Router       /api/habits/{date} [get]
 func (h *Handler) GetByDate(c *gin.Context) {
-	dateStr := c.Param("date") // например, ?date=2025-06-27
-	log.Println("dateStr:", dateStr)
-
-	layout := "2006-01-02"
-	date, err := time.Parse(layout, dateStr)
+	dateStr := c.Param("date")
+	date, err := time.Parse(constants.DayFormat, dateStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format"})
 		return
@@ -99,4 +100,48 @@ func (h *Handler) GetByDate(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, habits)
+}
+
+// ToggleHabitCompletion godoc
+// @Summary      Toggle habit completion status for a given date
+// @Description  Marks a habit as completed or not completed for the specified date for the current user
+// @Tags         habits
+// @Accept       json
+// @Produce      json
+// @Param        id        path      int     true  "Habit ID"
+// @Param        date      path      string  true  "Date in YYYY-MM-DD format"  Format(date)  example(2025-06-27)
+// @Param        completion body      CompletionRequest true  "Completion status"
+// @Success      200       {object}  map[string]bool  "Success response"
+// @Failure      400       {object}  map[string]string "Invalid request data"
+// @Failure      404       {object}  map[string]string "Habit not found or invalid ID"
+// @Failure      500       {object}  map[string]string "Internal server error"
+// @Router       /api/habits/habit/{id}/{date} [patch]
+func (h *Handler) ToggleHabitCompletion(c *gin.Context) {
+	habitId, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "invalid habitId"})
+		return
+	}
+	dateStr := c.Param("date")
+	date, err := time.Parse(constants.DayFormat, dateStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format"})
+		return
+	}
+
+	var req CompletionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Println("Error binding request:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+	completed := req.Completed
+
+	user := utils.GetUserByCtx(c)
+	err = h.service.ToggleHabitCompletion(user, habitId, date, completed)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }

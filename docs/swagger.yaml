@@ -1,4 +1,9 @@
 definitions:
+  habits.CompletionRequest:
+    properties:
+      completed:
+        type: boolean
+    type: object
   habits.Habit:
     properties:
       color:
@@ -34,6 +39,10 @@ definitions:
     properties:
       color:
         type: string
+      completed:
+        type: boolean
+      completed_day:
+        type: string
       days_of_week:
         type: string
       desc:
@@ -67,21 +76,7 @@ info:
   title: HabitMuse API
   version: "1.0"
 paths:
-  /api/user/:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/users.User'
-      summary: Получить Пользователя из контекста
-      tags:
-      - users
-  /habits:
+  /api/habits:
     post:
       consumes:
       - application/json
@@ -117,7 +112,43 @@ paths:
       summary: Create a new habit and Update
       tags:
       - habits
-  /habits/habit/{id}:
+  /api/habits/{date}:
+    get:
+      description: Returns list of habits for the authenticated user on the given
+        date
+      parameters:
+      - description: Date in YYYY-MM-DD format
+        example: "2025-06-27"
+        format: date
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/habits.Habit'
+            type: array
+        "400":
+          description: Invalid date format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not get habits
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get habits by date for current user
+      tags:
+      - habits
+  /api/habits/habit/{id}:
     get:
       description: Retrieves a habit by its ID
       parameters:
@@ -142,4 +173,73 @@ paths:
       summary: Get habit by ID
       tags:
       - habits
+  /api/habits/habit/{id}/{date}:
+    patch:
+      consumes:
+      - application/json
+      description: Marks a habit as completed or not completed for the specified date
+        for the current user
+      parameters:
+      - description: Habit ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Date in YYYY-MM-DD format
+        example: "2025-06-27"
+        format: date
+        in: path
+        name: date
+        required: true
+        type: string
+      - description: Completion status
+        in: body
+        name: completion
+        required: true
+        schema:
+          $ref: '#/definitions/habits.CompletionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Habit not found or invalid ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Toggle habit completion status for a given date
+      tags:
+      - habits
+  /api/user/:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+      summary: Получить Пользователя из контекста
+      tags:
+      - users
 swagger: "2.0"

@@ -17,6 +17,7 @@ type Service interface {
 	CreateBaseHabitsForNewUser(userId int64)
 	GetHabitById(id int64) *Habit
 	GetHabitsForUserByDate(user *users.User, date time.Time) ([]*HabitDto, error)
+	ToggleHabitCompletion(user *users.User, id int64, date time.Time, completed bool) error
 }
 
 type service struct {
@@ -100,6 +101,21 @@ func (s *service) GetHabitsForUserByDate(user *users.User, date time.Time) ([]*H
 	return GetValues(habitsMap), nil
 }
 
+func (s *service) ToggleHabitCompletion(user *users.User, habitId int64, date time.Time, completed bool) error {
+	habit := s.repo.GetHabitByID(habitId)
+	if habit == nil {
+		return errors.New("Habit not found")
+	}
+	if user.UserID != habit.UserID {
+		return errors.New("habit is not owned by this user")
+	}
+	if completed {
+		return s.repo.SaveOrUpdateCompletion(habitId, date)
+	} else {
+		return s.repo.DeleteCompletion(habitId, date)
+	}
+}
+
 func (s *service) CreateHabit(dto *HabitDto, user *users.User) (*Habit, error) {
 	err := validateHabit(dto)
 	if err != nil {
@@ -116,6 +132,10 @@ func (s *service) CreateHabit(dto *HabitDto, user *users.User) (*Habit, error) {
 		if err != nil {
 			return nil, err
 		}
+		return habit, nil
+	}
+	if !isHabitChanged(dto, habit) {
+		// ничего не изменилось — не сохраняем
 		return habit, nil
 	}
 
@@ -161,6 +181,7 @@ func updateModelFromDTO(dto *HabitDto, habit *Habit) {
 	habit.RepeatType = dto.RepeatType
 	habit.DaysOfWeek = dto.DaysOfWeek
 	habit.IsDefault = false
+	habit.ID = 0
 	habit.CreatedAt = time.Now()
 }
 
@@ -222,6 +243,15 @@ func isValidDaysOfWeek(days string) bool {
 	}
 
 	return true
+}
+
+func isHabitChanged(dto *HabitDto, habit *Habit) bool {
+	return dto.Name != habit.Name ||
+		dto.Desc != habit.Description ||
+		dto.Color != habit.Color ||
+		dto.Icon != habit.Icon ||
+		dto.RepeatType != habit.RepeatType ||
+		dto.DaysOfWeek != habit.DaysOfWeek
 }
 
 func GetUuid() string {

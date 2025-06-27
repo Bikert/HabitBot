@@ -14,6 +14,9 @@ type Repository interface {
 	Save(habit *Habit) error
 	GetCompletedHabitsByUserIdAndDate(userId int64, date time.Time) *[]Habit
 	HasCompletions(habitID int64) bool
+	GetCompletedHabitByHabitIdAndDate(id int64, date time.Time) (*HabitCompletion, error)
+	SaveOrUpdateCompletion(id int64, date time.Time) error
+	DeleteCompletion(id int64, date time.Time) error
 }
 
 type repository struct {
@@ -116,6 +119,56 @@ func (r *repository) GetCompletedHabitsByUserIdAndDate(userID int64, date time.T
 	}
 
 	return &habits
+}
+
+func (r *repository) GetCompletedHabitByHabitIdAndDate(id int64, date time.Time) (*HabitCompletion, error) {
+	var completions HabitCompletion
+	query := `
+        SELECT habit_id, date, completed
+        FROM habit_completions
+        WHERE habit_id = $1 AND date = $2
+    `
+	err := r.db.Get(&completions, query, id, date)
+	if err != nil {
+		return nil, err
+	}
+	return &completions, nil
+}
+
+func (r *repository) SaveOrUpdateCompletion(habitID int64, date time.Time) error {
+	updateQuery := `
+        UPDATE habit_completions
+        SET completed = TRUE
+        WHERE habit_id = $1 AND date = $2
+    `
+	res, err := r.db.Exec(updateQuery, habitID, date)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		insertQuery := `
+            INSERT INTO habit_completions (habit_id, date, completed)
+            VALUES ($1, $2, TRUE)
+            ON CONFLICT (habit_id, date) DO NOTHING
+        `
+		_, err := r.db.Exec(insertQuery, habitID, date)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *repository) DeleteCompletion(habitID int64, date time.Time) error {
+	query := `DELETE FROM habit_completions WHERE habit_id = $1 AND date = $2`
+	_, err := r.db.Exec(query, habitID, date)
+	return err
 }
 
 func (r *repository) HasCompletions(habitID int64) bool {

@@ -8,29 +8,7 @@
     },
     "host": "localhost:8080",
     "paths": {
-        "/api/user/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Получить Пользователя из контекста",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/users.User"
-                        }
-                    }
-                }
-            }
-        },
-        "/habits": {
+        "/api/habits": {
             "post": {
                 "security": [
                     {
@@ -87,7 +65,7 @@
                 }
             }
         },
-        "/habits/habit/{id}": {
+        "/api/habits/habit/{id}": {
             "get": {
                 "description": "Retrieves a habit by its ID",
                 "produces": [
@@ -124,9 +102,171 @@
                     }
                 }
             }
+        },
+        "/api/habits/habit/{id}/{date}": {
+            "patch": {
+                "description": "Marks a habit as completed or not completed for the specified date for the current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "habits"
+                ],
+                "summary": "Toggle habit completion status for a given date",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Habit ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-06-27",
+                        "description": "Date in YYYY-MM-DD format",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Completion status",
+                        "name": "completion",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/habits.CompletionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Habit not found or invalid ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/habits/{date}": {
+            "get": {
+                "description": "Returns list of habits for the authenticated user on the given date",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "habits"
+                ],
+                "summary": "Get habits by date for current user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-06-27",
+                        "description": "Date in YYYY-MM-DD format",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/habits.Habit"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid date format",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Could not get habits",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Получить Пользователя из контекста",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/users.User"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "habits.CompletionRequest": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "boolean"
+                }
+            }
+        },
         "habits.Habit": {
             "type": "object",
             "properties": {
@@ -177,6 +317,12 @@
             "type": "object",
             "properties": {
                 "color": {
+                    "type": "string"
+                },
+                "completed": {
+                    "type": "boolean"
+                },
+                "completed_day": {
                     "type": "string"
                 },
                 "days_of_week": {
