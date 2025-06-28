@@ -16,14 +16,36 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/habits": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
+        "/api/habit/": {
+            "get": {
+                "description": "Returns all active habits for the authenticated user",
+                "produces": [
+                    "application/json"
                 ],
-                "description": "Creates a new habit for the authenticated user",
+                "tags": [
+                    "habits"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/habits.HabitDto"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/habit/create": {
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
@@ -33,11 +55,11 @@ const docTemplate = `{
                 "tags": [
                     "habits"
                 ],
-                "summary": "Create a new habit and Update",
+                "summary": "Создать новую привычку",
                 "parameters": [
                     {
-                        "description": "Habit data",
-                        "name": "habit",
+                        "description": "HabitDto",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -49,71 +71,26 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/habits.Habit"
+                            "$ref": "#/definitions/habits.HabitDto"
                         }
                     },
                     "400": {
-                        "description": "Invalid input",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/api/habits/habit/{id}": {
-            "get": {
-                "description": "Retrieves a habit by its ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "habits"
-                ],
-                "summary": "Get habit by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Habit ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/habits.Habit"
-                        }
-                    },
-                    "404": {
-                        "description": "Habit not found or invalid ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/habits/habit/{id}/{date}": {
-            "patch": {
-                "description": "Marks a habit as completed or not completed for the specified date for the current user",
+        "/api/habit/update/{groupId}": {
+            "put": {
                 "consumes": [
                     "application/json"
                 ],
@@ -123,91 +100,61 @@ const docTemplate = `{
                 "tags": [
                     "habits"
                 ],
-                "summary": "Toggle habit completion status for a given date",
+                "summary": "Обновить привычку",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Habit ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "type": "string",
-                        "format": "date",
-                        "example": "2025-06-27",
-                        "description": "Date in YYYY-MM-DD format",
-                        "name": "date",
+                        "description": "ID группы привычки",
+                        "name": "groupId",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Completion status",
-                        "name": "completion",
+                        "description": "HabitDto",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/habits.CompletionRequest"
+                            "$ref": "#/definitions/habits.HabitDto"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success response",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "boolean"
-                            }
+                            "$ref": "#/definitions/habits.HabitDto"
                         }
                     },
                     "400": {
-                        "description": "Invalid request data",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Habit not found or invalid ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/api/habits/{date}": {
+        "/api/habit/{groupId}": {
             "get": {
-                "description": "Returns list of habits for the authenticated user on the given date",
+                "description": "Returns a single active habit by group ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "habits"
                 ],
-                "summary": "Get habits by date for current user",
                 "parameters": [
                     {
                         "type": "string",
-                        "format": "date",
-                        "example": "2025-06-27",
-                        "description": "Date in YYYY-MM-DD format",
-                        "name": "date",
+                        "description": "Habit group ID",
+                        "name": "groupId",
                         "in": "path",
                         "required": true
                     }
@@ -216,28 +163,60 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/habits.Habit"
-                            }
+                            "$ref": "#/definitions/habits.HabitDto"
                         }
+                    }
+                }
+            }
+        },
+        "/api/habit/{versionId}/{date}": {
+            "patch": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "habits"
+                ],
+                "summary": "Отметить выполнение привычки на дату",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID версии привычки",
+                        "name": "versionId",
+                        "in": "path",
+                        "required": true
                     },
-                    "400": {
-                        "description": "Invalid date format",
+                    {
+                        "type": "string",
+                        "description": "Дата (в формате 2006-01-02)",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Completion status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/habits.CompletionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Could not get habits",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -264,9 +243,60 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/habit/completion/{date}": {
+            "get": {
+                "description": "Returns all completed or active habits for a user on a given date",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "habits"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Date in format YYYY-MM-DD",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/habits.HabitCompletionDto"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
         "habits.CompletionRequest": {
             "type": "object",
             "properties": {
@@ -275,49 +305,18 @@ const docTemplate = `{
                 }
             }
         },
-        "habits.Habit": {
+        "habits.HabitCompletionDto": {
             "type": "object",
             "properties": {
-                "color": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "days_of_week": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "group_id": {
-                    "description": "UUID в виде строки",
-                    "type": "string"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "is_active": {
+                "completed": {
                     "type": "boolean"
                 },
-                "is_default": {
-                    "type": "boolean"
+                "completedDay": {
+                    "type": "string",
+                    "format": "2006-01-02"
                 },
-                "name": {
-                    "type": "string"
-                },
-                "repeat_type": {
-                    "description": "\"daily\" или \"weekly\"",
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                },
-                "version": {
-                    "type": "integer"
+                "habit": {
+                    "$ref": "#/definitions/habits.HabitDto"
                 }
             }
         },
@@ -327,29 +326,30 @@ const docTemplate = `{
                 "color": {
                     "type": "string"
                 },
-                "completed": {
-                    "type": "boolean"
-                },
-                "completed_day": {
-                    "type": "string"
-                },
-                "days_of_week": {
+                "daysOfWeek": {
                     "type": "string"
                 },
                 "desc": {
+                    "type": "string"
+                },
+                "firstDate": {
+                    "description": "\"2025-06-28T00:00:00Z\"",
                     "type": "string"
                 },
                 "icon": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "repeat_type": {
+                "repeatType": {
                     "type": "string"
+                },
+                "versionId": {
+                    "type": "integer"
                 }
             }
         },
