@@ -13,11 +13,14 @@ import (
 )
 
 type Service interface {
-	CreateHabit(dto *HabitDto, user *users.User) (*Habit, error)
-	GetHabitsByUser(userId int64) (*[]Habit, error)
+	GetHabitsByUser(userId int64) ([]*HabitDto, error)
+	GetHabitByGroupID(groupId string) *HabitDto
+	GetHabitByVersionId(versionId int64) *HabitDto
+
+	CreateHabit(dto *HabitDto, user *users.User) (*HabitDto, error)
+	UpdateHabit(groupId string, dto *HabitDto, user *users.User) (*HabitDto, error)
 	CreateBaseHabitsForNewUser(userId int64)
-	GetHabitById(id int64) *Habit
-	GetHabitsForUserByDate(user *users.User, date time.Time) ([]*HabitDto, error)
+	GetCompletionHabitsForUserByDate(user *users.User, date time.Time) ([]*HabitCompletionDto, error)
 	ToggleHabitCompletion(user *users.User, id int64, date time.Time, completed bool) error
 }
 
@@ -55,25 +58,52 @@ func UserRegistrationListener(lc fx.Lifecycle, s Service, channels channels.Init
 
 func (s *service) CreateBaseHabitsForNewUser(userId int64) {
 	for _, habitDto := range DefaultHabits {
+		now := time.Now()
+		habitDto.FirstDate = &now
 		habit := buildNewModelFromDTO(&habitDto)
 		habit.UserID = userId
-		habit.CreatedAt = time.Now()
-		err := s.repo.Save(habit)
+		habit.CreatedAt = now
+		habit.GroupId = GetUuid()
+		err := s.repo.SaveHabit(habit)
 		if err != nil {
 			log.Fatal(err)
 		}
-
 	}
 }
 
-func (s *service) GetHabitsForUserByDate(user *users.User, date time.Time) ([]*HabitDto, error) {
-	habit := s.repo.GetHabitsByUserID(user.UserID)
+func (s *service) GetHabitsByUser(userId int64) ([]*HabitDto, error) {
+	habits := s.repo.GetActiveHabitsByUserID(userId)
+	habitsDto := make([]*HabitDto, len(*habits))
+	for i, habit := range *habits {
+		habitsDto[i] = buildHabitDtoByModel(habit)
+	}
+	return habitsDto, nil
+}
+
+func (s *service) GetHabitByVersionId(id int64) *HabitDto {
+	h := s.repo.GetHabitByVersionID(id)
+	if h == nil {
+		return nil
+	}
+	return buildHabitDtoByModel(*h)
+}
+
+func (s *service) GetHabitByGroupID(groupId string) *HabitDto {
+	h := s.repo.GetActiveHabitByGroupID(groupId)
+	if h == nil {
+		return nil
+	}
+	return buildHabitDtoByModel(*h)
+}
+
+func (s *service) GetCompletionHabitsForUserByDate(user *users.User, date time.Time) ([]*HabitCompletionDto, error) {
+	habit := s.repo.GetActiveHabitsByUserIDByDate(user.UserID, date)
 	compareHabits := s.repo.GetCompletedHabitsByUserIdAndDate(user.UserID, date)
-	habitsMap := make(map[int64]*HabitDto)
+	habitsMap := make(map[int64]*HabitCompletionDto)
 
 	for _, h := range *habit {
 		if h.RepeatType == RepeatTypeDaily {
-			habitsMap[h.ID] = buildDtoByModel(h)
+			habitsMap[h.VersionId] = buildHabitCompletionDtoByModel(h)
 			continue
 		}
 		if h.RepeatType == RepeatTypeWeekly {
@@ -86,24 +116,28 @@ func (s *service) GetHabitsForUserByDate(user *users.User, date time.Time) ([]*H
 			}
 			_, ok := allowedDays[shortDay]
 			if ok {
-				habitsMap[h.ID] = buildDtoByModel(h)
+				habitsMap[h.VersionId] = buildHabitCompletionDtoByModel(h)
 				continue
 			}
 		}
 	}
-	for _, ch := range *compareHabits {
-		if habitsMap[ch.ID] != nil {
-			habitsMap[ch.ID].CompletedDay = date.Format("2006-01-02")
-			habitsMap[ch.ID].Completed = true
+	for _, ch := range compareHabits {
+		if habitsMap[ch.HabitID] != nil {
+			habitsMap[ch.HabitID].CompletedDay = ch.Date.Format("2006-01-02")
+			habitsMap[ch.HabitID].Completed = ch.Completed
 			continue
 		}
+		h := s.repo.GetHabitByVersionID(ch.HabitID)
+		habitsMap[ch.HabitID] = buildHabitCompletionDtoByModel(*h)
+		habitsMap[ch.HabitID].CompletedDay = ch.Date.Format("2006-01-02")
+		habitsMap[ch.HabitID].Completed = ch.Completed
 	}
 
 	return GetValues(habitsMap), nil
 }
 
 func (s *service) ToggleHabitCompletion(user *users.User, habitId int64, date time.Time, completed bool) error {
-	habit := s.repo.GetHabitByID(habitId)
+	habit := s.repo.GetHabitByVersionID(habitId)
 	if habit == nil {
 		return errors.New("Habit not found")
 	}
@@ -117,49 +151,62 @@ func (s *service) ToggleHabitCompletion(user *users.User, habitId int64, date ti
 	}
 }
 
-func (s *service) CreateHabit(dto *HabitDto, user *users.User) (*Habit, error) {
+func (s *service) CreateHabit(dto *HabitDto, user *users.User) (*HabitDto, error) {
+	log.Println("Habit dto = ", dto)
 	err := validateHabit(dto)
 	if err != nil {
 		return nil, err
 	}
-
-	habit := s.repo.GetHabitByID(dto.Id)
-	if habit == nil || s.repo.HasCompletions(habit.ID) {
-		habit = buildNewModelFromDTO(dto)
-		habit.UserID = user.UserID
-		habit.CreatedAt = time.Now()
-
-		err = s.repo.Save(habit)
-		if err != nil {
-			return nil, err
-		}
-		return habit, nil
+	habit := buildNewModelFromDTO(dto)
+	habit.UserID = user.UserID
+	habit.GroupId = GetUuid()
+	log.Println("Habit = ", habit)
+	err = s.repo.SaveHabit(habit)
+	if err != nil {
+		return nil, err
 	}
+	return buildHabitDtoByModel(*habit), nil
+}
+
+func (s *service) UpdateHabit(habitGroupId string, dto *HabitDto, user *users.User) (*HabitDto, error) {
+	habit := s.repo.GetActiveHabitByGroupID(habitGroupId)
+	if habit == nil {
+		return nil, errors.New("Habit not found")
+	}
+
+	// ничего не изменилось — не сохраняем
 	if !isHabitChanged(dto, habit) {
-		// ничего не изменилось — не сохраняем
-		return habit, nil
+		return dto, nil
+	}
+
+	if user.UserID != habit.UserID {
+		return nil, errors.New("habit is not owned by this user")
+	}
+
+	err := validateHabit(dto)
+	if err != nil {
+		return nil, err
 	}
 
 	newHabit := *habit
 	updateModelFromDTO(dto, &newHabit)
 
 	habit.IsActive = false
-	err = s.repo.Save(&newHabit)
+	habit.LastDate = dto.FirstDate
+	err = s.repo.SaveHabit(&newHabit)
 	if err != nil {
 		return nil, err
 	}
-	err = s.repo.Save(habit)
+	err = s.repo.UpdateHabit(habit)
 	if err != nil {
 		return nil, err
 	}
-	return &newHabit, nil
+	return buildHabitDtoByModel(newHabit), nil
 }
 
 func buildNewModelFromDTO(dto *HabitDto) *Habit {
 	var habit Habit
-	habit.GroupID = GetUuid()
 	habit.Version = 1
-
 	habit.Name = dto.Name
 	habit.Description = dto.Desc
 	habit.Color = dto.Color
@@ -168,6 +215,7 @@ func buildNewModelFromDTO(dto *HabitDto) *Habit {
 	habit.RepeatType = dto.RepeatType
 	habit.DaysOfWeek = dto.DaysOfWeek
 	habit.IsDefault = false
+	habit.FirstDate = *dto.FirstDate
 	habit.CreatedAt = time.Now()
 	return &habit
 }
@@ -182,49 +230,77 @@ func updateModelFromDTO(dto *HabitDto, habit *Habit) {
 	habit.RepeatType = dto.RepeatType
 	habit.DaysOfWeek = dto.DaysOfWeek
 	habit.IsDefault = false
-	habit.ID = 0
+	habit.FirstDate = *dto.FirstDate
 	habit.CreatedAt = time.Now()
 }
 
-func buildDtoByModel(model Habit) *HabitDto {
-	return &HabitDto{
-		Id:           model.ID,
-		Name:         model.Name,
-		Desc:         model.Description,
-		Color:        model.Color,
-		Icon:         model.Icon,
-		RepeatType:   model.RepeatType,
-		DaysOfWeek:   model.DaysOfWeek,
+func buildHabitCompletionDtoByModel(model Habit) *HabitCompletionDto {
+	habit := HabitDto{
+		GroupId:    model.GroupId,
+		VersionId:  model.VersionId,
+		Name:       model.Name,
+		Desc:       model.Description,
+		Color:      model.Color,
+		Icon:       model.Icon,
+		RepeatType: model.RepeatType,
+		DaysOfWeek: model.DaysOfWeek,
+		FirstDate:  &model.FirstDate,
+	}
+
+	return &HabitCompletionDto{
+		Habit:        habit,
 		Completed:    false,
 		CompletedDay: "",
 	}
 }
 
-func (s *service) GetHabitById(id int64) *Habit {
-	return s.repo.GetHabitByID(id)
-}
-
-func (s *service) GetHabitsByUser(userId int64) (*[]Habit, error) {
-	return s.repo.GetHabitsByUserID(userId), nil
+func buildHabitDtoByModel(model Habit) *HabitDto {
+	return &HabitDto{
+		GroupId:    model.GroupId,
+		VersionId:  model.VersionId,
+		Name:       model.Name,
+		Desc:       model.Description,
+		Color:      model.Color,
+		Icon:       model.Icon,
+		RepeatType: model.RepeatType,
+		DaysOfWeek: model.DaysOfWeek,
+		FirstDate:  &model.FirstDate,
+	}
 }
 
 func validateHabit(h *HabitDto) error {
 	if strings.TrimSpace(h.Name) == "" {
+		log.Println("Name is empty")
 		return errors.New("name is required")
 	}
 
 	if h.RepeatType != RepeatTypeDaily && h.RepeatType != RepeatTypeWeekly {
+
+		log.Println("Repeat type is invalid = ", h.RepeatType)
 		return errors.New("repeat_type must be 'daily' or 'weekly'")
 	}
 
 	if h.RepeatType == RepeatTypeWeekly {
 		if len(h.DaysOfWeek) == 0 {
+			log.Println("DaysOfWeek is empty")
 			return errors.New("days_of_week is required when repeat_type is 'weekly'")
 		}
 		if !isValidDaysOfWeek(h.DaysOfWeek) {
+			log.Println("DaysOfWeek is invalid")
 			return errors.New("days_of_week contains invalid day(s)")
 		}
-
+	}
+	if h.FirstDate == nil {
+		log.Println("FirstDate is empty")
+		return errors.New("firstDate is required")
+	}
+	if h.Color == "" {
+		log.Println("Color is empty")
+		return errors.New("color is required")
+	}
+	if h.Icon == "" {
+		log.Println("Icon is empty")
+		return errors.New("icon is required")
 	}
 	return nil
 }
@@ -259,8 +335,8 @@ func GetUuid() string {
 	return uuid.New().String()
 }
 
-func GetValues(m map[int64]*HabitDto) []*HabitDto {
-	values := make([]*HabitDto, 0, len(m))
+func GetValues(m map[int64]*HabitCompletionDto) []*HabitCompletionDto {
+	values := make([]*HabitCompletionDto, 0, len(m))
 	for _, v := range m {
 		values = append(values, v)
 	}

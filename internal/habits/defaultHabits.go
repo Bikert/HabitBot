@@ -2,7 +2,6 @@ package habits
 
 var (
 	StepsHabit = HabitDto{
-		Id:         1,
 		Name:       "Норма шагов",
 		Desc:       "Пройти 10 000 шагов за день",
 		Icon:       "👣",
@@ -12,7 +11,6 @@ var (
 	}
 
 	MorningExerciseHabit = HabitDto{
-		Id:         2,
 		Name:       "Зарядка",
 		Desc:       "Сделать утреннюю зарядку",
 		Icon:       "🏃",
@@ -22,7 +20,6 @@ var (
 	}
 
 	KbjuHabit = HabitDto{
-		Id:         3,
 		Name:       "Соблюдение КБЖУ",
 		Desc:       "Соблюдать нормы калорий, белков, жиров и углеводов",
 		Icon:       "🥗",
@@ -32,17 +29,15 @@ var (
 	}
 
 	SleepHabit = HabitDto{
-		Id:         4,
 		Name:       "Сон до 23:00",
 		Desc:       "Ложиться спать до 23:00",
 		Icon:       "🛌",
 		Color:      "#63e6be",
-		RepeatType: "daily",
-		DaysOfWeek: "",
+		RepeatType: "weekly",
+		DaysOfWeek: "wed,fri",
 	}
 
 	WorkoutHabit = HabitDto{
-		Id:         5,
 		Name:       "Тренировка",
 		Desc:       "Провести полноценную тренировку",
 		Icon:       "💪",

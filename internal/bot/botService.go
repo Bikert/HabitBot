@@ -38,26 +38,28 @@ func NewHandler(bot *tgbotapi.BotAPI) tgbotapi.UpdatesChannel {
 func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel, userService users.Service, sessionService session.Service, habitService habits.Service, scenarioFactory scenaries.ScenarioFactory) error {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			log.Println("bot started")
-			for update := range updates {
-				tgUser := utils.GetUserId(&update)
-				user, err := userService.GetOrCreateUser(*tgUser)
-				if err != nil {
-					return err
-				}
-				message := utils.GetMessage(&update)
-				sess := sessionService.GetOrCreate(user.UserID)
-
-				switch message.Command() {
-				case "open":
-					err := SendOpenAppButton(update, bot)
+			go func() {
+				log.Println("bot started")
+				for update := range updates {
+					tgUser := utils.GetUserId(&update)
+					user, err := userService.GetOrCreateUser(*tgUser)
 					if err != nil {
-						return err
+						log.Println(err)
 					}
-				default:
-					runScenario(sess, scenarioFactory, update, sessionService, bot)
+					message := utils.GetMessage(&update)
+					sess := sessionService.GetOrCreate(user.UserID)
+
+					switch message.Command() {
+					case "open":
+						err := SendOpenAppButton(update, bot)
+						if err != nil {
+							log.Println(err)
+						}
+					default:
+						runScenario(sess, scenarioFactory, update, sessionService, bot)
+					}
 				}
-			}
+			}()
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
