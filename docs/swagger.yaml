@@ -1,60 +1,45 @@
 definitions:
+  dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
   habits.CompletionRequest:
     properties:
       completed:
         type: boolean
     type: object
-  habits.Habit:
+  habits.HabitCompletionDto:
     properties:
-      color:
-        type: string
-      created_at:
-        type: string
-      days_of_week:
-        type: string
-      description:
-        type: string
-      group_id:
-        description: UUID в виде строки
-        type: string
-      icon:
-        type: string
-      id:
-        type: integer
-      is_active:
+      completed:
         type: boolean
-      is_default:
-        type: boolean
-      name:
+      completedDay:
+        format: "2006-01-02"
         type: string
-      repeat_type:
-        description: '"daily" или "weekly"'
-        type: string
-      user_id:
-        type: integer
-      version:
-        type: integer
+      habit:
+        $ref: '#/definitions/habits.HabitDto'
     type: object
   habits.HabitDto:
     properties:
       color:
         type: string
-      completed:
-        type: boolean
-      completed_day:
-        type: string
-      days_of_week:
+      daysOfWeek:
         type: string
       desc:
+        type: string
+      firstDate:
+        description: '"2025-06-28T00:00:00Z"'
         type: string
       icon:
         type: string
       id:
-        type: integer
+        type: string
       name:
         type: string
-      repeat_type:
+      repeatType:
         type: string
+      versionId:
+        type: integer
     type: object
   users.User:
     properties:
@@ -76,15 +61,85 @@ info:
   title: HabitMuse API
   version: "1.0"
 paths:
-  /api/habits:
+  /api/habit/:
+    get:
+      description: Returns all active habits for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/habits.HabitDto'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      tags:
+      - habits
+  /api/habit/{groupId}:
+    get:
+      description: Returns a single active habit by group ID
+      parameters:
+      - description: Habit group ID
+        in: path
+        name: groupId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/habits.HabitDto'
+      tags:
+      - habits
+  /api/habit/{versionId}/{date}:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID версии привычки
+        in: path
+        name: versionId
+        required: true
+        type: integer
+      - description: Дата (в формате 2006-01-02)
+        in: path
+        name: date
+        required: true
+        type: string
+      - description: Completion status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/habits.CompletionRequest'
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Отметить выполнение привычки на дату
+      tags:
+      - habits
+  /api/habit/create:
     post:
       consumes:
       - application/json
-      description: Creates a new habit for the authenticated user
       parameters:
-      - description: Habit data
+      - description: HabitDto
         in: body
-        name: habit
+        name: request
         required: true
         schema:
           $ref: '#/definitions/habits.HabitDto'
@@ -94,138 +149,50 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/habits.Habit'
+            $ref: '#/definitions/habits.HabitDto'
         "400":
-          description: Invalid input
+          description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create a new habit and Update
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Создать новую привычку
       tags:
       - habits
-  /api/habits/{date}:
-    get:
-      description: Returns list of habits for the authenticated user on the given
-        date
-      parameters:
-      - description: Date in YYYY-MM-DD format
-        example: "2025-06-27"
-        format: date
-        in: path
-        name: date
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/habits.Habit'
-            type: array
-        "400":
-          description: Invalid date format
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Could not get habits
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get habits by date for current user
-      tags:
-      - habits
-  /api/habits/habit/{id}:
-    get:
-      description: Retrieves a habit by its ID
-      parameters:
-      - description: Habit ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/habits.Habit'
-        "404":
-          description: Habit not found or invalid ID
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get habit by ID
-      tags:
-      - habits
-  /api/habits/habit/{id}/{date}:
-    patch:
+  /api/habit/update/{groupId}:
+    put:
       consumes:
       - application/json
-      description: Marks a habit as completed or not completed for the specified date
-        for the current user
       parameters:
-      - description: Habit ID
+      - description: ID группы привычки
         in: path
-        name: id
-        required: true
-        type: integer
-      - description: Date in YYYY-MM-DD format
-        example: "2025-06-27"
-        format: date
-        in: path
-        name: date
+        name: groupId
         required: true
         type: string
-      - description: Completion status
+      - description: HabitDto
         in: body
-        name: completion
+        name: request
         required: true
         schema:
-          $ref: '#/definitions/habits.CompletionRequest'
+          $ref: '#/definitions/habits.HabitDto'
       produces:
       - application/json
       responses:
         "200":
-          description: Success response
+          description: OK
           schema:
-            additionalProperties:
-              type: boolean
-            type: object
+            $ref: '#/definitions/habits.HabitDto'
         "400":
-          description: Invalid request data
+          description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Habit not found or invalid ID
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
-          description: Internal server error
+          description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Toggle habit completion status for a given date
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Обновить привычку
       tags:
       - habits
   /api/user/:
@@ -242,4 +209,32 @@ paths:
       summary: Получить Пользователя из контекста
       tags:
       - users
+  /habit/completion/{date}:
+    get:
+      description: Returns all completed or active habits for a user on a given date
+      parameters:
+      - description: Date in format YYYY-MM-DD
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/habits.HabitCompletionDto'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      tags:
+      - habits
 swagger: "2.0"

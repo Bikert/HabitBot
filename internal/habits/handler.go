@@ -2,6 +2,7 @@ package habits
 
 import (
 	"HabitMuse/internal/constants"
+	"HabitMuse/internal/dto"
 	"HabitMuse/internal/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -21,80 +22,66 @@ func NewHandler(s Service) *Handler {
 
 func RegisterRoutes(auth *gin.RouterGroup, h *Handler) {
 	fmt.Println("RegisterRoutes")
-	api := auth.Group("/habits")
+	api := auth.Group("/habit")
 	{
-		api.POST("/", h.CreateHabit)
-		api.GET("/:date", h.GetByDate)
-		api.GET("/habit/:id", h.GetHabitById)
-		api.PATCH("/habit/:id/:date", h.ToggleHabitCompletion)
+		api.GET("/", h.getAllActiveHabits)
+		api.GET("/:groupId", h.GetActiveHabitByGroupId)
+		api.GET("/completion/:date", h.GetCompletionHabitsByDate)
+		api.POST("/create", h.CreateHabit)
+		api.PUT("/update/:groupId", h.Update)
+		api.PATCH("/:versionId/:date", h.ToggleHabitCompletion)
 	}
 }
 
-// CreateHabit godoc
-// @Summary      Create a new habit and Update
-// @Description  Creates a new habit for the authenticated user If id = 0 - Create new else Update
-// @Tags         habits
-// @Accept       json
-// @Produce      json
-// @Param        habit  body      HabitDto  true  "Habit data"
-// @Success      201    {object}  Habit
-// @Failure      400    {object}  map[string]string  "Invalid input"
-// @Failure      500    {object}  map[string]string  "Internal server error"
-// @Security     ApiKeyAuth
-// @Router       /api/habits [post]
-func (h *Handler) CreateHabit(c *gin.Context) {
-	var dto *HabitDto
-	if err := c.ShouldBindJSON(&dto); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
-		return
-	}
+// getAllActiveHabits @Summary Get all active habits
+// @Description Returns all active habits for the authenticated user
+// @Tags habits
+// @Produce json
+// @Success 200 {array} HabitDto
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/habit/ [get]
+func (h *Handler) getAllActiveHabits(c *gin.Context) {
 	user := utils.GetUserByCtx(c)
-	created, err := h.service.CreateHabit(dto, user)
+	habitDto, err := h.service.GetHabitsByUser(user.UserID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create habit"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, created)
+	c.JSON(http.StatusOK, habitDto)
 }
 
-// GetHabitById godoc
-// @Summary      Get habit by ID
-// @Description  Retrieves a habit by its ID
-// @Tags         habits
-// @Produce      json
-// @Param        id   path      int64  true  "Habit ID"
-// @Success      200  {object}  Habit
-// @Failure      404  {object}  map[string]string  "Habit not found or invalid ID"
-// @Router       /api/habits/habit/{id} [get]
-func (h *Handler) GetHabitById(c *gin.Context) {
-	habitId, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "invalid habitId"})
-		return
-	}
-	habit := h.service.GetHabitById(habitId)
+// GetActiveHabitByGroupId @Summary Get active habit by group ID
+// @Description Returns a single active habit by group ID
+// @Tags habits
+// @Produce json
+// @Param groupId path string true "Habit group ID"
+// @Success 200 {object} HabitDto
+// @Router /api/habit/{groupId} [get]
+func (h *Handler) GetActiveHabitByGroupId(c *gin.Context) {
+	groupId := c.Param("groupId")
+	habit := h.service.GetHabitByGroupID(groupId)
 	c.JSON(http.StatusOK, habit)
 }
 
-// GetByDate godoc
-// @Summary      Get habits by date for current user
-// @Description  Returns list of habits for the authenticated user on the given date
-// @Tags         habits
-// @Produce      json
-// @Param        date  path      string  true  "Date in YYYY-MM-DD format"  Format(date)  example(2025-06-27)
-// @Success      200   {array}   Habit
-// @Failure      400   {object}  map[string]string  "Invalid date format"
-// @Failure      500   {object}  map[string]string  "Could not get habits"
-// @Router       /api/habits/{date} [get]
-func (h *Handler) GetByDate(c *gin.Context) {
+// GetCompletionHabitsByDate @Summary Get completed habits for a specific date
+// @Description Returns all completed or active habits for a user on a given date
+// @Tags habits
+// @Produce json
+// @Param date path string true "Date in format YYYY-MM-DD"
+// @Success 200 {array} HabitCompletionDto
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /habit/completion/{date} [get]
+func (h *Handler) GetCompletionHabitsByDate(c *gin.Context) {
 	dateStr := c.Param("date")
 	date, err := time.Parse(constants.DayFormat, dateStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: fmt.Sprintf("Invalid date format: %s", dateStr)})
 		return
 	}
 	user := utils.GetUserByCtx(c)
-	habits, err := h.service.GetHabitsForUserByDate(user, date)
+	habits, err := h.service.GetCompletionHabitsForUserByDate(user, date)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get habits"})
 		return
@@ -102,22 +89,73 @@ func (h *Handler) GetByDate(c *gin.Context) {
 	c.JSON(http.StatusOK, habits)
 }
 
+// CreateHabit godoc
+// @Summary Создать новую привычку
+// @Tags habits
+// @Accept json
+// @Produce json
+// @Param request body HabitDto true "HabitDto"
+// @Success 201 {object} HabitDto
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/habit/create [post]
+func (h *Handler) CreateHabit(c *gin.Context) {
+	var habitDto *HabitDto
+	log.Println("CreateHabit")
+	if err := c.ShouldBindJSON(&habitDto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Println("CreateHabit = ", habitDto)
+	user := utils.GetUserByCtx(c)
+	created, err := h.service.CreateHabit(habitDto, user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, created)
+}
+
+// Update godoc
+// @Summary Обновить привычку
+// @Tags habits
+// @Accept json
+// @Produce json
+// @Param groupId path string true "ID группы привычки"
+// @Param request body HabitDto true "HabitDto"
+// @Success 200 {object} HabitDto
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/habit/update/{groupId} [put]
+func (h *Handler) Update(c *gin.Context) {
+	var habitDto *HabitDto
+	if err := c.ShouldBindJSON(&habitDto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	groupId := c.Param("groupId")
+	user := utils.GetUserByCtx(c)
+	updated, err := h.service.UpdateHabit(groupId, habitDto, user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not update habit"})
+		return
+	}
+	c.JSON(http.StatusOK, updated)
+}
+
 // ToggleHabitCompletion godoc
-// @Summary      Toggle habit completion status for a given date
-// @Description  Marks a habit as completed or not completed for the specified date for the current user
-// @Tags         habits
-// @Accept       json
-// @Produce      json
-// @Param        id        path      int     true  "Habit ID"
-// @Param        date      path      string  true  "Date in YYYY-MM-DD format"  Format(date)  example(2025-06-27)
-// @Param        completion body      CompletionRequest true  "Completion status"
-// @Success      200       {object}  map[string]bool  "Success response"
-// @Failure      400       {object}  map[string]string "Invalid request data"
-// @Failure      404       {object}  map[string]string "Habit not found or invalid ID"
-// @Failure      500       {object}  map[string]string "Internal server error"
-// @Router       /api/habits/habit/{id}/{date} [patch]
+// @Summary Отметить выполнение привычки на дату
+// @Tags habits
+// @Accept json
+// @Produce json
+// @Param versionId path int true "ID версии привычки"
+// @Param date path string true "Дата (в формате 2006-01-02)"
+// @Param request body CompletionRequest true "Completion status"
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/habit/{versionId}/{date} [patch]
 func (h *Handler) ToggleHabitCompletion(c *gin.Context) {
-	habitId, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	habitId, err := strconv.ParseInt(c.Param("versionId"), 10, 64)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "invalid habitId"})
 		return
@@ -131,7 +169,7 @@ func (h *Handler) ToggleHabitCompletion(c *gin.Context) {
 
 	var req CompletionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Println("Error binding request:", err)
+		log.Printf("Error binding request for  habitId=%v, date=%v: %v", habitId, dateStr, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
