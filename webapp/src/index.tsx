@@ -9,6 +9,10 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { getCurrentDate } from './utils/date'
 import { dayDataLoader, DayView } from './components/DayView'
 
+if (!sessionStorage['initialLocation']) {
+  sessionStorage['initialLocation'] = window.location.href
+}
+
 const router = createBrowserRouter([
   {
     path: '/',

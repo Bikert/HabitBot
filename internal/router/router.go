@@ -12,7 +12,6 @@ import (
 
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
-	router.Use(spa.Middleware("/", "./webapp/dist"))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return router
 }
@@ -24,5 +23,9 @@ func NewProtectedGroup(router *gin.Engine, userService users.Service) *gin.Route
 		middleware.ValidationToken(userService),
 		middleware.ErrorHandler(),
 	)
+
+	// HACK: spa middleware MUST be registered after all other middlewares
+	// TODO: reverse router registration logic along with moving it to the single Provide phase 
+	router.Use(spa.Middleware("/", "./webapp/dist"))
 	return auth
 }

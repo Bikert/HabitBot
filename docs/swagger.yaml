@@ -18,6 +18,10 @@ definitions:
         type: string
       habit:
         $ref: '#/definitions/habits.HabitDto'
+    required:
+    - completed
+    - completedDay
+    - habit
     type: object
   habits.HabitDto:
     properties:
@@ -132,6 +136,34 @@ paths:
       summary: Отметить выполнение привычки на дату
       tags:
       - habits
+  /api/habit/completion/{date}:
+    get:
+      description: Returns all completed or active habits for a user on a given date
+      parameters:
+      - description: Date in format YYYY-MM-DD
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/habits.HabitCompletionDto'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      tags:
+      - habits
   /api/habit/create:
     post:
       consumes:
@@ -209,32 +241,4 @@ paths:
       summary: Получить Пользователя из контекста
       tags:
       - users
-  /habit/completion/{date}:
-    get:
-      description: Returns all completed or active habits for a user on a given date
-      parameters:
-      - description: Date in format YYYY-MM-DD
-        in: path
-        name: date
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/habits.HabitCompletionDto'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      tags:
-      - habits
 swagger: "2.0"

@@ -5,6 +5,8 @@ export function DebugView() {
   const user = TelegramWebApp.initDataUnsafe?.user
   const debug = useShowDebugInformation((state) => state.active)
   if (!debug) return null
+  const currentLocation = window.location.href
+  const initialLocation = sessionStorage.getItem('initialLocation')
   return (
     <div className="flex max-w-screen flex-col gap-2 overflow-x-hidden px-2 py-4 whitespace-nowrap">
       <div>Version: {TelegramWebApp.version}</div>
@@ -32,12 +34,21 @@ export function DebugView() {
       </div>
       <div className="flex gap-4">
         <button
-          className="bg-tg-button text-tg-button-text cursor-pointer rounded-xl"
-          onClick={() => navigator.clipboard.writeText(window.location.href)}
+          className="bg-tg-button cursor-pointer rounded-xl"
+          onClick={() => navigator.clipboard.writeText(currentLocation)}
         >
           📋Location📋
         </button>
-        <div className="overflow-x-hidden text-ellipsis">{window.location.href}</div>
+        <div className="overflow-x-hidden text-ellipsis">{currentLocation}</div>
+      </div>
+      <div className="flex gap-4">
+        <button
+          className="bg-tg-button cursor-pointer rounded-xl"
+          onClick={() => navigator.clipboard.writeText(initialLocation ?? '')}
+        >
+          📋Initial location📋
+        </button>
+        <div className="overflow-x-hidden text-ellipsis">{initialLocation}</div>
       </div>
     </div>
   )

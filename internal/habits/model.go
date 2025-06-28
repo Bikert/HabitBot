@@ -52,9 +52,9 @@ type HabitDto struct {
 }
 
 type HabitCompletionDto struct {
-	Habit        HabitDto `json:"habit"`
-	Completed    bool     `json:"completed"`
-	CompletedDay string   `json:"completedDay" format:"2006-01-02"`
+	Habit        HabitDto `json:"habit"        binding:"required"`
+	Completed    bool     `json:"completed"    binding:"required"`
+	CompletedDay string   `json:"completedDay" binding:"required" format:"2006-01-02" `
 }
 
 type CompletionRequest struct {
