@@ -37,24 +37,6 @@ jobs:
             ./HabitMuse
             ./migrations
             ./webapp/dist
-      - name: Upload FE
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_KEY }}
-          source: ./webapp/dist/*
-          target: ~/HabitBot/webapp/dist
-          rm: true
-      - name: Upload BE
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_KEY }}
-          source: ./HabitMuse
-          target: ~/HabitBot.new
-          overwrite: true
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
@@ -71,11 +53,37 @@ jobs:
           SSH_HOST: ${{ secrets.VPS_HOST }}
           SSH_USER: ${{ secrets.VPS_USERNAME }}
           SSH_KEY: ${{ secrets.VPS_KEY }}
+      - name: Clear target temp folder
+        run: ssh vps 'rm -r ~/HabitBot.new'
+      - name: Upload FE
+        run: scp -r ./webapp/dist/* vps:~/HabitBot.new/webapp/dist/
+      - name: Upload BE
+        run: scp ./HabitMuse vps:~/HabitBot.new/
       - name: Copy migrations assets
-        run: scp -r ./migrations/* vps:~/HabitBot/migrations/
+        run: scp -r ./migrations/* vps:~/HabitBot.new/migrations/
+#      - name: Upload FE alt
+#        uses: appleboy/scp-action@v1
+#        with:
+#          host: ${{ secrets.VPS_HOST }}
+#          username: ${{ secrets.VPS_USERNAME }}
+#          key: ${{ secrets.VPS_KEY }}
+#          source: ./webapp/dist/*
+#          target: ~/HabitBot/webapp/dist
+#          rm: true
+#      - name: Upload BE
+#        uses: appleboy/scp-action@v1
+#        with:
+#          host: ${{ secrets.VPS_HOST }}
+#          username: ${{ secrets.VPS_USERNAME }}
+#          key: ${{ secrets.VPS_KEY }}
+#          source: ./HabitMuse
+#          target: ~/HabitBot.new
+#          overwrite: true
       - name: Take backup
         run: ssh vps 'cp -r ~/HabitBot/. ~/HabitBot.old'
-      - name: Remove executable
-        run: ssh vps 'rm ~/HabitBot/HabitMuse'
+      - name: Clear deployment directory
+        run: ssh vps 'rm -rf ./HabitBot/!(.env)'
+#      - name: Remove executable
+#        run: ssh vps 'rm ~/HabitBot/HabitMuse'
       - name: Update with new version
         run: ssh vps 'cp -r ~/HabitBot.new/. ~/HabitBot'
