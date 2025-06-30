@@ -36,7 +36,7 @@ jobs:
           path: |
             ./HabitMuse
             ./webapp/dist
-      - name: Deploy
+      - name: Upload FE
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -45,4 +45,12 @@ jobs:
           source: ./webapp/dist/*
           target: ~/HabitBot/webapp/dist
           rm: true
-#          debug: true
+      - name: Upload BE
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_KEY }}
+          source: ./HabitMuse
+          target: ~/HabitBot/
+          rm: true
