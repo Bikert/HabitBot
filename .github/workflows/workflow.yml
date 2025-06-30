@@ -72,7 +72,7 @@ jobs:
           SSH_USER: ${{ secrets.VPS_USERNAME }}
           SSH_KEY: ${{ secrets.VPS_KEY }}
       - name: Copy migrations assets
-        run: scp ./migrations/. vps:~/HabitBot
+        run: scp -r ./migrations/* vps:~/HabitBot/
       - name: Take backup
         run: ssh vps 'cp -r ~/HabitBot/. ~/HabitBot.old'
       - name: Remove executable
