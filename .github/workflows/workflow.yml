@@ -4,6 +4,7 @@ on:
 
 jobs:
   build:
+    environment: production
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,3 +45,4 @@ jobs:
           source: ./webapp/dist/*
           target: ~/HabitBot/webapp/dist
           rm: true
+#          debug: true
