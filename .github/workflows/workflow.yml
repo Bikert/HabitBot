@@ -71,6 +71,6 @@ jobs:
       - name: Take backup
         run: ssh vps 'cp -r ~/HabitBot/. ~/HabitBot.old'
       - name: Clear deployment directory
-        run: ssh vps 'rm -rf ./HabitBot/!\(.env\)'
+        run: ssh vps "rm -rf ./HabitBot/!\(.env\)"
       - name: Update with new version
         run: ssh vps 'cp -r ~/HabitBot.new/. ~/HabitBot'
