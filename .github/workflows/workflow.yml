@@ -52,5 +52,5 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_KEY }}
           source: ./HabitMuse
-          target: ~/HabitBot/
+          target: ~/HabitBot/HabitMuse.new
           overwrite: true
