@@ -37,6 +37,16 @@ jobs:
             ./HabitMuse
             ./migrations
             ./webapp/dist
+  deploy:
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: habit-bot
+      - name: Add executable
+        run: chmod +x ./HabitMuse
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
@@ -55,12 +65,14 @@ jobs:
           SSH_KEY: ${{ secrets.VPS_KEY }}
       - name: Clear target temp folder
         run: ssh vps 'rm -rf ~/HabitBot.new'
-      - name: Upload FE
-        run: scp -r ./webapp/dist/* vps:~/HabitBot.new/webapp/dist/
-      - name: Upload BE
-        run: scp ./HabitMuse vps:~/HabitBot.new/
-      - name: Copy migrations assets
-        run: scp -r ./migrations/* vps:~/HabitBot.new/migrations/
+      - name: Upload everything
+        run: scp -r ./* vps:~/HabitBot.new/
+#      - name: Upload FE
+#        run: scp -r ./webapp/dist/* vps:~/HabitBot.new/webapp/dist/
+#      - name: Upload BE
+#        run: scp ./HabitMuse vps:~/HabitBot.new/
+#      - name: Copy migrations assets
+#        run: scp -r ./migrations/* vps:~/HabitBot.new/migrations/
 #      - name: Upload FE alt
 #        uses: appleboy/scp-action@v1
 #        with:
