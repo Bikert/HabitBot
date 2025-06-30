@@ -39,7 +39,7 @@ func NewDB(lc fx.Lifecycle) (*sqlx.DB, error) {
 				return err
 			}
 			m, err := migrate.NewWithDatabaseInstance(
-				"file://internal/db/migrations", // путь относительно рабочей директории
+				"file://migrations", // путь относительно рабочей директории
 				"sqlite3",
 				driver,
 			)

@@ -1,0 +1,77 @@
+name: main.yml
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Install dependencies
+        run: go get .
+      - name: Build be
+        env:
+          GOOS: linux
+          GOARCH: amd64
+        run: go build
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache-dependency-path: ./webapp/package-lock.json
+          cache: npm
+      - run: npm ci
+        working-directory: ./webapp
+      - run: npm run build
+        working-directory: ./webapp
+      - name: Upload build results
+        uses: actions/upload-artifact@v4
+        with:
+          name: habit-bot
+          path: |
+            ./HabitMuse
+            ./migrations
+            ./webapp/dist
+
+  deploy:
+    environment: production
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: habit-bot
+      - name: Add executable
+        run: chmod +x ./HabitMuse
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/vps.key
+          chmod 600 ~/.ssh/vps.key
+          cat >>~/.ssh/config <<END
+          Host vps
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/vps.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+          SSH_USER: ${{ secrets.VPS_USERNAME }}
+          SSH_KEY: ${{ secrets.VPS_KEY }}
+      - name: Clear target temp folder
+        run: ssh vps 'rm -rf ~/HabitBot.new'
+      - name: Upload everything
+        run: scp -r ./* vps:~/HabitBot.new/
+      - name: Take backup
+        run: ssh vps 'cp -r ~/HabitBot/. ~/HabitBot.old'
+      - name: Clear deployment directory
+        run: ssh vps 'rm -rf ./HabitBot/migrations ./HabitBot/webapp ./HabitBot/HabitMuse'
+      - name: Update with new version
+        run: ssh vps 'cp -r ~/HabitBot.new/. ~/HabitBot'
