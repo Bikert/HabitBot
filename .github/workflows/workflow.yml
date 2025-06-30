@@ -72,5 +72,5 @@ jobs:
           SSH_KEY: ${{ secrets.VPS_KEY }}
       - name: Take backup
         run: ssh vps 'cp -r ~/HabitBot ~/HabitBot.old'
-      - name: Update with new version
-        run: ssh vps 'cp -r ~/HabitBot.new ~/HabitBot'
+#      - name: Update with new version
+#        run: ssh vps 'cp -r ~/HabitBot.new ~/HabitBot'
