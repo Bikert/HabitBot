@@ -1,4 +1,4 @@
-name: ci.yml
+name: workflow.yml
 on:
 #  pull_request:
 #    branches:
