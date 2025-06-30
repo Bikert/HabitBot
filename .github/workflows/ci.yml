@@ -1,0 +1,38 @@
+name: ci.yml
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - '*'
+      - '!main'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Install dependencies
+        run: go get .
+      - name: Build be
+        env:
+          GOOS: linux
+          GOARCH: amd64
+        run: go build
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache-dependency-path: ./webapp/package-lock.json
+          cache: npm
+      - run: npm ci
+        working-directory: ./webapp
+      - run: npm run lint
+        working-directory: ./webapp
+      - run: npm run build
+        working-directory: ./webapp

@@ -1,6 +1,7 @@
-name: workflow.yml
+name: main.yml
 on:
-  push: {}
+  push:
+    branches: [main]
 
 jobs:
   build:
