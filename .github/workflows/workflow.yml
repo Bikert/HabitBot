@@ -60,7 +60,7 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/vps.key
           chmod 600 ~/.ssh/vps.key
           cat >>~/.ssh/config <<END
-          Host staging
+          Host vps
             HostName $SSH_HOST
             User $SSH_USER
             IdentityFile ~/.ssh/vps.key
