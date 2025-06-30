@@ -54,7 +54,7 @@ jobs:
           SSH_USER: ${{ secrets.VPS_USERNAME }}
           SSH_KEY: ${{ secrets.VPS_KEY }}
       - name: Clear target temp folder
-        run: ssh vps 'rm -r ~/HabitBot.new'
+        run: ssh vps 'rm -rf ~/HabitBot.new'
       - name: Upload FE
         run: scp -r ./webapp/dist/* vps:~/HabitBot.new/webapp/dist/
       - name: Upload BE
