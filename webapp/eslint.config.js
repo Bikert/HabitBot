@@ -9,7 +9,7 @@ import globals from 'globals'
 
 export default defineConfig([
   {
-    ignores: ['node_modules/', 'dist/'],
+    ignores: ['node_modules/', '**/dist/'],
   },
   {
     files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
