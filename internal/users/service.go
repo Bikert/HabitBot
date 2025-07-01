@@ -14,16 +14,14 @@ type Service interface {
 }
 
 type service struct {
-	repo                 Repository
-	addDefaultHabitsCh   chan int64
-	saveWelcomeSessionCh chan int64
+	repo               Repository
+	addDefaultHabitsCh chan int64
 }
 
 func NewService(repo Repository, channels channels.InitChannels) Service {
 	return &service{
-		repo:                 repo,
-		addDefaultHabitsCh:   channels.AddDefaultHabitsCh,
-		saveWelcomeSessionCh: channels.SaveWelcomeSessionCh,
+		repo:               repo,
+		addDefaultHabitsCh: channels.AddDefaultHabitsCh,
 	}
 }
 
@@ -55,7 +53,6 @@ func (s service) GetOrCreateUser(userTg tgbotapi.User) (User, error) {
 	}
 	log.Println("GetOrCreateUser: saved user:", user)
 	s.addDefaultHabitsCh <- user.UserID
-	s.saveWelcomeSessionCh <- user.UserID
 	log.Printf("User ID: %d, Name: %s, FirstName: %s, LastName: %s\n Created!", user.UserID, user.UserName, user.FirstName, user.LastName)
 	return user, nil
 }

@@ -9,5 +9,4 @@ var Module = fx.Module("session",
 		NewRepository,
 		NewService,
 	),
-	fx.Invoke(UserRegistrationListener),
 )
