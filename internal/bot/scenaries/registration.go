@@ -2,6 +2,7 @@ package scenaries
 
 import (
 	"HabitMuse/internal/bot/utils"
+	"HabitMuse/internal/constants"
 	"HabitMuse/internal/session"
 	"HabitMuse/internal/users"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -46,7 +47,7 @@ func (r Registration) StepResolver(sess *session.Session, update *tgbotapi.Updat
 		if err != nil {
 			return err
 		}
-		sess.Scenario = ""
+		sess.Scenario = constants.MainMenu
 		sess.NextStep = ""
 		sess.PreviousStep = ""
 		sess.Data = map[string]string{}

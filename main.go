@@ -39,6 +39,7 @@ func main() {
 	app := fx.New(
 		fx.Provide(db.NewDB),
 		fx.Provide(channels.NewInitChannels),
+		fx.Provide(http.NewHttpServer),
 		users.Module,
 		habits.Module,
 		session.Module,
@@ -49,7 +50,7 @@ func main() {
 			router.NewProtectedGroup,
 		),
 		fx.Invoke(
-			http.NewHttpServer,
+			http.RunHttpServer,
 		),
 	)
 

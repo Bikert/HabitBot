@@ -17,122 +17,136 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func NewBot() (*tgbotapi.BotAPI, error) {
-	log.Println("creating new bot ... ")
+type Bot struct {
+	userService     users.Service
+	sessionService  session.Service
+	habitService    habits.Service
+	scenarioFactory scenaries.ScenarioFactory
+	api             *tgbotapi.BotAPI
+	updateConfig    tgbotapi.UpdateConfig
+}
+
+func NewBot(userService users.Service, sessionService session.Service, habitService habits.Service) *Bot {
+	log.Println("Initializing bot ... ")
 	tgToken := os.Getenv("TG_TOKEN")
-	log.Println("tgToken:", tgToken)
 	botAPI, err := tgbotapi.NewBotAPI(tgToken)
+
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
+		return nil
 	}
 	botAPI.Debug = true
-	log.Println("bot created")
-	return botAPI, nil
+	updateConfig := tgbotapi.NewUpdate(0)
+	updateConfig.Timeout = 60
+
+	scenarioFactory := scenaries.NewScenarioFactory(sessionService, userService, botAPI, habitService)
+
+	log.Println("Initialized bot successfully")
+	return &Bot{
+		sessionService:  sessionService,
+		habitService:    habitService,
+		userService:     userService,
+		api:             botAPI,
+		scenarioFactory: scenarioFactory,
+		updateConfig:    updateConfig,
+	}
 }
 
-func NewHandler(bot *tgbotapi.BotAPI) tgbotapi.UpdatesChannel {
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-	// u.AllowedUpdates = []string{"message", "edited_channel_post", "callback_query"}
-	updates := bot.GetUpdatesChan(u)
-	return updates
-}
-
-func RunBot(lc fx.Lifecycle, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel, userService users.Service, sessionService session.Service, habitService habits.Service, scenarioFactory scenaries.ScenarioFactory) error {
+func RunBot(lc fx.Lifecycle, bot *Bot) error {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			go func() {
-				log.Println("bot started")
-				for update := range updates {
-					log.Println("++++++++Get NEW update ++++++++++++")
-					log.Println("update = ", update)
-					tgUser := utils.GetUserId(&update)
-					user, err := userService.GetOrCreateUser(*tgUser)
-					if err != nil {
-						log.Println(err)
-						SendErrorMessage(update, bot, err)
-						continue
-					}
-					message := utils.GetMessage(&update)
-					sess := sessionService.GetOrCreateSessionForUser(user.UserID)
-
-					if message.IsCommand() {
-						log.Println("++++++++ COMMAND++++++++++++")
-						CommandStepResolver(update, bot)
-						log.Println("++++++++ COMMAND  finished +++++++++")
-						continue
-					}
-
-					if update.CallbackQuery != nil {
-						log.Println("++++++++ CALLBACKQUERY ++++++++++++")
-						CallbackStepResolver(sess, scenarioFactory, update, sessionService, bot)
-						continue
-					}
-					runScenario(sess, scenarioFactory, update, sessionService, bot)
-				}
-			}()
+			log.Println("Bot starting ...")
+			bot.onStart()
+			log.Println("Bot started successfully")
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			log.Println("Stopping bot...")
-			bot.StopReceivingUpdates()
+			log.Println("Bot stopping ...")
+			bot.api.StopReceivingUpdates()
+			log.Println("Bot stopped successfully...")
 			return nil
 		},
 	})
 	return nil
 }
 
-func CommandStepResolver(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func (bot *Bot) onStart() {
+	go func() {
+		updates := bot.api.GetUpdatesChan(bot.updateConfig)
+		for update := range updates {
+			log.Println("++++++++Get NEW update ++++++++++++")
+			log.Println("update = ", update)
+			tgUser := utils.GetUserId(&update)
+			user, err := bot.userService.GetOrCreateUser(*tgUser)
+			if err != nil {
+				log.Println(err)
+				bot.sendErrorMessage(update, err)
+				continue
+			}
+			message := utils.GetMessage(&update)
+			sess := bot.sessionService.GetOrCreateSessionForUser(user.UserID)
+
+			if message.IsCommand() {
+				bot.commandStepResolver(update, sess)
+				continue
+			}
+
+			if update.CallbackQuery != nil {
+				bot.callbackStepResolver(sess, update)
+				continue
+			}
+			bot.scenarioResolver(sess, update)
+		}
+	}()
+}
+
+func (bot *Bot) commandStepResolver(update tgbotapi.Update, sess *session.Session) {
 	message := utils.GetMessage(&update)
 	log.Println("message is command ", message.Command())
 	switch message.Command() {
 	case constants.OpenApp:
-		err := SendOpenAppButton(update, bot)
+		err := bot.sendOpenAppButton(update)
 		if err != nil {
 			log.Println(err)
 		}
 	case constants.MainMenu:
-		err := mainMenu(update, bot)
+		err := bot.mainMenu(update, sess)
 		if err != nil {
 			log.Println(err)
 		}
 	}
 }
 
-func CallbackStepResolver(sess *session.Session, scenarioFactory scenaries.ScenarioFactory, update tgbotapi.Update, sessionService session.Service, bot *tgbotapi.BotAPI) {
-	log.Println("callback query", update.CallbackQuery)
-	callbackData := update.CallbackQuery.Data
-	callbackConfig := tgbotapi.NewCallback(update.CallbackQuery.ID, "")
-	_, err := bot.Request(callbackConfig)
+// If a callback is received from MainMenu buttons, we switch the scenario and pass it to the scenarioResolver.
+func (bot *Bot) callbackStepResolver(sess *session.Session, update tgbotapi.Update) {
+	log.Println("Calling callback step resolver callback data = ", update.CallbackQuery.Data)
+	callback := update.CallbackQuery
+	err := utils.СonfirmPressAndHideButtons(bot.api, callback)
 	if err != nil {
-		log.Println(err)
-	}
-
-	switch callbackData {
-	case constants.CallbackRegistration:
-		sess.Scenario = constants.ScenarioRegistration
-		sess.NextStep = ""
-		sess.PreviousStep = ""
-	case constants.CallbackSendWelcomeMessage:
-		sess.Scenario = constants.ScenarioWelcome
-		sess.NextStep = ""
-		sess.PreviousStep = ""
-	}
-	runScenario(sess, scenarioFactory, update, sessionService, bot)
-}
-
-func runScenario(sess *session.Session, scenarioFactory scenaries.ScenarioFactory, update tgbotapi.Update, sessionService session.Service, bot *tgbotapi.BotAPI) {
-	if sess.Scenario == "" || sess.Scenario == constants.MainMenu {
-		err := mainMenu(update, bot)
-		if err != nil {
-			return
-		}
 		return
 	}
-	scenarios := scenarioFactory.GetScenarios()
+
+	if sess.Scenario == constants.MainMenu {
+		log.Println("setScenario to ", callback.Data)
+		sess.Scenario = callback.Data
+		sess.NextStep = ""
+		sess.PreviousStep = ""
+	}
+	bot.scenarioResolver(sess, update)
+}
+
+func (bot *Bot) scenarioResolver(sess *session.Session, update tgbotapi.Update) {
+	scenarios := bot.scenarioFactory.GetScenarios()
 	currentScenario := ""
 	for {
-		if sess.Scenario == "" || currentScenario == sess.Scenario {
+		if sess.Scenario == "" || sess.Scenario == constants.MainMenu {
+			err := bot.mainMenu(update, sess)
+			if err != nil {
+				log.Println(err)
+			}
+			break
+		}
+		if currentScenario == sess.Scenario {
 			break
 		}
 		currentScenario = sess.Scenario
@@ -140,18 +154,19 @@ func runScenario(sess *session.Session, scenarioFactory scenaries.ScenarioFactor
 		if scenario, ok := scenarios[sess.Scenario]; ok {
 			if err := scenario.StepResolver(sess, &update); err != nil {
 				log.Println("Ошибка в сценарии:", err)
+				bot.sendErrorMessage(update, err)
 			}
-			sessionService.Save(*sess)
+			bot.sessionService.Save(*sess)
 		} else {
 			str := fmt.Sprintf("Сценарий не найден: %s", sess.Scenario)
 			log.Println(str)
-			SendErrorMessage(update, bot, errors.New(str))
+			bot.sendErrorMessage(update, errors.New(str))
 			break
 		}
 	}
 }
 
-func SendOpenAppButton(update tgbotapi.Update, api *tgbotapi.BotAPI) error {
+func (bot *Bot) sendOpenAppButton(update tgbotapi.Update) error {
 	buttons := [][]tgbotapi.InlineKeyboardButton{
 		{
 			tgbotapi.InlineKeyboardButton{
@@ -165,18 +180,23 @@ func SendOpenAppButton(update tgbotapi.Update, api *tgbotapi.BotAPI) error {
 	markup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Открой приложение, не волнуйся сейчас все работает в тестовом режиме на локальной машине соглашайся на все.")
 	msg.ReplyMarkup = markup
-	_, err := api.Send(msg)
+	_, err := bot.api.Send(msg)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func mainMenu(update tgbotapi.Update, api *tgbotapi.BotAPI) error {
+func (bot *Bot) mainMenu(update tgbotapi.Update, sess *session.Session) error {
+	sess.Scenario = constants.MainMenu
+	sess.NextStep = ""
+	sess.PreviousStep = ""
+	sess.Data = map[string]string{}
+
 	buttons := [][]tgbotapi.InlineKeyboardButton{
 		{
-			tgbotapi.NewInlineKeyboardButtonData("🚀 Заполнить Анкету Регистрации", constants.CallbackRegistration),
-			tgbotapi.NewInlineKeyboardButtonData("🚀 Привет", constants.CallbackSendWelcomeMessage),
+			tgbotapi.NewInlineKeyboardButtonData("🚀 Заполнить Анкету Регистрации", constants.ScenarioRegistration),
+			tgbotapi.NewInlineKeyboardButtonData("🚀 Отправить приветственное сообщение", constants.ScenarioWelcome),
 		},
 		{
 			tgbotapi.InlineKeyboardButton{
@@ -190,17 +210,18 @@ func mainMenu(update tgbotapi.Update, api *tgbotapi.BotAPI) error {
 	markup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 	msg := tgbotapi.NewMessage(utils.GetMessage(&update).Chat.ID, "Вот что я умею")
 	msg.ReplyMarkup = markup
-	_, err := api.Send(msg)
+	_, err := bot.api.Send(msg)
 	if err != nil {
 		return err
 	}
+	bot.sessionService.Save(*sess)
 	return nil
 }
 
-func SendErrorMessage(update tgbotapi.Update, api *tgbotapi.BotAPI, err error) {
+func (bot *Bot) sendErrorMessage(update tgbotapi.Update, err error) {
 	str := fmt.Sprintf("😕 Упс! Что-то пошло не так: %s. Попробуй ещё раз чуть позже!", err.Error())
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, str)
-	_, err = api.Send(msg)
+	msg := tgbotapi.NewMessage(utils.GetMessage(&update).Chat.ID, str)
+	_, err = bot.api.Send(msg)
 	if err != nil {
 		log.Println(err)
 	}
