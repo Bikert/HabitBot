@@ -2,7 +2,6 @@ package session
 
 import (
 	_ "HabitMuse/internal/db"
-	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -25,9 +24,7 @@ func NewRepository(db *sqlx.DB) Repository {
 
 func (r *repository) Get(userID int64) *Session {
 	query := "SELECT user_id, next_step, previous_step, data, scenario FROM sessions WHERE user_id = $1"
-	// TODO вынести контекст наверх
-	ctx := context.Background()
-	row := r.DB.QueryRowContext(ctx, query, userID)
+	row := r.DB.QueryRow(query, userID)
 	var sess Session
 	var dataJSON []byte
 	if err := row.Scan(&sess.UserID, &sess.NextStep, &sess.PreviousStep, &dataJSON, &sess.Scenario); err != nil {
@@ -48,16 +45,13 @@ func (r *repository) Get(userID int64) *Session {
 }
 
 func (r *repository) Save(sess Session) {
-	// TODO вынести контекст наверх
-	ctx := context.Background()
-
 	dataJSON, err := json.Marshal(sess.Data)
 	if err != nil {
 		log.Println("Ошибка при сериализации data:", err)
 		return
 	}
 
-	_, err = r.DB.ExecContext(ctx, `
+	_, err = r.DB.Exec(`
         INSERT INTO sessions (user_id, next_step, previous_step, data, scenario)
         VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (user_id)
