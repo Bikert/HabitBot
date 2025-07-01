@@ -9,17 +9,28 @@ import (
 	"net/http"
 )
 
-func NewHttpServer(lc fx.Lifecycle, router *gin.Engine) *http.Server {
+type Server struct {
+	router *gin.Engine
+	server *http.Server
+}
+
+func NewHttpServer(router *gin.Engine) *Server {
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: router,
 	}
-	log.Println("http server listening on :8080")
+	return &Server{
+		router: router,
+		server: server,
+	}
+}
+
+func RunHttpServer(lc fx.Lifecycle, s *Server) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			go func() {
 				log.Println("Starting HTTP server on :8080")
-				if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					log.Fatalf("Listen: %s\n", err)
 				}
 			}()
@@ -27,8 +38,7 @@ func NewHttpServer(lc fx.Lifecycle, router *gin.Engine) *http.Server {
 		},
 		OnStop: func(ctx context.Context) error {
 			log.Println("Stopping HTTP server on :8080")
-			return server.Shutdown(ctx)
+			return s.server.Shutdown(ctx)
 		},
 	})
-	return server
 }

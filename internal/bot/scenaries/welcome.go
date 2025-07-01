@@ -22,27 +22,27 @@ func (s Welcome) StepResolver(sess *session.Session, update *tgbotapi.Update) er
 	log.Println("Welcome step resolver ")
 	if update.CallbackQuery != nil {
 		callback := update.CallbackQuery
-
 		switch callback.Data {
 		case "start_registration":
 			sess.Scenario = constants.ScenarioRegistration
 			msg := tgbotapi.NewMessage(callback.From.ID, "Отлично, начинаем! 🚀")
-			s.api.Send(msg)
+			_, err := s.api.Send(msg)
+			if err != nil {
+				return err
+			}
 
 		case "remind_later":
-			sess.Scenario = ""
+			sess.Scenario = constants.MainMenu
 			msg := tgbotapi.NewMessage(callback.From.ID, "Хорошо, напомню позже ⏳")
-			s.api.Send(msg)
+			_, err := s.api.Send(msg)
+			if err != nil {
+				return err
+			}
 
-		case constants.CallbackSendWelcomeMessage:
+		case constants.ScenarioWelcome:
 			return s.sendWelcomeMessage(sess)
 		}
 
-		callbackConfig := tgbotapi.NewCallback(callback.ID, "")
-		_, err := s.api.Request(callbackConfig)
-		if err != nil {
-			return err
-		}
 		return nil
 	}
 	return s.sendWelcomeMessage(sess)
