@@ -71,7 +71,7 @@ func (h *Handler) GetActiveHabitByGroupId(c *gin.Context) {
 // @Success 200 {array} HabitCompletionDto
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /habit/completion/{date} [get]
+// @Router /api/habit/completion/{date} [get]
 func (h *Handler) GetCompletionHabitsByDate(c *gin.Context) {
 	dateStr := c.Param("date")
 	date, err := time.Parse(constants.DayFormat, dateStr)

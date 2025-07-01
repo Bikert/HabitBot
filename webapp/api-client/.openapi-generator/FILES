@@ -1,0 +1,17 @@
+.gitignore
+.npmignore
+README.md
+package.json
+src/apis/HabitsApi.ts
+src/apis/UsersApi.ts
+src/apis/index.ts
+src/index.ts
+src/models/DtoErrorResponse.ts
+src/models/HabitsCompletionRequest.ts
+src/models/HabitsHabitCompletionDto.ts
+src/models/HabitsHabitDto.ts
+src/models/UsersUser.ts
+src/models/index.ts
+src/runtime.ts
+tsconfig.esm.json
+tsconfig.json

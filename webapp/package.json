@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@emoji-mart/data": "^1.2.1",
+    "@habit-bot/api-client": "file:api-client",
     "@tailwindcss/vite": "^4.1.10",
     "classnames": "^2.5.1",
     "emoji-mart": "^5.6.0",
@@ -18,12 +19,16 @@
   "scripts": {
     "start": "vite dev",
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "vite build && npm run build:api",
+    "build:api": "cd ./api-client && npm run build",
     "preview": "vite preview",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate:api": "openapi-generator-cli generate -i ../docs/swagger.yaml -g typescript-fetch -o api-client --additional-properties=npmName=@habit-bot/api-client,supportsES6=true,withInterfaces=true && npm run build:api",
+    "postinstall": "npm run build:api"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
+    "@openapitools/openapi-generator-cli": "^2.21.0",
     "@stylistic/eslint-plugin": "^4.4.1",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",

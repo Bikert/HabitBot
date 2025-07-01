@@ -1,100 +1,55 @@
 import { type LoaderFunction, NavLink, replace, useLoaderData, useNavigate, useParams } from 'react-router'
-import { delay } from '../utils/delay'
 import { getCurrentDate, getRelativeDate, isValidDateString } from '../utils/date'
 import classNames from 'classnames'
-import type { HabitColor } from '../constants/HabitOptions'
 import { TelegramWebApp } from '../telegram'
-
-type Habit = {
-  id: number
-  title: string
-  emoji: string
-  description: string
-  color: HabitColor
-}
-
-type HabitOnDate = {
-  habit: Habit
-  completed: boolean
-}
+import { Configuration, DefaultConfig, HabitsApi, type HabitsHabitCompletionDto } from '@habit-bot/api-client'
 
 type DayViewLoaderData = {
-  habitsOnDate: HabitOnDate[]
+  habitsOnDate: HabitsHabitCompletionDto[]
 }
 
-const fakeHabitOnDate: HabitOnDate[] = [
-  {
-    habit: {
-      id: 1,
-      title: 'Read',
-      description: '',
-      emoji: '📚',
-      color: '#63e6be',
+const api = new HabitsApi(
+  new Configuration({
+    ...DefaultConfig,
+    basePath: window.location.origin,
+    headers: {
+      'x-telegram-init-data': TelegramWebApp.initData,
     },
-    completed: true,
-  },
-  {
-    habit: {
-      id: 2,
-      title: 'Study',
-      description: '',
-      emoji: '📖',
-      color: '#c77dff',
-    },
-    completed: false,
-  },
-  {
-    habit: {
-      id: 3,
-      title: 'Mop the house',
-      description: '',
-      emoji: '🧹',
-      color: '#f06595',
-    },
-    completed: false,
-  },
-]
+  }),
+)
 
 export const dayDataLoader: LoaderFunction = async ({ params }) => {
   const date = params['date']
   if (!isValidDateString(date)) return replace('/day/' + getCurrentDate())
-  await delay(500)
-  return { habitsOnDate: structuredClone(fakeHabitOnDate) }
 
-  // const response = await fetch('/api/habits/day/' + params['date'])
-  // const habits = await response.json()
-  // return {
-  //   habits,
-  // }
+  const habitCompletions = await api.apiHabitCompletionDateGet({ date: date! })
+  console.log(habitCompletions)
+  return { habitsOnDate: habitCompletions }
 }
 
+type VersionId = NonNullable<DayViewLoaderData['habitsOnDate'][number]['habit']>['versionId']
 export const DayView = () => {
   const { habitsOnDate }: DayViewLoaderData = useLoaderData()
   const navigate = useNavigate()
   const params = useParams()
   const date = params['date']!
 
-  async function toggleHabit(id: Habit['id']) {
-    const existing = habitsOnDate.find((h) => h.habit.id === id)
+  console.log(habitsOnDate)
+  async function toggleHabit(versionId: VersionId) {
+    if (!versionId) {
+      throw new Error('versionId is required')
+    }
+    const existing = habitsOnDate.find((h) => h.habit?.versionId === versionId)
     if (!existing) {
-      return
+      throw new Error('habit not found')
     }
-    const res = await fetch(`/api/habits/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'content-type': 'application/json',
-        'x-telegram-init-data': TelegramWebApp.initData,
+    await api.apiHabitVersionIdDatePatch({
+      date: date,
+      versionId: versionId,
+      request: {
+        completed: !existing.completed,
       },
-      body: JSON.stringify({ completed: !existing.completed }),
     })
-    if (!res.ok) {
-      console.log('failed to toggle habit')
-      const originalExisting = fakeHabitOnDate.find((h) => h.habit.id === id)
-      if (!originalExisting) {
-        return
-      }
-      originalExisting.completed = !existing.completed
-    }
     navigate('.', { replace: true })
   }
 
@@ -110,30 +65,32 @@ export const DayView = () => {
         </NavLink>
       </div>
       <ul className="m-4 flex list-none flex-col gap-2">
-        {habitsOnDate.map(({ habit, completed }) => (
+        {habitsOnDate.map(({ completed, habit }) => (
           <li
-            key={habit.id}
+            key={habit.versionId}
             className={classNames('flex justify-between gap-2 rounded-xl p-3')}
             style={{ backgroundColor: `color-mix(in srgb, ${habit.color}, transparent 40%)` }}
-            onClick={() => toggleHabit(habit.id)}
+            onClick={() => toggleHabit(habit.versionId)}
           >
-            <div className="flex grow flex-row items-center">
-              <div>{habit.emoji}</div>
+            <div className="flex grow flex-row items-center justify-stretch">
+              <div>{habit.icon}</div>
               <div
                 className={classNames(
-                  'grow',
+                  'grow text-center',
                   completed &&
                     'after:bg-tg-text relative box-border line-through after:absolute after:top-1/2 after:block after:h-[1px] after:w-full after:px-11 after:content-[""]',
                 )}
               >
-                {habit.title}
+                {habit.icon}
+                {habit.name}
+                {habit.icon}
               </div>
             </div>
             <div className="flex items-center">
               <input
                 type="checkbox"
                 className="checked:bg-tg-button h-5 w-5 cursor-pointer appearance-none rounded-full border-3"
-                onChange={() => toggleHabit(habit.id)}
+                onChange={() => toggleHabit(habit.versionId)}
                 checked={completed}
               />
             </div>

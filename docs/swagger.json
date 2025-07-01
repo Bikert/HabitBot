@@ -36,6 +36,49 @@
                 }
             }
         },
+        "/api/habit/completion/{date}": {
+            "get": {
+                "description": "Returns all completed or active habits for a user on a given date",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "habits"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Date in format YYYY-MM-DD",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/habits.HabitCompletionDto"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/habit/create": {
             "post": {
                 "consumes": [
@@ -235,49 +278,6 @@
                     }
                 }
             }
-        },
-        "/habit/completion/{date}": {
-            "get": {
-                "description": "Returns all completed or active habits for a user on a given date",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "habits"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Date in format YYYY-MM-DD",
-                        "name": "date",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/habits.HabitCompletionDto"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -299,6 +299,11 @@
         },
         "habits.HabitCompletionDto": {
             "type": "object",
+            "required": [
+                "completed",
+                "completedDay",
+                "habit"
+            ],
             "properties": {
                 "completed": {
                     "type": "boolean"
