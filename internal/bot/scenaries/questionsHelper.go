@@ -20,7 +20,7 @@ type Question struct {
 }
 
 func loadQuestions(filename string) ([]Question, error) {
-	data, err := os.ReadFile("internal/bot/questions/" + filename + ".json")
+	data, err := os.ReadFile("resources/questions/" + filename + ".json")
 	if err != nil {
 		return nil, err
 	}
