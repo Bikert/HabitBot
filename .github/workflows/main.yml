@@ -35,7 +35,7 @@ jobs:
           name: habit-bot
           path: |
             ./HabitMuse
-            ./migrations
+            ./resources
             ./webapp/dist
 
   deploy:
@@ -72,6 +72,6 @@ jobs:
       - name: Take backup
         run: ssh vps 'cp -r ~/HabitBot/. ~/HabitBot.old'
       - name: Clear deployment directory
-        run: ssh vps 'rm -rf ./HabitBot/migrations ./HabitBot/webapp ./HabitBot/HabitMuse'
+        run: ssh vps 'rm -rf ./HabitBot/resources ./HabitBot/webapp ./HabitBot/HabitMuse'
       - name: Update with new version
         run: ssh vps 'cp -r ~/HabitBot.new/. ~/HabitBot'
