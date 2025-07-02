@@ -6,8 +6,9 @@ import { createBrowserRouter, redirect, replace, RouterProvider } from 'react-ro
 import HabitPage from './components/HabitPage'
 import { ConfigPage } from './components/ConfigPage'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { getCurrentDate } from './utils/date'
-import { dayDataLoader, DayView } from './components/DayView'
+import { getCurrentDateApiString, isValidDateString } from './utils/date'
+import { DayView } from './components/DayView'
+import { delay } from './utils/delay'
 
 if (!sessionStorage['initialLocation']) {
   sessionStorage['initialLocation'] = window.location.href
@@ -32,16 +33,26 @@ const router = createBrowserRouter([
       },
       {
         path: 'day',
-        HydrateFallback: () => <div>Loading...</div>,
+        HydrateFallback: () => <div>Loading... (router hydrate fallback)</div>,
         ErrorBoundary: ErrorBoundary,
         children: [
           {
             index: true,
-            loader: async () => redirect('/day/' + getCurrentDate()),
+            loader: async () => {
+              // HACK: give some time to router to understand transition is started, so isPending initialised
+              await delay(1)
+              return redirect('/day/' + getCurrentDateApiString())
+            },
           },
           {
             path: ':date',
-            loader: dayDataLoader,
+            loader: ({ params }) => {
+              const date = params['date']
+              if (!isValidDateString(date)) {
+                return redirect('/day/' + getCurrentDateApiString())
+              }
+              return delay(1)
+            },
             Component: DayView,
           },
         ],
@@ -60,3 +71,4 @@ root.render(
     <RouterProvider router={router} />
   </React.StrictMode>,
 )
+export { habitsApi } from './api/habitsApi'

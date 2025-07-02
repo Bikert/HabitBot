@@ -1,13 +1,15 @@
-function dateToDateSting(date: Date) {
+import type { DateApiString } from '../types/DateFormat'
+
+function dateToDateSting(date: Date): DateApiString {
   // do not use toISOString here - it formats in UTC+0 (Z) timezone instead of local, effectively adding off-by-one error
   return [
     date.getFullYear().toString(),
     (date.getMonth() + 1).toString().padStart(2, '0'),
     date.getDate().toString().padStart(2, '0'),
-  ].join('-')
+  ].join('-') as DateApiString
 }
 
-export function getCurrentDate() {
+export function getCurrentDateApiString() {
   const date = new Date()
   return dateToDateSting(date)
 }
@@ -17,8 +19,8 @@ export function reformatDate(date: string) {
 }
 
 export function getRelativeDate(date: string, days: number) {
-  if (!isValidDateString(date)) return date
-  const [year, month, day] = date.split('-').map(Number) as [number, number, number]
+  const validDate = isValidDateString(date) ? date : getCurrentDateApiString()
+  const [year, month, day] = validDate.split('-').map(Number) as [number, number, number]
   const newDate = new Date(year, month - 1, day + days)
   return dateToDateSting(newDate)
 }
@@ -29,7 +31,7 @@ export function toDate(dateString: string) {
   return new Date(year, month - 1, day)
 }
 
-export function isValidDateString(date: unknown): boolean {
+export function isValidDateString(date: unknown): date is DateApiString {
   if (typeof date !== 'string') return false
   const datePattern = /^\d{4}-\d{2}-\d{2}$/
   if (!datePattern.test(date)) return false
