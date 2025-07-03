@@ -1,14 +1,14 @@
-import { NavLink, useNavigate, useParams } from 'react-router'
+import { type LoaderFunction, NavLink, redirect, useNavigate, useParams } from 'react-router'
 import { getCurrentDateApiString, getRelativeDate, isValidDateString, toDate } from '../../utils/date'
 import classNames from 'classnames'
 import { useEffect } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { delay } from '../../utils/delay'
-import { habitsApi } from '../../api/habitsApi'
 import { HabitOnDateRow } from './HabitOnDateRow'
-import { habitsOnDateQueryKey } from './queryKey'
 import { useEmulateSlowConnection } from '../../stores/featureFlagsStores'
 import type { DateApiString } from '../../types/DateFormat'
+import { habitsOnDateQueryOptions } from './habitsOnDateQueryOptions'
+import { delay } from '../../utils/delay'
+import { queryClient } from '../../api/queryClient'
 
 interface DayViewInternalProps {
   date: DateApiString
@@ -20,43 +20,44 @@ function HabitDateNavLink({ date: dateApiString }: { date: DateApiString }) {
   const fullDateString = `${shortDateString}.${date.getFullYear()}`
   return (
     <NavLink
+      style={{
+        viewTransitionName: 'match-element',
+      }}
       className={({ isActive, isPending }) =>
         classNames(
           'rounded-xl px-2 py-1',
           isActive ? 'bg-tg-secondary-bg pointer-events-none' : 'bg-tg-button',
-          isPending && 'pointer-events-none animate-pulse',
+          isPending && 'pointer-events-none',
         )
       }
       to={`../${dateApiString}`}
+      viewTransition
     >
       {({ isActive }) => (isActive ? fullDateString : shortDateString)}
     </NavLink>
   )
 }
 
+export const dayViewLoader: LoaderFunction = async ({ params }) => {
+  const date = params['date']
+  if (!isValidDateString(date)) {
+    return redirect('/day/' + getCurrentDateApiString())
+  }
+  await queryClient.prefetchQuery(habitsOnDateQueryOptions(date))
+  return delay(1)
+}
+
 export const DayViewInternal = ({ date }: DayViewInternalProps) => {
   const emulateSlowConnection = useEmulateSlowConnection((state) => state.active)
-  const { data: habitsOnDate, isFetching } = useSuspenseQuery({
-    queryKey: habitsOnDateQueryKey(date),
-    queryFn: async () => {
-      if (emulateSlowConnection) {
-        await delay(1500)
-      }
-      return habitsApi.apiHabitCompletionDateGet({
-        date,
-      })
-    },
-    staleTime: 30_000,
-  })
+  const { data: habitsOnDate, isFetching } = useSuspenseQuery(habitsOnDateQueryOptions(date, emulateSlowConnection))
 
   return (
     <>
       <div className="flex justify-center gap-2 *:first:before:content-['<'] *:last:after:content-['>']">
-        <HabitDateNavLink date={getRelativeDate(date, -2)} />
-        <HabitDateNavLink date={getRelativeDate(date, -1)} />
-        <HabitDateNavLink date={getRelativeDate(date, 0)} />
-        <HabitDateNavLink date={getRelativeDate(date, 1)} />
-        <HabitDateNavLink date={getRelativeDate(date, 2)} />
+        {[-2, -1, 0, 1, 2].map((offset) => {
+          const relativeDate = getRelativeDate(date, offset)
+          return <HabitDateNavLink key={relativeDate} date={relativeDate} />
+        })}
       </div>
       <ul className={classNames('m-4 flex list-none flex-col gap-2', isFetching && '*:opacity-50')}>
         {habitsOnDate.map((habitOnDate) => (

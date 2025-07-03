@@ -4,11 +4,19 @@ import {
   colors,
   type DayOfWeek,
   daysOfWeek,
+  daysOfWeekLabels,
   type HabitColor,
   type RepeatType,
   repeatTypes,
 } from '../constants/HabitOptions'
 import { EmojiInput } from './EmojiInput'
+import { type LoaderFunction, replace, useNavigate, useParams } from 'react-router'
+import { delay } from '../utils/delay'
+import { queryClient } from '../api/queryClient'
+import { habitsApi } from '../api/habitsApi'
+import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-query'
+import type { HabitsHabitDto } from '@habit-bot/api-client'
+import { useEmulateSlowConnection } from '../stores/featureFlagsStores'
 
 type CreateHabitPayload = {
   emoji: string
@@ -25,17 +33,61 @@ type CreateHabitPayload = {
     }
 )
 
-export default function HabitPage() {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [emoji, setEmoji] = useState('⭐')
-  const [color, setColor] = useState<(typeof colors)[number]>(colors[0])
-  const [repeatType, setRepeatType] = useState<RepeatType>('daily')
-  const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
+function habitQueryOptions(id?: string) {
+  return queryOptions({
+    queryKey: ['habit', id],
+    queryFn: () => {
+      if (!id) return Promise.resolve(null)
+      return habitsApi.apiHabitGroupIdGet({ groupId: id })
+    },
+    staleTime: 10_000,
+  })
+}
 
+export const editHabitLoader: LoaderFunction = async ({ params }) => {
+  const { id } = params
+  if (!id) {
+    return await delay(1)
+  }
+  try {
+    const habit = await queryClient.fetchQuery(habitQueryOptions(id))
+    if (!habit) return replace('/habit')
+  } catch (e) {
+    console.error(e)
+    return replace('/habit')
+  }
+}
+
+export default function EditHabitPage() {
+  const id = useParams()['id']
+  const { data: existing } = useSuspenseQuery(habitQueryOptions(id))
+  const [title, setTitle] = useState(existing?.name ?? '')
+  const [description, setDescription] = useState(existing?.desc ?? '')
+  const [emoji, setEmoji] = useState(existing?.icon ?? '⭐')
+  const [color, setColor] = useState<(typeof colors)[number]>((existing?.color as (typeof colors)[number]) ?? colors[0])
+  const [repeatType, setRepeatType] = useState<RepeatType>(existing?.repeatType === 'weekly' ? 'weekly' : 'daily')
+  const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>(
+    (existing?.daysOfWeek?.split(',').filter((d) => d) as DayOfWeek[]) ?? [],
+  )
+
+  const navigate = useNavigate()
+  const emulateSlowConnection = useEmulateSlowConnection((state) => state.active)
   const toggleDay = (day: DayOfWeek) => {
     setSelectedDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]))
   }
+  const editMutation = useMutation({
+    mutationFn: (habit: HabitsHabitDto) => {
+      if (id) {
+        return habitsApi.apiHabitUpdateGroupIdPut({
+          groupId: id,
+          request: habit,
+        })
+      }
+      return habitsApi.apiHabitCreatePost({
+        request: habit,
+      })
+    },
+  })
 
   const handleSubmit = useCallback(
     (e: FormEvent) => {
@@ -47,41 +99,31 @@ export default function HabitPage() {
     [repeatType, selectedDays],
   )
 
-  const [, formAction, pending] = useActionState(
-    async (previousState: Partial<CreateHabitPayload>, formData: FormData) => {
-      const title = formData.get('title') as string
-      const description = (formData.get('description') ?? '') as string
-      const data: CreateHabitPayload =
-        repeatType === 'weekly'
-          ? {
-              emoji,
-              repeatType,
-              color,
-              description,
-              title,
-              selectedDays,
-            }
-          : {
-              emoji,
-              repeatType,
-              color,
-              description,
-              title,
-            }
+  const [, formAction, pending] = useActionState(async (previousState: Partial<HabitsHabitDto>, formData: FormData) => {
+    const title = formData.get('title') as string
+    const description = (formData.get('description') ?? '') as string
+    const data: HabitsHabitDto = {
+      id: id,
+      icon: emoji,
+      desc: description,
+      name: title,
+      daysOfWeek: selectedDays?.join(','),
+      // TODO: fix expected format on BE
+      // firstDate: getCurrentDateApiString(),
+      firstDate: new Date().toISOString(),
+      repeatType,
+      color,
+    }
+    const saved = await editMutation.mutateAsync(data)
+
+    if (emulateSlowConnection) {
       await new Promise((resolve) => setTimeout(resolve, 2000))
-      TelegramWebApp.showAlert(
-        JSON.stringify(
-          {
-            data,
-          },
-          null,
-          2,
-        ),
-      )
-      return data
-    },
-    {} as Partial<CreateHabitPayload>,
-  )
+    }
+    if (saved.id !== id) {
+      navigate(`/habit/${id}`)
+    }
+    return data
+  }, {} as Partial<CreateHabitPayload>)
 
   return (
     <form autoComplete="off" className="m-5 overflow-y-auto" onSubmit={handleSubmit} action={formAction}>
@@ -171,7 +213,7 @@ export default function HabitPage() {
                       : 'bg-tg-bg border-gray-400 text-gray-600'
                   }`}
                 >
-                  {day}
+                  {daysOfWeekLabels[day]}
                 </div>
               ))}
             </div>
@@ -183,7 +225,7 @@ export default function HabitPage() {
           type="submit"
           className="bg-tg-button text-tg-button-text w-full cursor-pointer rounded-3xl py-3.5 text-lg font-bold transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Add
+          {id ? 'Update' : 'Add'}
         </button>
       </div>
     </form>

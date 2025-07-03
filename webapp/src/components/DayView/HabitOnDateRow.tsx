@@ -6,6 +6,7 @@ import type { HabitsHabitCompletionDto } from '@habit-bot/api-client'
 import { habitsOnDateQueryKey } from './queryKey'
 import { useEmulateSlowConnection } from '../../stores/featureFlagsStores'
 import type { DateApiString } from '../../types/DateFormat'
+import { NavLink } from 'react-router'
 
 type HabitOnDateRowProps = {
   completed: boolean
@@ -50,12 +51,14 @@ export function HabitOnDateRow({ completed, habit, date }: HabitOnDateRowProps) 
         'flex justify-between gap-2 rounded-xl p-3',
         isPending && 'pointer-events-none animate-pulse',
       )}
-      style={{ backgroundColor: `color-mix(in srgb, ${habit.color}, transparent 40%)` }}
-      onClick={() => updateHabitCompletion(!completed)}
+      style={{
+        backgroundColor: `color-mix(in srgb, ${habit.color}, transparent 40%)`,
+      }}
     >
       <div className="flex grow flex-row items-center justify-stretch">
-        <div>{habit.icon}</div>
+        <NavLink to={`/habit/${habit.id}`}>✏️</NavLink>
         <div
+          onClick={() => updateHabitCompletion(!completed)}
           className={classNames(
             'grow text-center',
             completed &&
