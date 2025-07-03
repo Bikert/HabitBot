@@ -6,10 +6,9 @@ import { createBrowserRouter, redirect, replace, RouterProvider } from 'react-ro
 import EditHabitPage, { editHabitLoader } from './components/EditHabitPage'
 import { ConfigPage } from './components/ConfigPage'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { getCurrentDateApiString, isValidDateString } from './utils/date'
+import { getCurrentDateApiString } from './utils/date'
 import { DayView, dayViewLoader } from './components/DayView'
 import { delay } from './utils/delay'
-import { queryClient } from './api/queryClient'
 
 if (!sessionStorage['initialLocation']) {
   sessionStorage['initialLocation'] = window.location.href
