@@ -55,8 +55,8 @@ export function HabitOnDateRow({ completed, habit, date }: HabitOnDateRowProps) 
         backgroundColor: `color-mix(in srgb, ${habit.color}, transparent 40%)`,
       }}
     >
+      <div>{habit.icon}</div>
       <div className="flex grow flex-row items-center justify-stretch">
-        <NavLink to={`/habit/${habit.id}`}>✏️</NavLink>
         <div
           onClick={() => updateHabitCompletion(!completed)}
           className={classNames(
@@ -65,18 +65,11 @@ export function HabitOnDateRow({ completed, habit, date }: HabitOnDateRowProps) 
               'after:bg-tg-text relative box-border line-through after:absolute after:top-1/2 after:block after:h-[1px] after:w-full after:px-11 after:content-[""]',
           )}
         >
-          {habit.icon}
           {habit.name}
-          {habit.icon}
         </div>
       </div>
       <div className="flex items-center">
-        <input
-          type="checkbox"
-          className="checked:bg-tg-button h-5 w-5 cursor-pointer appearance-none rounded-full border-3"
-          onChange={() => updateHabitCompletion(!completed)}
-          checked={completed}
-        />
+        <NavLink to={`/habit/${habit.id}`}>✏️</NavLink>
       </div>
     </li>
   )

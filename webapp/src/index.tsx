@@ -9,6 +9,9 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { getCurrentDateApiString } from './utils/date'
 import { DayView, dayViewLoader } from './components/DayView'
 import { delay } from './utils/delay'
+import '@material-design-icons/font'
+import { PATHS } from './constants/paths'
+import { HabitsListPage } from './components/HabitsListPage'
 
 if (!sessionStorage['initialLocation']) {
   sessionStorage['initialLocation'] = window.location.href
@@ -22,19 +25,23 @@ const router = createBrowserRouter(
       children: [
         {
           index: true,
-          loader: async () => replace('/day' + window.location.hash),
+          loader: async () => replace(PATHS.day()),
         },
         {
-          path: 'habit/:id?',
+          path: PATHS.editHabit(':id?'),
           loader: editHabitLoader,
           Component: EditHabitPage,
         },
         {
-          path: 'config',
+          path: PATHS.habitsList,
+          Component: HabitsListPage,
+        },
+        {
+          path: PATHS.settings,
           Component: ConfigPage,
         },
         {
-          path: 'day',
+          path: PATHS.day(),
           HydrateFallback: () => <div>Loading... (router hydrate fallback)</div>,
           ErrorBoundary: ErrorBoundary,
           children: [
@@ -43,7 +50,7 @@ const router = createBrowserRouter(
               loader: async () => {
                 // HACK: give some time to router to understand transition is started, so isPending initialised
                 await delay(1)
-                return redirect('/day/' + getCurrentDateApiString())
+                return redirect(PATHS.day(getCurrentDateApiString()))
               },
             },
             {
@@ -69,4 +76,3 @@ root.render(
     <RouterProvider router={router} />
   </React.StrictMode>,
 )
-export { habitsApi } from './api/habitsApi'
