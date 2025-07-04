@@ -17,7 +17,7 @@ export function NavigationButtons() {
         className={({ isActive, isPending }) =>
           classNames(
             'text-tg-button-text ring-tg-bg flex h-14 w-14 items-center justify-center rounded-full text-2xl ring-2',
-            isActive ? 'bg-tg-button-text' : 'bg-tg-button',
+            isActive ? 'bg-tg-button-text pointer-events-none' : 'bg-tg-button',
             isPending && 'pointer-events-none animate-spin',
           )
         }
@@ -29,7 +29,7 @@ export function NavigationButtons() {
         className={({ isActive, isPending }) =>
           classNames(
             'text-tg-button-text ring-tg-bg flex h-14 w-14 items-center justify-center rounded-full text-2xl ring-2',
-            isActive ? 'bg-tg-button-text' : 'bg-tg-button',
+            isActive ? 'bg-tg-button-text pointer-events-none' : 'bg-tg-button',
             isPending && 'pointer-events-none animate-spin',
           )
         }
@@ -41,7 +41,7 @@ export function NavigationButtons() {
         className={({ isActive, isPending }) =>
           classNames(
             'text-tg-button-text ring-tg-bg flex h-14 w-14 items-center justify-center rounded-full text-2xl ring-2',
-            isActive ? 'bg-tg-button-text' : 'bg-tg-button',
+            isActive ? 'bg-tg-button-text pointer-events-none' : 'bg-tg-button',
             isPending && 'pointer-events-none animate-spin',
           )
         }

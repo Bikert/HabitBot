@@ -1,4 +1,5 @@
 import {
+  useEmulateSlowConnection,
   useFullscreenState,
   useShowDebugInformation,
   useShowDemoButtons,
@@ -21,6 +22,9 @@ export function ConfigPage() {
 
   const toggleVerticalSwipes = useVerticalSwipes((state) => state.toggle)
   const verticalSwipesActive = useVerticalSwipes((state) => state.active)
+
+  const toggleEmulateSlowConnection = useEmulateSlowConnection((state) => state.toggle)
+  const emulateSlowConnectionActive = useEmulateSlowConnection((state) => state.active)
 
   return (
     <div className="text-tg-button-text fl flex w-full flex-wrap justify-center gap-2 *:rounded-xl *:p-2">
@@ -53,6 +57,14 @@ export function ConfigPage() {
         onClick={toggleVerticalSwipes}
       >
         Telegram vertical swipes
+      </button>
+      <button
+        className={
+          emulateSlowConnectionActive ? 'bg-tg-button-text text-tg-button' : 'bg-tg-button text-tg-button-text'
+        }
+        onClick={toggleEmulateSlowConnection}
+      >
+        Emulate slow connection
       </button>
     </div>
   )
