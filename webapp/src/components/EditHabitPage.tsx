@@ -114,14 +114,12 @@ export default function EditHabitPage() {
       repeatType,
       color,
     }
-    const saved = await editMutation.mutateAsync(data)
+    await editMutation.mutateAsync(data)
 
     if (emulateSlowConnection) {
       await new Promise((resolve) => setTimeout(resolve, 2000))
     }
-    if (saved.id !== id) {
-      navigate(`/habit/${id}`)
-    }
+    navigate(-1)
     return data
   }, {} as Partial<CreateHabitPayload>)
 

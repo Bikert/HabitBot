@@ -6,6 +6,7 @@
   "dependencies": {
     "@emoji-mart/data": "^1.2.1",
     "@habit-bot/api-client": "file:api-client",
+    "@material-design-icons/font": "^0.14.15",
     "@tailwindcss/vite": "^4.1.10",
     "@tanstack/react-query": "^5.81.5",
     "classnames": "^2.5.1",

@@ -1,53 +1,60 @@
 import { useViewportHeight } from '../utils/useViewportHeight'
 import classNames from 'classnames'
-import { NavLink } from 'react-router'
+import { NavLink, To } from 'react-router'
+import type { PropsWithChildren } from 'react'
+import { PATHS } from '../constants/paths'
+
+function NavigationButton({ to, children }: PropsWithChildren<{ to: To }>) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive, isPending }) =>
+        classNames(
+          'flex h-14 w-14 items-center justify-center rounded-full text-2xl',
+          isActive ? 'bg-tg-bg pointer-events-none' : 'bg-tg-secondary-bg',
+          isPending && 'pointer-events-none animate-spin',
+        )
+      }
+    >
+      {children}
+    </NavLink>
+  )
+}
 
 export function NavigationButtons() {
   const viewportHeight = useViewportHeight()
   const navFixed = viewportHeight && viewportHeight > 500
+  const buttons = (
+    <>
+      <NavigationButton to={PATHS.editHabit()}>
+        <span className="material-icons">add</span>
+      </NavigationButton>
+      <NavigationButton to={PATHS.habitsList}>
+        <span className="material-icons">checklist</span>
+      </NavigationButton>
+      <NavigationButton to={PATHS.day()}>
+        <span className="material-icons">today</span>
+      </NavigationButton>
+      <NavigationButton to={PATHS.settings}>
+        <span className="material-icons">tune</span>
+      </NavigationButton>
+    </>
+  )
   return (
-    <div
-      className={classNames(
-        'right-0 left-0 mx-auto flex w-fit gap-3 select-none',
-        navFixed ? 'bottom-tg-content-safe-bottom fixed mb-4' : 'static pb-4',
-      )}
-    >
-      <NavLink
-        to="/habit"
-        className={({ isActive, isPending }) =>
-          classNames(
-            'text-tg-button-text ring-tg-bg flex h-14 w-14 items-center justify-center rounded-full text-2xl ring-2',
-            isActive ? 'bg-tg-button-text pointer-events-none' : 'bg-tg-button',
-            isPending && 'pointer-events-none animate-spin',
-          )
-        }
+    <>
+      {/* TODO: fix the buttons positioning */}
+      {/* fake to add some space under the fixed element. */}
+      <div className={classNames('rounded-t-4xl py-4 select-none', 'invisible', navFixed ? 'static flex' : 'hidden')}>
+        <NavigationButton to="" />
+      </div>
+      <div
+        className={classNames(
+          'bg-tg-secondary-bg right-0 left-0 flex w-full justify-center gap-3 rounded-t-4xl py-4 select-none',
+          navFixed ? 'bottom-tg-content-safe-bottom fixed' : 'static',
+        )}
       >
-        ➕
-      </NavLink>
-      <NavLink
-        to="/day"
-        className={({ isActive, isPending }) =>
-          classNames(
-            'text-tg-button-text ring-tg-bg flex h-14 w-14 items-center justify-center rounded-full text-2xl ring-2',
-            isActive ? 'bg-tg-button-text pointer-events-none' : 'bg-tg-button',
-            isPending && 'pointer-events-none animate-spin',
-          )
-        }
-      >
-        📋
-      </NavLink>
-      <NavLink
-        to="/config"
-        className={({ isActive, isPending }) =>
-          classNames(
-            'text-tg-button-text ring-tg-bg flex h-14 w-14 items-center justify-center rounded-full text-2xl ring-2',
-            isActive ? 'bg-tg-button-text pointer-events-none' : 'bg-tg-button',
-            isPending && 'pointer-events-none animate-spin',
-          )
-        }
-      >
-        🔧
-      </NavLink>
-    </div>
+        {buttons}
+      </div>
+    </>
   )
 }

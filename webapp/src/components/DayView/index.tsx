@@ -14,10 +14,16 @@ interface DayViewInternalProps {
   date: DateApiString
 }
 
+function getDay(date: Date) {
+  const options = { weekday: 'short' } as const
+  const format = new Intl.DateTimeFormat('en-US', options)
+  return format.format(date)
+}
+
 function HabitDateNavLink({ date: dateApiString }: { date: DateApiString }) {
   const date = toDate(dateApiString)
-  const shortDateString = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}`
-  const fullDateString = `${shortDateString}.${date.getFullYear()}`
+  const dayOfWeek = getDay(date)
+  const dayOfMonth = date.getDate()
   return (
     <NavLink
       style={{
@@ -26,14 +32,22 @@ function HabitDateNavLink({ date: dateApiString }: { date: DateApiString }) {
       className={({ isActive, isPending }) =>
         classNames(
           'rounded-xl px-2 py-1',
-          isActive ? 'bg-tg-secondary-bg pointer-events-none' : 'bg-tg-button',
+          isActive ? 'bg-tg-accent-text pointer-events-none' : 'bg-tg-button',
           isPending && 'pointer-events-none',
         )
       }
       to={`../${dateApiString}`}
       viewTransition
     >
-      {({ isActive }) => (isActive ? fullDateString : shortDateString)}
+      <div className="flex flex-col items-center text-center">
+        <div className="relative">
+          <div className="absolute right-0 left-0">{dayOfWeek}</div>
+          <div className="invisible">Mon</div>
+        </div>
+        <div className="bg-tg-bg flex h-8 w-8 items-center justify-center rounded-full">
+          <p>{dayOfMonth}</p>
+        </div>
+      </div>
     </NavLink>
   )
 }
@@ -53,7 +67,7 @@ export const DayViewInternal = ({ date }: DayViewInternalProps) => {
 
   return (
     <>
-      <div className="flex justify-center gap-2 *:first:before:content-['<'] *:last:after:content-['>']">
+      <div className="flex justify-center gap-2">
         {[-2, -1, 0, 1, 2].map((offset) => {
           const relativeDate = getRelativeDate(date, offset)
           return <HabitDateNavLink key={relativeDate} date={relativeDate} />
