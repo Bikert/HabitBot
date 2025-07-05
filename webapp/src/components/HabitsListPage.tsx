@@ -3,25 +3,23 @@ import { habitsApi } from '../api/habitsApi'
 import classNames from 'classnames'
 import type { HabitsHabitDto } from '@habit-bot/api-client'
 import { NavLink } from 'react-router'
+import { AddHabitButton } from './NavigationButtons'
 
 function HabitRow({ habit }: { habit: HabitsHabitDto }) {
   return (
     <li
-      key={habit.versionId}
-      className={classNames('flex justify-between gap-2 rounded-xl p-3 align-baseline')}
+      className="rounded-xl p-3"
       style={{
         backgroundColor: `color-mix(in srgb, ${habit.color}, transparent 40%)`,
       }}
     >
-      <div>{habit.icon}</div>
-      <div className="flex grow flex-row items-center justify-stretch">
-        <div className={classNames('grow text-center')}>{habit.name}</div>
-      </div>
-      <div className="flex items-center">
-        <NavLink to={`/habit/${habit.id}`}>
-          <span className="material-icons">edit</span>
-        </NavLink>
-      </div>
+      <NavLink to={`/habit/${habit.id}`} className={classNames('flex gap-2 rounded-xl')}>
+        <div className={classNames('relative flex min-w-0 grow flex-row items-center justify-stretch')}>
+          <span>{habit.icon}</span>
+          <span className="min-w-0 overflow-x-clip text-nowrap text-ellipsis">{habit.name}</span>
+        </div>
+        <span className="material-icons">edit</span>
+      </NavLink>
     </li>
   )
 }
@@ -41,6 +39,7 @@ export function HabitsListPage() {
           ))}
         </ul>
       )}
+      <AddHabitButton />
     </div>
   )
 }

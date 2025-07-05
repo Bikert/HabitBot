@@ -4,7 +4,7 @@ import { NavLink, To } from 'react-router'
 import type { PropsWithChildren } from 'react'
 import { PATHS } from '../constants/paths'
 
-function NavigationButton({ to, children }: PropsWithChildren<{ to: To }>) {
+export function NavigationButton({ to, children }: PropsWithChildren<{ to: To }>) {
   return (
     <NavLink
       to={to}
@@ -21,14 +21,28 @@ function NavigationButton({ to, children }: PropsWithChildren<{ to: To }>) {
   )
 }
 
+export function AddHabitButton() {
+  return (
+    <div
+      className={classNames(
+        'right-tg-content-safe-right bottom-tg-content-safe-bottom fixed mr-8 mb-30 rounded-full select-none',
+        'shadow-tg-secondary-bg',
+        'shadow-2xl/30',
+        'drop-shadow-2xl',
+      )}
+    >
+      <NavigationButton to={PATHS.editHabit()}>
+        <span className="material-icons">add</span>
+      </NavigationButton>
+    </div>
+  )
+}
+
 export function NavigationButtons() {
   const viewportHeight = useViewportHeight()
   const navFixed = viewportHeight && viewportHeight > 500
   const buttons = (
     <>
-      <NavigationButton to={PATHS.editHabit()}>
-        <span className="material-icons">add</span>
-      </NavigationButton>
       <NavigationButton to={PATHS.habitsList}>
         <span className="material-icons">checklist</span>
       </NavigationButton>
