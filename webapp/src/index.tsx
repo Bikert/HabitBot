@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
-import { createBrowserRouter, redirect, replace, RouterProvider } from 'react-router'
+import { createBrowserRouter, replace, RouterProvider } from 'react-router'
 import EditHabitPage, { editHabitLoader } from './components/EditHabitPage'
 import { ConfigPage } from './components/ConfigPage'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -50,7 +50,7 @@ const router = createBrowserRouter(
               loader: async () => {
                 // HACK: give some time to router to understand transition is started, so isPending initialised
                 await delay(1)
-                return redirect(PATHS.day(getCurrentDateApiString()))
+                return replace(PATHS.day(getCurrentDateApiString()))
               },
             },
             {

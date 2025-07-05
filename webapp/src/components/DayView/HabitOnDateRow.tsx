@@ -48,29 +48,25 @@ export function HabitOnDateRow({ completed, habit, date }: HabitOnDateRowProps) 
     <li
       key={habit.versionId}
       className={classNames(
-        'flex justify-between gap-2 rounded-xl p-3',
+        'flex gap-2 rounded-xl p-3',
         isPending && 'pointer-events-none animate-pulse',
+        completed && 'opacity-50',
       )}
       style={{
         backgroundColor: `color-mix(in srgb, ${habit.color}, transparent 40%)`,
       }}
     >
-      <div>{habit.icon}</div>
-      <div className="flex grow flex-row items-center justify-stretch">
-        <div
-          onClick={() => updateHabitCompletion(!completed)}
-          className={classNames(
-            'grow text-center',
-            completed &&
-              'after:bg-tg-text relative box-border line-through after:absolute after:top-1/2 after:block after:h-[1px] after:w-full after:px-11 after:content-[""]',
-          )}
-        >
-          {habit.name}
-        </div>
+      <div
+        onClick={() => updateHabitCompletion(!completed)}
+        className={classNames('relative flex min-w-0 grow flex-row items-center justify-stretch')}
+      >
+        <span>{habit.icon}</span>
+        <span className="min-w-0 overflow-x-clip text-nowrap text-ellipsis">{habit.name}</span>
+        {completed && <div className="bg-tg-text absolute top-1/2 box-border h-[1px] w-full px-11" />}
       </div>
-      <div className="flex items-center">
-        <NavLink to={`/habit/${habit.id}`}>✏️</NavLink>
-      </div>
+      <NavLink to={`/habit/${habit.id}`} className="flex">
+        <span className="material-icons">edit</span>
+      </NavLink>
     </li>
   )
 }

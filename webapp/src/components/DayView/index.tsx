@@ -9,6 +9,7 @@ import type { DateApiString } from '../../types/DateFormat'
 import { habitsOnDateQueryOptions } from './habitsOnDateQueryOptions'
 import { delay } from '../../utils/delay'
 import { queryClient } from '../../api/queryClient'
+import { AddHabitButton } from '../NavigationButtons'
 
 interface DayViewInternalProps {
   date: DateApiString
@@ -83,6 +84,7 @@ export const DayViewInternal = ({ date }: DayViewInternalProps) => {
           />
         ))}
       </ul>
+      <AddHabitButton />
     </>
   )
 }
