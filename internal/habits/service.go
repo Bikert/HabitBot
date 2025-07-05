@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/fx"
 	"log"
+	"sort"
 	"strings"
 	"time"
 )
@@ -340,5 +341,9 @@ func GetValues(m map[int64]*HabitCompletionDto) []*HabitCompletionDto {
 	for _, v := range m {
 		values = append(values, v)
 	}
+
+	sort.Slice(values, func(i, j int) bool {
+		return values[i].Habit.Name < values[j].Habit.Name
+	})
 	return values
 }

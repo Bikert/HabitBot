@@ -20,7 +20,7 @@ func NewHandler(s Service) *Handler {
 	return &Handler{service: s}
 }
 
-func RegisterRoutes(auth *gin.RouterGroup, h *Handler) {
+func (h *Handler) RegisterRoutes(auth gin.IRouter) {
 	fmt.Println("RegisterRoutes")
 	api := auth.Group("/habit")
 	{

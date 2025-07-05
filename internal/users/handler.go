@@ -14,12 +14,12 @@ func NewHandler(s Service) *Handler {
 	return &Handler{service: s}
 }
 
-func RegisterRoutes(router *gin.Engine, h *Handler) {
+func (h *Handler) RegisterRoutes(router gin.IRouter) {
 	fmt.Println("RegisterRoutes")
-	api := router.Group("/user")
-	{
-		api.GET("/", h.GetUser)
-	}
+
+	api := router.Group("/users")
+
+	api.GET("/", h.GetUser)
 }
 
 // GetUser godoc
