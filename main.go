@@ -11,7 +11,6 @@ import (
 	"HabitMuse/internal/db"
 	"HabitMuse/internal/habits"
 	"HabitMuse/internal/http"
-	"HabitMuse/internal/router"
 	"HabitMuse/internal/session"
 	"HabitMuse/internal/users"
 	"context"
@@ -39,16 +38,18 @@ func main() {
 	app := fx.New(
 		fx.Provide(db.NewDB),
 		fx.Provide(channels.NewInitChannels),
-		fx.Provide(http.NewHttpServer),
+		fx.Provide(
+			http.NewHttpServer,
+			fx.Annotate(
+				http.NewEngine,
+				fx.ParamTags(`group:"apiHandlers"`),
+			),
+		),
 		users.Module,
 		habits.Module,
 		session.Module,
 		bot.Module,
 
-		fx.Provide(
-			router.SetupRouter,
-			router.NewProtectedGroup,
-		),
 		fx.Invoke(
 			http.RunHttpServer,
 		),

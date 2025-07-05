@@ -1,8 +1,7 @@
-package middleware
+package http
 
 import (
 	"HabitMuse/internal/constants"
-	myHttp "HabitMuse/internal/http"
 	"HabitMuse/internal/users"
 	"bytes"
 	"encoding/json"
@@ -26,7 +25,7 @@ func ErrorHandler() gin.HandlerFunc {
 			return
 		}
 
-		var httpErr *myHttp.HTTPError
+		var httpErr *HTTPError
 		if ok := ginErrorAs(err, &httpErr); ok {
 			log.Printf("Handled error: %s (code=%d)", httpErr.Message, httpErr.Code)
 			c.JSON(httpErr.Code, gin.H{"error": httpErr.Message})
@@ -44,8 +43,8 @@ func ginErrorAs(err *gin.Error, target interface{}) bool {
 
 func errorAs(err error, target interface{}) bool {
 	switch t := target.(type) {
-	case **myHttp.HTTPError:
-		var e *myHttp.HTTPError
+	case **HTTPError:
+		var e *HTTPError
 		if errors.As(err, &e) {
 			*t = e
 			return true
