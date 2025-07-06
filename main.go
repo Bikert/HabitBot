@@ -6,6 +6,7 @@ package main
 // @host localhost:8080
 
 import (
+	"HabitMuse/internal/body_metrics"
 	"HabitMuse/internal/bot"
 	"HabitMuse/internal/channels"
 	"HabitMuse/internal/db"
@@ -47,6 +48,7 @@ func main() {
 		),
 		users.Module,
 		habits.Module,
+		body_metrics.Module,
 		session.Module,
 		bot.Module,
 
