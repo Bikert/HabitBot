@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate } from 'react-router'
+import { Outlet, useNavigate } from 'react-router'
 import { BackButton, MainButton, SecondaryButton } from './telegram/components'
 import { DebugView } from './components/DebugView'
 import { useShowDemoButtons, useShowHeader } from './stores/featureFlagsStores'
@@ -9,33 +9,63 @@ import { SettingsButton } from './telegram/components/SettingsButton'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { queryClient } from './api/queryClient'
+import { useViewportHeight } from './utils/useViewportHeight'
+import { PATHS } from './constants/paths'
+
+function AppHeader() {
+  const showHeader = useShowHeader((state) => state.active)
+  return (
+    <div className="bg-tg-bg backdrop-opacity-50">
+      <div className="min-h-tg-content-safe-top-inset">
+        {showHeader && <h1 className="p-2 text-center text-3xl font-bold">HabitBot {location.pathname}</h1>}
+      </div>
+    </div>
+  )
+}
+
+function AppFooter() {
+  return (
+    <div className="pb-tg-safe-bottom bg-tg-secondary-bg rounded-t-4xl">
+      <NavigationButtons />
+    </div>
+  )
+}
 
 function App() {
-  const showHeader = useShowHeader((state) => state.active)
   const showDemoButtons = useShowDemoButtons((state) => state.active)
   useTelegramInit()
   const goBack = useNavigateBackOrClose()
   const navigate = useNavigate()
-  const location = useLocation()
+
+  const viewportHeight = useViewportHeight()
+  const fixedLayoutElements = viewportHeight && viewportHeight > 560
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div
-        style={{
-          viewTransitionName: 'app',
-        }}
-        className="mt-tg-content-safe-top mb-tg-content-safe-bottom ml-tg-content-safe-left mr-tg-content-safe-right max-h-svh p-2"
-      >
-        {showHeader && <h1 className="p-2 text-center text-3xl font-bold">HabitBot {location.pathname}</h1>}
-        <BackButton onClick={goBack} />
-        <SettingsButton onClick={() => navigate('/config')} />
-        <Suspense fallback={<div>Loading...</div>}>
-          <Outlet />
-        </Suspense>
-        {showDemoButtons && <MainButton text="submit" />}
-        {showDemoButtons && <SecondaryButton text="secondary" />}
-        <DebugView />
-        <NavigationButtons />
+      {/* Out-of-page native telegram elements */}
+      <BackButton onClick={goBack} />
+      <SettingsButton onClick={() => navigate(PATHS.settings)} />
+      {showDemoButtons && <MainButton text="submit" />}
+      {showDemoButtons && <SecondaryButton text="secondary" />}
+      {/* Layout container */}
+      <div className="pl-tg-safe-left pr-tg-safe-right pt-tg-safe-top relative box-border flex h-full flex-col">
+        {fixedLayoutElements && <AppHeader />}
+        {/* Non-scrollable positioned container for absolute elements */}
+        <div className="relative flex min-h-0 shrink grow">
+          {/* Scrollable container */}
+          <div className="flex grow flex-col overflow-y-auto">
+            {!fixedLayoutElements && <AppHeader />}
+            {/* Content goes here */}
+            <div className="grow py-4">
+              <Suspense fallback={<div>Loading...</div>}>
+                <Outlet />
+              </Suspense>
+              <DebugView />
+            </div>
+            {!fixedLayoutElements && <AppFooter />}
+          </div>
+        </div>
+        {fixedLayoutElements && <AppFooter />}
       </div>
     </QueryClientProvider>
   )

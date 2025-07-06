@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
+import { throttle } from './throttle'
+
+const UPDATE_DELAY_MS = 200
 
 export const useViewportHeight = () => {
   const [viewportHeight, setViewportHeight] = useState(window.visualViewport?.height ?? window.innerHeight)
 
   useEffect(() => {
+    const updater = throttle(setViewportHeight, UPDATE_DELAY_MS)
     const visualViewport = window.visualViewport
     if (visualViewport) {
       const listener = () => {
-        setViewportHeight(visualViewport.height)
+        updater(visualViewport.height)
       }
       visualViewport.addEventListener('resize', listener)
       return () => {
@@ -15,7 +19,7 @@ export const useViewportHeight = () => {
       }
     } else {
       const listener = () => {
-        setViewportHeight(window.innerHeight)
+        updater(window.innerHeight)
       }
       window.addEventListener('resize', listener)
       return () => {

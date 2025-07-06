@@ -1,4 +1,3 @@
-import { useViewportHeight } from '../utils/useViewportHeight'
 import classNames from 'classnames'
 import { NavLink, To } from 'react-router'
 import type { PropsWithChildren } from 'react'
@@ -23,14 +22,7 @@ export function NavigationButton({ to, children }: PropsWithChildren<{ to: To }>
 
 export function AddHabitButton() {
   return (
-    <div
-      className={classNames(
-        'right-tg-content-safe-right bottom-tg-content-safe-bottom fixed mr-8 mb-30 rounded-full select-none',
-        'shadow-tg-secondary-bg',
-        'shadow-2xl/30',
-        'drop-shadow-2xl',
-      )}
-    >
+    <div className="ring-tg-bg shadow-tg-bg absolute right-1/12 bottom-1/12 rounded-full shadow-xl ring-2 select-none">
       <NavigationButton to={PATHS.editHabit()}>
         <span className="material-icons">add</span>
       </NavigationButton>
@@ -39,10 +31,8 @@ export function AddHabitButton() {
 }
 
 export function NavigationButtons() {
-  const viewportHeight = useViewportHeight()
-  const navFixed = viewportHeight && viewportHeight > 500
-  const buttons = (
-    <>
+  return (
+    <div className="flex w-full justify-center gap-3 py-4 select-none">
       <NavigationButton to={PATHS.habitsList}>
         <span className="material-icons">checklist</span>
       </NavigationButton>
@@ -52,23 +42,6 @@ export function NavigationButtons() {
       <NavigationButton to={PATHS.settings}>
         <span className="material-icons">tune</span>
       </NavigationButton>
-    </>
-  )
-  return (
-    <>
-      {/* TODO: fix the buttons positioning */}
-      {/* fake to add some space under the fixed element. */}
-      <div className={classNames('rounded-t-4xl py-4 select-none', 'invisible', navFixed ? 'static flex' : 'hidden')}>
-        <NavigationButton to="" />
-      </div>
-      <div
-        className={classNames(
-          'bg-tg-secondary-bg right-0 left-0 flex w-full justify-center gap-3 rounded-t-4xl py-4 select-none',
-          navFixed ? 'bottom-tg-content-safe-bottom fixed' : 'static',
-        )}
-      >
-        {buttons}
-      </div>
-    </>
+    </div>
   )
 }

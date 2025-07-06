@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import '@material-design-icons/font';
+@import './light.css';
+@import './dark.css';
 
 html {
     --tg-color-scheme: dark;
@@ -18,14 +20,14 @@ html {
     --tg-theme-section-separator-color: #111921;
     --tg-theme-subtitle-text-color: #708499;
     --tg-theme-text-color: #f5f5f5;
-    --tg-safe-area-inset-top: 30px;
-    --tg-safe-area-inset-bottom: 0px;
-    --tg-safe-area-inset-left: 0px;
-    --tg-safe-area-inset-right: 0px;
-    --tg-content-safe-area-inset-top: 56px;
-    --tg-content-safe-area-inset-bottom: 0px;
-    --tg-content-safe-area-inset-left: 0px;
-    --tg-content-safe-area-inset-right: 0px;
+    --tg-safe-area-inset-top: 10px;
+    --tg-safe-area-inset-bottom: 5px;
+    --tg-safe-area-inset-left: 5px;
+    --tg-safe-area-inset-right: 5px;
+    --tg-content-safe-area-inset-top: 10px;
+    --tg-content-safe-area-inset-bottom: 5px;
+    --tg-content-safe-area-inset-left: 5px;
+    --tg-content-safe-area-inset-right: 5px;
 }
 
 @theme {
@@ -44,6 +46,57 @@ html {
     --color-tg-section-separator: var(--tg-theme-section-separator-color);
     --color-tg-subtitle-text: var(--tg-theme-subtitle-text-color);
     --color-tg-text: var(--tg-theme-text-color);
+
+    --color-md-primary: var(--md-sys-color-primary);
+    --color-md-surface-tint: var(--md-sys-color-surface-tint);
+    --color-md-on-primary: var(--md-sys-color-on-primary);
+    --color-md-primary-container: var(--md-sys-color-primary-container);
+    --color-md-on-primary-container: var(--md-sys-color-on-primary-container);
+    --color-md-secondary: var(--md-sys-color-secondary);
+    --color-md-on-secondary: var(--md-sys-color-on-secondary);
+    --color-md-secondary-container: var(--md-sys-color-secondary-container);
+    --color-md-on-secondary-container: var(--md-sys-color-on-secondary-container);
+    --color-md-tertiary: var(--md-sys-color-tertiary);
+    --color-md-on-tertiary: var(--md-sys-color-on-tertiary);
+    --color-md-tertiary-container: var(--md-sys-color-tertiary-container);
+    --color-md-on-tertiary-container: var(--md-sys-color-on-tertiary-container);
+    --color-md-error: var(--md-sys-color-error);
+    --color-md-on-error: var(--md-sys-color-on-error);
+    --color-md-error-container: var(--md-sys-color-error-container);
+    --color-md-on-error-container: var(--md-sys-color-on-error-container);
+    --color-md-background: var(--md-sys-color-background);
+    --color-md-on-background: var(--md-sys-color-on-background);
+    --color-md-surface: var(--md-sys-color-surface);
+    --color-md-on-surface: var(--md-sys-color-on-surface);
+    --color-md-surface-variant: var(--md-sys-color-surface-variant);
+    --color-md-on-surface-variant: var(--md-sys-color-on-surface-variant);
+    --color-md-outline: var(--md-sys-color-outline);
+    --color-md-outline-variant: var(--md-sys-color-outline-variant);
+    --color-md-shadow: var(--md-sys-color-shadow);
+    --color-md-scrim: var(--md-sys-color-scrim);
+    --color-md-inverse-surface: var(--md-sys-color-inverse-surface);
+    --color-md-inverse-on-surface: var(--md-sys-color-inverse-on-surface);
+    --color-md-inverse-primary: var(--md-sys-color-inverse-primary);
+    --color-md-primary-fixed: var(--md-sys-color-primary-fixed);
+    --color-md-on-primary-fixed: var(--md-sys-color-on-primary-fixed);
+    --color-md-primary-fixed-dim: var(--md-sys-color-primary-fixed-dim);
+    --color-md-on-primary-fixed-variant: var(--md-sys-color-on-primary-fixed-variant);
+    --color-md-secondary-fixed: var(--md-sys-color-secondary-fixed);
+    --color-md-on-secondary-fixed: var(--md-sys-color-on-secondary-fixed);
+    --color-md-secondary-fixed-dim: var(--md-sys-color-secondary-fixed-dim);
+    --color-md-on-secondary-fixed-variant: var(--md-sys-color-on-secondary-fixed-variant);
+    --color-md-tertiary-fixed: var(--md-sys-color-tertiary-fixed);
+    --color-md-on-tertiary-fixed: var(--md-sys-color-on-tertiary-fixed);
+    --color-md-tertiary-fixed-dim: var(--md-sys-color-tertiary-fixed-dim);
+    --color-md-on-tertiary-fixed-variant: var(--md-sys-color-on-tertiary-fixed-variant);
+    --color-md-surface-dim: var(--md-sys-color-surface-dim);
+    --color-md-surface-bright: var(--md-sys-color-surface-bright);
+    --color-md-surface-container-lowest: var(--md-sys-color-surface-container-lowest);
+    --color-md-surface-container-low: var(--md-sys-color-surface-container-low);
+    --color-md-surface-container: var(--md-sys-color-surface-container);
+    --color-md-surface-container-high: var(--md-sys-color-surface-container-high);
+    --color-md-surface-container-highest: var(--md-sys-color-surface-container-highest);
+
     --spacing-tg-safe-top: var(--tg-safe-area-inset-top);
     --spacing-tg-safe-bottom: var(--tg-safe-area-inset-bottom);
     --spacing-tg-safe-left: var(--tg-safe-area-inset-left);
@@ -54,7 +107,7 @@ html {
     --spacing-tg-content-safe-right-inset: var(--tg-content-safe-area-inset-top);
     --spacing-tg-content-safe-top: calc(var(--tg-content-safe-area-inset-top) + var(--tg-safe-area-inset-top));
     --spacing-tg-content-safe-bottom: calc(var(--tg-content-safe-area-inset-bottom) + var(--tg-safe-area-inset-bottom));
-    --spacing-tg-content-safe-left: calc(var(--tg-content-safe-area-inset-left ) + var(--tg-safe-area-inset-left));
+    --spacing-tg-content-safe-left: calc(var(--tg-content-safe-area-inset-left) + var(--tg-safe-area-inset-left));
     --spacing-tg-content-safe-right: calc(var(--tg-content-safe-area-inset-right) + var(--tg-safe-area-inset-right));
 }
 
@@ -76,7 +129,7 @@ code {
     font-family: 'Material Icons';
     font-weight: normal;
     font-style: normal;
-    font-size: 24px;  /* Preferred icon size */
+    font-size: 24px; /* Preferred icon size */
     display: inline-block;
     line-height: 1;
     text-transform: none;

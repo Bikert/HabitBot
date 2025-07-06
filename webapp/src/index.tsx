@@ -12,10 +12,17 @@ import { delay } from './utils/delay'
 import '@material-design-icons/font'
 import { PATHS } from './constants/paths'
 import { HabitsListPage } from './components/HabitsListPage'
+import { BodyMeasurementsPage } from './components/BodyMeasurementsPage'
+import { TelegramWebApp } from './telegram'
 
 if (!sessionStorage['initialLocation']) {
   sessionStorage['initialLocation'] = window.location.href
 }
+
+window.document.documentElement.dataset['theme'] = TelegramWebApp.colorScheme
+TelegramWebApp.onEvent('themeChanged', () => {
+  window.document.documentElement.dataset['theme'] = TelegramWebApp.colorScheme
+})
 
 const router = createBrowserRouter(
   [
@@ -26,6 +33,10 @@ const router = createBrowserRouter(
         {
           index: true,
           loader: async () => replace(PATHS.day()),
+        },
+        {
+          path: PATHS.bodyMeasurements,
+          Component: BodyMeasurementsPage,
         },
         {
           path: PATHS.editHabit(':id?'),
@@ -48,7 +59,6 @@ const router = createBrowserRouter(
             {
               index: true,
               loader: async () => {
-                // HACK: give some time to router to understand transition is started, so isPending initialised
                 await delay(1)
                 return replace(PATHS.day(getCurrentDateApiString()))
               },

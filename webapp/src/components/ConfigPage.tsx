@@ -6,6 +6,22 @@ import {
   useShowHeader,
   useVerticalSwipes,
 } from '../stores/featureFlagsStores'
+import type { PropsWithChildren } from 'react'
+import classNames from 'classnames'
+
+function ConfigButton({ active, toggle, children }: PropsWithChildren<{ active: boolean; toggle: { (): void } }>) {
+  return (
+    <button
+      className={classNames(
+        'ring-tg-button ring-2',
+        active ? 'bg-tg-secondary-bg text-tg-button' : 'bg-tg-button text-tg-button-text',
+      )}
+      onClick={toggle}
+    >
+      {children}
+    </button>
+  )
+}
 
 export function ConfigPage() {
   const toggleDemoButtons = useShowDemoButtons((state) => state.toggle)
@@ -27,45 +43,25 @@ export function ConfigPage() {
   const emulateSlowConnectionActive = useEmulateSlowConnection((state) => state.active)
 
   return (
-    <div className="text-tg-button-text fl flex w-full flex-wrap justify-center gap-2 *:rounded-xl *:p-2">
-      <button
-        className={demoButtonsActive ? 'bg-tg-button-text text-tg-button' : 'bg-tg-button text-tg-button-text'}
-        onClick={toggleDemoButtons}
-      >
+    <div className="text-tg-button-text fl flex w-full flex-wrap justify-center gap-3 *:rounded-xl *:p-2">
+      <ConfigButton active={demoButtonsActive} toggle={toggleDemoButtons}>
         Demo buttons
-      </button>
-      <button
-        className={headerActive ? 'bg-tg-button-text text-tg-button' : 'bg-tg-button text-tg-button-text'}
-        onClick={toggleHeader}
-      >
+      </ConfigButton>
+      <ConfigButton active={headerActive} toggle={toggleHeader}>
         Header
-      </button>
-      <button
-        className={debugActive ? 'bg-tg-button-text text-tg-button' : 'bg-tg-button text-tg-button-text'}
-        onClick={toggleDebug}
-      >
+      </ConfigButton>
+      <ConfigButton active={debugActive} toggle={toggleDebug}>
         Debug information
-      </button>
-      <button
-        className={fullscreenActive ? 'bg-tg-button-text text-tg-button' : 'bg-tg-button text-tg-button-text'}
-        onClick={toggleFullscreen}
-      >
+      </ConfigButton>
+      <ConfigButton active={fullscreenActive} toggle={toggleFullscreen}>
         Fullscreen
-      </button>
-      <button
-        className={verticalSwipesActive ? 'bg-tg-button-text text-tg-button' : 'bg-tg-button text-tg-button-text'}
-        onClick={toggleVerticalSwipes}
-      >
+      </ConfigButton>
+      <ConfigButton active={verticalSwipesActive} toggle={toggleVerticalSwipes}>
         Telegram vertical swipes
-      </button>
-      <button
-        className={
-          emulateSlowConnectionActive ? 'bg-tg-button-text text-tg-button' : 'bg-tg-button text-tg-button-text'
-        }
-        onClick={toggleEmulateSlowConnection}
-      >
+      </ConfigButton>
+      <ConfigButton active={emulateSlowConnectionActive} toggle={toggleEmulateSlowConnection}>
         Emulate slow connection
-      </button>
+      </ConfigButton>
     </div>
   )
 }

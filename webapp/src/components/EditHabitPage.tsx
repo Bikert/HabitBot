@@ -119,6 +119,8 @@ export default function EditHabitPage() {
     if (emulateSlowConnection) {
       await new Promise((resolve) => setTimeout(resolve, 2000))
     }
+
+    TelegramWebApp.HapticFeedback.selectionChanged()
     navigate(-1)
     return data
   }, {} as Partial<CreateHabitPayload>)
@@ -136,6 +138,7 @@ export default function EditHabitPage() {
         </div>
 
         <input
+          autoFocus
           type="text"
           name="title"
           placeholder="Name your new task"
