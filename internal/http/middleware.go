@@ -1,6 +1,7 @@
 package http
 
 import (
+	"HabitMuse/internal/config"
 	"HabitMuse/internal/constants"
 	"HabitMuse/internal/users"
 	"bytes"
@@ -13,7 +14,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 )
 
 func ErrorHandler() gin.HandlerFunc {
@@ -87,7 +87,7 @@ func ValidationToken(userService users.Service) gin.HandlerFunc {
 		fmt.Println("Path = ", path)
 
 		var token, telegramInitData string
-		token = os.Getenv("TG_TOKEN")
+		token = config.Get().TGToken
 		telegramInitData = c.Request.Header.Get("x-telegram-init-data")
 		log.Println("telegramInitData = ", telegramInitData)
 		if telegramInitData == "" {

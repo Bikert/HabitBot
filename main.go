@@ -9,6 +9,7 @@ import (
 	"HabitMuse/internal/body_metrics"
 	"HabitMuse/internal/bot"
 	"HabitMuse/internal/channels"
+	"HabitMuse/internal/config"
 	"HabitMuse/internal/db"
 	"HabitMuse/internal/habits"
 	"HabitMuse/internal/http"
@@ -16,24 +17,11 @@ import (
 	"HabitMuse/internal/users"
 	"context"
 	"fmt"
-	"github.com/joho/godotenv"
 	"go.uber.org/fx"
-	"log"
 )
 
 func main() {
-	//logFile, err := os.OpenFile("logs/app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	//if err != nil {
-	//	log.Fatalf("Error opening log file %v", err)
-	//}
-	//defer logFile.Close()
-	//
-	//mw := io.MultiWriter(os.Stdout, logFile)
-	//log.SetOutput(mw)
-
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
-	}
+	config.Init()
 
 	ctx := context.Background()
 	app := fx.New(

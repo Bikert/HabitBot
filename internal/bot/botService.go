@@ -3,6 +3,7 @@ package bot
 import (
 	"HabitMuse/internal/bot/scenaries"
 	"HabitMuse/internal/bot/utils"
+	"HabitMuse/internal/config"
 	"HabitMuse/internal/constants"
 	"HabitMuse/internal/habits"
 	"HabitMuse/internal/session"
@@ -10,11 +11,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"go.uber.org/fx"
 	"log"
-	"os"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type Bot struct {
@@ -28,7 +27,7 @@ type Bot struct {
 
 func NewBot(userService users.Service, sessionService session.Service, habitService habits.Service) *Bot {
 	log.Println("Initializing bot ... ")
-	tgToken := os.Getenv("TG_TOKEN")
+	tgToken := config.Get().TGToken
 	botAPI, err := tgbotapi.NewBotAPI(tgToken)
 
 	if err != nil {
@@ -172,7 +171,7 @@ func (bot *Bot) sendOpenAppButton(update tgbotapi.Update) error {
 			tgbotapi.InlineKeyboardButton{
 				Text: "Открыть WebApp",
 				WebApp: &tgbotapi.WebAppInfo{
-					URL: os.Getenv("WEB_APP_URL"),
+					URL: config.Get().WebBaseUrl,
 				},
 			},
 		},
@@ -202,7 +201,13 @@ func (bot *Bot) mainMenu(update tgbotapi.Update, sess *session.Session) error {
 			tgbotapi.InlineKeyboardButton{
 				Text: "Затрекать привычку",
 				WebApp: &tgbotapi.WebAppInfo{
-					URL: os.Getenv("WEB_APP_URL"),
+					URL: config.Get().WebBaseUrl,
+				},
+			},
+			tgbotapi.InlineKeyboardButton{
+				Text: "Пора измеряться!",
+				WebApp: &tgbotapi.WebAppInfo{
+					URL: config.Get().WebBaseUrl,
 				},
 			},
 		},

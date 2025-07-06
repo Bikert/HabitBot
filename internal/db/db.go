@@ -1,6 +1,7 @@
 package db
 
 import (
+	"HabitMuse/internal/config"
 	"context"
 	"errors"
 	"fmt"
@@ -10,11 +11,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/fx"
-	"os"
 )
 
 func NewDB(lc fx.Lifecycle) (*sqlx.DB, error) {
-	filepath := os.Getenv("DB_FILE_PATH")
+	filepath := config.Get().DBFilePath
 
 	fmt.Println("Get file path = ", filepath)
 	database, err := sqlx.Open("sqlite3", filepath)
