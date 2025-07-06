@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -24,7 +25,7 @@ func Init() {
 		if err := godotenv.Load(); err != nil {
 			log.Println("No .env file found")
 		}
-		baseUrl := getHostURL(getEnv("WEB_BASE_URL"))
+		baseUrl := normalizeURL(getEnv("WEB_BASE_URL"))
 		cfg = &Config{
 			TGToken:    getEnv("TG_TOKEN"),
 			WebBaseUrl: baseUrl,
@@ -41,13 +42,17 @@ func getEnv(key string) string {
 	return result
 }
 
-func getHostURL(urlStr string) string {
+func normalizeURL(urlStr string) string {
 	parsed, err := url.Parse(urlStr)
 	if err != nil {
 		log.Fatalf("Invalid URL: %v", err)
 	}
-	baseUrl := parsed.Scheme + "://" + parsed.Host + "/"
-	return baseUrl
+
+	if !strings.HasSuffix(parsed.Path, "/") {
+		parsed.Path += "/"
+	}
+
+	return parsed.String()
 }
 
 func Get() *Config {
