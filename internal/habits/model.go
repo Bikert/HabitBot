@@ -40,15 +40,15 @@ type HabitCompletion struct {
 }
 
 type HabitDto struct {
-	GroupId    string     `json:"id"`
-	VersionId  int64      `json:"versionId"`
-	Name       string     `json:"name"`
-	Desc       string     `json:"desc"`
-	Icon       string     `json:"icon"`
-	Color      string     `json:"color"`
-	RepeatType string     `json:"repeatType"`
-	DaysOfWeek string     `json:"daysOfWeek"`
-	FirstDate  *time.Time `json:"firstDate"` //"2025-06-28T00:00:00Z"
+	GroupId    string     `json:"id" binding:"required"`
+	VersionId  int64      `json:"versionId" binding:"required"`
+	Name       string     `json:"name" binding:"required"`
+	Desc       string     `json:"desc" binding:"required"`
+	Icon       string     `json:"icon" binding:"required"`
+	Color      string     `json:"color" binding:"required"`
+	RepeatType string     `json:"repeatType" binding:"required"`
+	DaysOfWeek string     `json:"daysOfWeek" binding:"required"`
+	FirstDate  *time.Time `json:"firstDate" binding:"required"` //"2025-06-28T00:00:00Z"
 }
 
 type HabitCompletionDto struct {
