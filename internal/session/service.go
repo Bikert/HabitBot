@@ -1,7 +1,7 @@
 package session
 
 import (
-	"HabitMuse/internal/constants"
+	"HabitMuse/internal/bot/constants"
 	"log"
 )
 

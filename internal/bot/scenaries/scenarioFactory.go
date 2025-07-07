@@ -1,7 +1,7 @@
 package scenaries
 
 import (
-	"HabitMuse/internal/constants"
+	"HabitMuse/internal/bot/constants"
 	"HabitMuse/internal/habits"
 	"HabitMuse/internal/session"
 	"HabitMuse/internal/users"

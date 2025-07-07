@@ -1,7 +1,7 @@
 package scenaries
 
 import (
-	"HabitMuse/internal/constants"
+	"HabitMuse/internal/bot/constants"
 	"HabitMuse/internal/session"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
