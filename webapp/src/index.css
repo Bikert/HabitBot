@@ -2,6 +2,7 @@
 @import '@material-design-icons/font';
 @import './light.css';
 @import './dark.css';
+@plugin 'tailwind-scrollbar';
 
 html {
     --tg-color-scheme: dark;

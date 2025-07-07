@@ -17,6 +17,7 @@ import { habitsApi } from '../api/habitsApi'
 import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-query'
 import type { HabitsHabitDto } from '@habit-bot/api-client'
 import { useEmulateSlowConnection } from '../stores/featureFlagsStores'
+import { randomElement } from '../utils/randomElement'
 
 type CreateHabitPayload = {
   emoji: string
@@ -64,7 +65,9 @@ export default function EditHabitPage() {
   const [title, setTitle] = useState(existing?.name ?? '')
   const [description, setDescription] = useState(existing?.desc ?? '')
   const [emoji, setEmoji] = useState(existing?.icon ?? '⭐')
-  const [color, setColor] = useState<(typeof colors)[number]>((existing?.color as (typeof colors)[number]) ?? colors[0])
+  const [color, setColor] = useState<HabitColor>(
+    (existing?.color as HabitColor) ?? randomElement(colors as unknown as HabitColor[]),
+  )
   const [repeatType, setRepeatType] = useState<RepeatType>(existing?.repeatType === 'weekly' ? 'weekly' : 'daily')
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>(
     (existing?.daysOfWeek?.split(',').filter((d) => d) as DayOfWeek[]) ?? [],
