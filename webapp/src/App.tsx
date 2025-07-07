@@ -53,10 +53,10 @@ function App() {
         {/* Non-scrollable positioned container for absolute elements */}
         <div className="relative flex min-h-0 shrink grow">
           {/* Scrollable container */}
-          <div className="flex grow flex-col overflow-y-auto">
+          <div className="scrollbar scrollbar-thumb-tg-secondary-bg flex min-w-0 grow flex-col overflow-y-auto">
             {!fixedLayoutElements && <AppHeader />}
             {/* Content goes here */}
-            <div className="grow py-4">
+            <div className="w-full max-w-xl grow self-center py-4">
               <Suspense fallback={<div>Loading...</div>}>
                 <Outlet />
               </Suspense>

@@ -16,84 +16,77 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface HabitsHabitDto
+ * @interface HabitsUpdateHabitDto
  */
-export interface HabitsHabitDto {
+export interface HabitsUpdateHabitDto {
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsUpdateHabitDto
      */
     color: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsUpdateHabitDto
      */
     daysOfWeek?: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsUpdateHabitDto
      */
     desc?: string;
     /**
      * "2025-06-28T00:00:00Z"
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsUpdateHabitDto
      */
     firstDate: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsUpdateHabitDto
      */
     icon: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsUpdateHabitDto
      */
     id: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsUpdateHabitDto
      */
     name: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsUpdateHabitDto
      */
     repeatType: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof HabitsHabitDto
-     */
-    versionId: number;
 }
 
 /**
- * Check if a given object implements the HabitsHabitDto interface.
+ * Check if a given object implements the HabitsUpdateHabitDto interface.
  */
-export function instanceOfHabitsHabitDto(value: object): value is HabitsHabitDto {
+export function instanceOfHabitsUpdateHabitDto(value: object): value is HabitsUpdateHabitDto {
     if (!('color' in value) || value['color'] === undefined) return false;
     if (!('firstDate' in value) || value['firstDate'] === undefined) return false;
     if (!('icon' in value) || value['icon'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('repeatType' in value) || value['repeatType'] === undefined) return false;
-    if (!('versionId' in value) || value['versionId'] === undefined) return false;
     return true;
 }
 
-export function HabitsHabitDtoFromJSON(json: any): HabitsHabitDto {
-    return HabitsHabitDtoFromJSONTyped(json, false);
+export function HabitsUpdateHabitDtoFromJSON(json: any): HabitsUpdateHabitDto {
+    return HabitsUpdateHabitDtoFromJSONTyped(json, false);
 }
 
-export function HabitsHabitDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): HabitsHabitDto {
+export function HabitsUpdateHabitDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): HabitsUpdateHabitDto {
     if (json == null) {
         return json;
     }
@@ -107,15 +100,14 @@ export function HabitsHabitDtoFromJSONTyped(json: any, ignoreDiscriminator: bool
         'id': json['id'],
         'name': json['name'],
         'repeatType': json['repeatType'],
-        'versionId': json['versionId'],
     };
 }
 
-export function HabitsHabitDtoToJSON(json: any): HabitsHabitDto {
-    return HabitsHabitDtoToJSONTyped(json, false);
+export function HabitsUpdateHabitDtoToJSON(json: any): HabitsUpdateHabitDto {
+    return HabitsUpdateHabitDtoToJSONTyped(json, false);
 }
 
-export function HabitsHabitDtoToJSONTyped(value?: HabitsHabitDto | null, ignoreDiscriminator: boolean = false): any {
+export function HabitsUpdateHabitDtoToJSONTyped(value?: HabitsUpdateHabitDto | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -130,7 +122,6 @@ export function HabitsHabitDtoToJSONTyped(value?: HabitsHabitDto | null, ignoreD
         'id': value['id'],
         'name': value['name'],
         'repeatType': value['repeatType'],
-        'versionId': value['versionId'],
     };
 }
 

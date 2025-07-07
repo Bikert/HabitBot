@@ -16,84 +16,70 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface HabitsHabitDto
+ * @interface HabitsCreateHabitDto
  */
-export interface HabitsHabitDto {
+export interface HabitsCreateHabitDto {
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsCreateHabitDto
      */
     color: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsCreateHabitDto
      */
     daysOfWeek?: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsCreateHabitDto
      */
     desc?: string;
     /**
      * "2025-06-28T00:00:00Z"
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsCreateHabitDto
      */
     firstDate: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsCreateHabitDto
      */
     icon: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
-     */
-    id: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsCreateHabitDto
      */
     name: string;
     /**
      * 
      * @type {string}
-     * @memberof HabitsHabitDto
+     * @memberof HabitsCreateHabitDto
      */
     repeatType: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof HabitsHabitDto
-     */
-    versionId: number;
 }
 
 /**
- * Check if a given object implements the HabitsHabitDto interface.
+ * Check if a given object implements the HabitsCreateHabitDto interface.
  */
-export function instanceOfHabitsHabitDto(value: object): value is HabitsHabitDto {
+export function instanceOfHabitsCreateHabitDto(value: object): value is HabitsCreateHabitDto {
     if (!('color' in value) || value['color'] === undefined) return false;
     if (!('firstDate' in value) || value['firstDate'] === undefined) return false;
     if (!('icon' in value) || value['icon'] === undefined) return false;
-    if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('repeatType' in value) || value['repeatType'] === undefined) return false;
-    if (!('versionId' in value) || value['versionId'] === undefined) return false;
     return true;
 }
 
-export function HabitsHabitDtoFromJSON(json: any): HabitsHabitDto {
-    return HabitsHabitDtoFromJSONTyped(json, false);
+export function HabitsCreateHabitDtoFromJSON(json: any): HabitsCreateHabitDto {
+    return HabitsCreateHabitDtoFromJSONTyped(json, false);
 }
 
-export function HabitsHabitDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): HabitsHabitDto {
+export function HabitsCreateHabitDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): HabitsCreateHabitDto {
     if (json == null) {
         return json;
     }
@@ -104,18 +90,16 @@ export function HabitsHabitDtoFromJSONTyped(json: any, ignoreDiscriminator: bool
         'desc': json['desc'] == null ? undefined : json['desc'],
         'firstDate': json['firstDate'],
         'icon': json['icon'],
-        'id': json['id'],
         'name': json['name'],
         'repeatType': json['repeatType'],
-        'versionId': json['versionId'],
     };
 }
 
-export function HabitsHabitDtoToJSON(json: any): HabitsHabitDto {
-    return HabitsHabitDtoToJSONTyped(json, false);
+export function HabitsCreateHabitDtoToJSON(json: any): HabitsCreateHabitDto {
+    return HabitsCreateHabitDtoToJSONTyped(json, false);
 }
 
-export function HabitsHabitDtoToJSONTyped(value?: HabitsHabitDto | null, ignoreDiscriminator: boolean = false): any {
+export function HabitsCreateHabitDtoToJSONTyped(value?: HabitsCreateHabitDto | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -127,10 +111,8 @@ export function HabitsHabitDtoToJSONTyped(value?: HabitsHabitDto | null, ignoreD
         'desc': value['desc'],
         'firstDate': value['firstDate'],
         'icon': value['icon'],
-        'id': value['id'],
         'name': value['name'],
         'repeatType': value['repeatType'],
-        'versionId': value['versionId'],
     };
 }
 

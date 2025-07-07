@@ -15,23 +15,9 @@ import { delay } from '../utils/delay'
 import { queryClient } from '../api/queryClient'
 import { habitsApi } from '../api/habitsApi'
 import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-query'
-import type { HabitsHabitDto } from '@habit-bot/api-client'
+import type { HabitsCreateHabitDto, HabitsUpdateHabitDto } from '@habit-bot/api-client'
 import { useEmulateSlowConnection } from '../stores/featureFlagsStores'
-
-type CreateHabitPayload = {
-  emoji: string
-  title: string
-  description: string
-  color: HabitColor
-} & (
-  | {
-      repeatType: 'daily'
-    }
-  | {
-      repeatType: 'weekly'
-      selectedDays: DayOfWeek[]
-    }
-)
+import { randomElement } from '../utils/randomElement'
 
 function habitQueryOptions(id?: string) {
   return queryOptions({
@@ -64,7 +50,9 @@ export default function EditHabitPage() {
   const [title, setTitle] = useState(existing?.name ?? '')
   const [description, setDescription] = useState(existing?.desc ?? '')
   const [emoji, setEmoji] = useState(existing?.icon ?? '⭐')
-  const [color, setColor] = useState<(typeof colors)[number]>((existing?.color as (typeof colors)[number]) ?? colors[0])
+  const [color, setColor] = useState<HabitColor>(
+    (existing?.color as HabitColor) ?? randomElement(colors as unknown as HabitColor[]),
+  )
   const [repeatType, setRepeatType] = useState<RepeatType>(existing?.repeatType === 'weekly' ? 'weekly' : 'daily')
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>(
     (existing?.daysOfWeek?.split(',').filter((d) => d) as DayOfWeek[]) ?? [],
@@ -76,10 +64,10 @@ export default function EditHabitPage() {
     setSelectedDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]))
   }
   const editMutation = useMutation({
-    mutationFn: (habit: HabitsHabitDto) => {
-      if (id) {
+    mutationFn: (habit: HabitsCreateHabitDto | HabitsUpdateHabitDto) => {
+      if ('id' in habit && habit.id) {
         return habitsApi.apiHabitUpdateGroupIdPut({
-          groupId: id,
+          groupId: habit.id,
           request: habit,
         })
       }
@@ -99,31 +87,34 @@ export default function EditHabitPage() {
     [repeatType, selectedDays],
   )
 
-  const [, formAction, pending] = useActionState(async (previousState: Partial<HabitsHabitDto>, formData: FormData) => {
-    const title = formData.get('title') as string
-    const description = (formData.get('description') ?? '') as string
-    const data: HabitsHabitDto = {
-      id: id,
-      icon: emoji,
-      desc: description,
-      name: title,
-      daysOfWeek: selectedDays?.join(','),
-      // TODO: fix expected format on BE
-      // firstDate: getCurrentDateApiString(),
-      firstDate: new Date().toISOString(),
-      repeatType,
-      color,
-    }
-    await editMutation.mutateAsync(data)
+  const [, formAction, pending] = useActionState(
+    async (previousState: Partial<HabitsCreateHabitDto>, formData: FormData) => {
+      const title = formData.get('title') as string
+      const description = (formData.get('description') ?? '') as string
+      const data: HabitsUpdateHabitDto | HabitsCreateHabitDto = {
+        id: id,
+        icon: emoji,
+        desc: description,
+        name: title,
+        daysOfWeek: selectedDays?.join(','),
+        // TODO: fix expected format on BE
+        // firstDate: getCurrentDateApiString(),
+        firstDate: new Date().toISOString(),
+        repeatType,
+        color,
+      }
+      await editMutation.mutateAsync(data)
 
-    if (emulateSlowConnection) {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-    }
+      if (emulateSlowConnection) {
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+      }
 
-    TelegramWebApp.HapticFeedback.selectionChanged()
-    navigate(-1)
-    return data
-  }, {} as Partial<CreateHabitPayload>)
+      TelegramWebApp.HapticFeedback.selectionChanged()
+      navigate(-1)
+      return data
+    },
+    {} as Partial<HabitsCreateHabitDto>,
+  )
 
   return (
     <form autoComplete="off" className="m-5 overflow-y-auto" onSubmit={handleSubmit} action={formAction}>
