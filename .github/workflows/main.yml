@@ -50,8 +50,10 @@ jobs:
       - name: Add executable
         run: chmod +x ./HabitMuse
       - name: Create .env
+        env:
+          SECRETS: ${{ toJson(secrets) }}
         run: |
-          echo toJson(secrets) | jq -r 'to_entries[] | select( .key | test("^APP_") ) | ( .key | sub("^APP_"; "") ) + "=" + ( .value )' >> .env
+          echo "$SECRETS" | jq -r 'to_entries[] | select( .key | test("^APP_") ) | ( .key | sub("^APP_"; "") ) + "=" + ( .value|@sh )' >> .env
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
