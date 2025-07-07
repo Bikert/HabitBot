@@ -39,16 +39,29 @@ type HabitCompletion struct {
 	Completed bool      `db:"completed"`
 }
 
-type HabitDto struct {
-	GroupId    string     `json:"id" binding:"required"`
-	VersionId  int64      `json:"versionId" binding:"required"`
+type BaseHabitDto struct {
 	Name       string     `json:"name" binding:"required"`
-	Desc       string     `json:"desc" binding:"required"`
+	Desc       string     `json:"desc"`
 	Icon       string     `json:"icon" binding:"required"`
 	Color      string     `json:"color" binding:"required"`
 	RepeatType string     `json:"repeatType" binding:"required"`
-	DaysOfWeek string     `json:"daysOfWeek" binding:"required"`
+	DaysOfWeek string     `json:"daysOfWeek"`
 	FirstDate  *time.Time `json:"firstDate" binding:"required"` //"2025-06-28T00:00:00Z"
+}
+
+type HabitDto struct {
+	BaseHabitDto
+	GroupId   string `json:"id" binding:"required"`
+	VersionId int64  `json:"versionId" binding:"required"`
+}
+
+type CreateHabitDto struct {
+	BaseHabitDto
+}
+
+type UpdateHabitDto struct {
+	BaseHabitDto
+	GroupId string `json:"id" binding:"required"`
 }
 
 type HabitCompletionDto struct {

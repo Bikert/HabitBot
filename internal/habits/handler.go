@@ -43,6 +43,7 @@ func (h *Handler) RegisterRoutes(auth gin.IRouter) {
 func (h *Handler) getAllActiveHabits(c *gin.Context) {
 	user := utils.GetUserByCtx(c)
 	habitDto, err := h.service.GetHabitsByUser(user.UserID)
+	log.Println("getAllActiveHabits", habitDto, err)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -94,13 +95,13 @@ func (h *Handler) GetCompletionHabitsByDate(c *gin.Context) {
 // @Tags habits
 // @Accept json
 // @Produce json
-// @Param request body HabitDto true "HabitDto"
+// @Param request body CreateHabitDto true "CreateHabitDto"
 // @Success 201 {object} HabitDto
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /api/habit/create [post]
 func (h *Handler) CreateHabit(c *gin.Context) {
-	var habitDto *HabitDto
+	var habitDto *CreateHabitDto
 	log.Println("CreateHabit")
 	if err := c.ShouldBindJSON(&habitDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -122,13 +123,13 @@ func (h *Handler) CreateHabit(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param groupId path string true "ID группы привычки"
-// @Param request body HabitDto true "HabitDto"
+// @Param request body UpdateHabitDto true "UpdateHabitDto"
 // @Success 200 {object} HabitDto
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /api/habit/update/{groupId} [put]
 func (h *Handler) Update(c *gin.Context) {
-	var habitDto *HabitDto
+	var habitDto *UpdateHabitDto
 	if err := c.ShouldBindJSON(&habitDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

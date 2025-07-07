@@ -18,8 +18,8 @@ type Service interface {
 	GetHabitByGroupID(groupId string) *HabitDto
 	GetHabitByVersionId(versionId int64) *HabitDto
 
-	CreateHabit(dto *HabitDto, user *users.User) (*HabitDto, error)
-	UpdateHabit(groupId string, dto *HabitDto, user *users.User) (*HabitDto, error)
+	CreateHabit(dto *CreateHabitDto, user *users.User) (*HabitDto, error)
+	UpdateHabit(groupId string, dto *UpdateHabitDto, user *users.User) (*HabitDto, error)
 	CreateBaseHabitsForNewUser(userId int64)
 	GetCompletionHabitsForUserByDate(user *users.User, date time.Time) ([]*HabitCompletionDto, error)
 	ToggleHabitCompletion(user *users.User, id int64, date time.Time, completed bool) error
@@ -61,7 +61,7 @@ func (s *service) CreateBaseHabitsForNewUser(userId int64) {
 	for _, habitDto := range DefaultHabits {
 		now := time.Now()
 		habitDto.FirstDate = &now
-		habit := buildNewModelFromDTO(&habitDto)
+		habit := buildNewModelFromCreateDTO(&habitDto)
 		habit.UserID = userId
 		habit.CreatedAt = now
 		habit.GroupId = GetUuid()
@@ -74,6 +74,7 @@ func (s *service) CreateBaseHabitsForNewUser(userId int64) {
 
 func (s *service) GetHabitsByUser(userId int64) ([]*HabitDto, error) {
 	habits := s.repo.GetActiveHabitsByUserID(userId)
+	log.Println("ActiveHabitsByUserID:", habits)
 	habitsDto := make([]*HabitDto, len(*habits))
 	for i, habit := range *habits {
 		habitsDto[i] = buildHabitDtoByModel(habit)
@@ -98,11 +99,12 @@ func (s *service) GetHabitByGroupID(groupId string) *HabitDto {
 }
 
 func (s *service) GetCompletionHabitsForUserByDate(user *users.User, date time.Time) ([]*HabitCompletionDto, error) {
-	habit := s.repo.GetActiveHabitsByUserIDByDate(user.UserID, date)
+	habits := s.repo.GetActiveHabitsByUserIDByDate(user.UserID, date)
+	log.Println("ActiveHabitsByUserID:", habits)
 	compareHabits := s.repo.GetCompletedHabitsByUserIdAndDate(user.UserID, date)
 	habitsMap := make(map[int64]*HabitCompletionDto)
 
-	for _, h := range *habit {
+	for _, h := range *habits {
 		if h.RepeatType == RepeatTypeDaily {
 			habitsMap[h.VersionId] = buildHabitCompletionDtoByModel(h)
 			continue
@@ -152,13 +154,13 @@ func (s *service) ToggleHabitCompletion(user *users.User, habitId int64, date ti
 	}
 }
 
-func (s *service) CreateHabit(dto *HabitDto, user *users.User) (*HabitDto, error) {
+func (s *service) CreateHabit(dto *CreateHabitDto, user *users.User) (*HabitDto, error) {
 	log.Println("Habit dto = ", dto)
-	err := validateHabit(dto)
+	err := validateHabit(dto.BaseHabitDto)
 	if err != nil {
 		return nil, err
 	}
-	habit := buildNewModelFromDTO(dto)
+	habit := buildNewModelFromCreateDTO(dto)
 	habit.UserID = user.UserID
 	habit.GroupId = GetUuid()
 	log.Println("Habit = ", habit)
@@ -169,7 +171,7 @@ func (s *service) CreateHabit(dto *HabitDto, user *users.User) (*HabitDto, error
 	return buildHabitDtoByModel(*habit), nil
 }
 
-func (s *service) UpdateHabit(habitGroupId string, dto *HabitDto, user *users.User) (*HabitDto, error) {
+func (s *service) UpdateHabit(habitGroupId string, dto *UpdateHabitDto, user *users.User) (*HabitDto, error) {
 	habit := s.repo.GetActiveHabitByGroupID(habitGroupId)
 	if habit == nil {
 		return nil, errors.New("Habit not found")
@@ -177,20 +179,24 @@ func (s *service) UpdateHabit(habitGroupId string, dto *HabitDto, user *users.Us
 
 	// ничего не изменилось — не сохраняем
 	if !isHabitChanged(dto, habit) {
-		return dto, nil
+		return &HabitDto{
+			BaseHabitDto: dto.BaseHabitDto,
+			GroupId:      dto.GroupId,
+			VersionId:    habit.VersionId,
+		}, nil
 	}
 
 	if user.UserID != habit.UserID {
 		return nil, errors.New("habit is not owned by this user")
 	}
 
-	err := validateHabit(dto)
+	err := validateHabit(dto.BaseHabitDto)
 	if err != nil {
 		return nil, err
 	}
 
 	newHabit := *habit
-	updateModelFromDTO(dto, &newHabit)
+	updateModelFromDTO(&dto.BaseHabitDto, &newHabit)
 
 	habit.IsActive = false
 	habit.LastDate = dto.FirstDate
@@ -205,7 +211,7 @@ func (s *service) UpdateHabit(habitGroupId string, dto *HabitDto, user *users.Us
 	return buildHabitDtoByModel(newHabit), nil
 }
 
-func buildNewModelFromDTO(dto *HabitDto) *Habit {
+func buildNewModelFromCreateDTO(dto *CreateHabitDto) *Habit {
 	var habit Habit
 	habit.Version = 1
 	habit.Name = dto.Name
@@ -221,7 +227,7 @@ func buildNewModelFromDTO(dto *HabitDto) *Habit {
 	return &habit
 }
 
-func updateModelFromDTO(dto *HabitDto, habit *Habit) {
+func updateModelFromDTO(dto *BaseHabitDto, habit *Habit) {
 	habit.Version = habit.Version + 1
 	habit.Name = dto.Name
 	habit.Description = dto.Desc
@@ -237,15 +243,17 @@ func updateModelFromDTO(dto *HabitDto, habit *Habit) {
 
 func buildHabitCompletionDtoByModel(model Habit) *HabitCompletionDto {
 	habit := HabitDto{
-		GroupId:    model.GroupId,
-		VersionId:  model.VersionId,
-		Name:       model.Name,
-		Desc:       model.Description,
-		Color:      model.Color,
-		Icon:       model.Icon,
-		RepeatType: model.RepeatType,
-		DaysOfWeek: model.DaysOfWeek,
-		FirstDate:  &model.FirstDate,
+		GroupId:   model.GroupId,
+		VersionId: model.VersionId,
+		BaseHabitDto: BaseHabitDto{
+			Name:       model.Name,
+			Desc:       model.Description,
+			Color:      model.Color,
+			Icon:       model.Icon,
+			RepeatType: model.RepeatType,
+			DaysOfWeek: model.DaysOfWeek,
+			FirstDate:  &model.FirstDate,
+		},
 	}
 
 	return &HabitCompletionDto{
@@ -257,19 +265,21 @@ func buildHabitCompletionDtoByModel(model Habit) *HabitCompletionDto {
 
 func buildHabitDtoByModel(model Habit) *HabitDto {
 	return &HabitDto{
-		GroupId:    model.GroupId,
-		VersionId:  model.VersionId,
-		Name:       model.Name,
-		Desc:       model.Description,
-		Color:      model.Color,
-		Icon:       model.Icon,
-		RepeatType: model.RepeatType,
-		DaysOfWeek: model.DaysOfWeek,
-		FirstDate:  &model.FirstDate,
+		GroupId:   model.GroupId,
+		VersionId: model.VersionId,
+		BaseHabitDto: BaseHabitDto{
+			Name:       model.Name,
+			Desc:       model.Description,
+			Color:      model.Color,
+			Icon:       model.Icon,
+			RepeatType: model.RepeatType,
+			DaysOfWeek: model.DaysOfWeek,
+			FirstDate:  &model.FirstDate,
+		},
 	}
 }
 
-func validateHabit(h *HabitDto) error {
+func validateHabit(h BaseHabitDto) error {
 	if strings.TrimSpace(h.Name) == "" {
 		log.Println("Name is empty")
 		return errors.New("name is required")
@@ -323,7 +333,7 @@ func isValidDaysOfWeek(days string) bool {
 	return true
 }
 
-func isHabitChanged(dto *HabitDto, habit *Habit) bool {
+func isHabitChanged(dto *UpdateHabitDto, habit *Habit) bool {
 	return dto.Name != habit.Name ||
 		dto.Desc != habit.Description ||
 		dto.Color != habit.Color ||
