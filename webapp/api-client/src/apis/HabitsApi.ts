@@ -17,18 +17,24 @@ import * as runtime from '../runtime';
 import type {
   DtoErrorResponse,
   HabitsCompletionRequest,
+  HabitsCreateHabitDto,
   HabitsHabitCompletionDto,
   HabitsHabitDto,
+  HabitsUpdateHabitDto,
 } from '../models/index';
 import {
     DtoErrorResponseFromJSON,
     DtoErrorResponseToJSON,
     HabitsCompletionRequestFromJSON,
     HabitsCompletionRequestToJSON,
+    HabitsCreateHabitDtoFromJSON,
+    HabitsCreateHabitDtoToJSON,
     HabitsHabitCompletionDtoFromJSON,
     HabitsHabitCompletionDtoToJSON,
     HabitsHabitDtoFromJSON,
     HabitsHabitDtoToJSON,
+    HabitsUpdateHabitDtoFromJSON,
+    HabitsUpdateHabitDtoToJSON,
 } from '../models/index';
 
 export interface ApiHabitCompletionDateGetRequest {
@@ -36,7 +42,7 @@ export interface ApiHabitCompletionDateGetRequest {
 }
 
 export interface ApiHabitCreatePostRequest {
-    request: HabitsHabitDto;
+    request: HabitsCreateHabitDto;
 }
 
 export interface ApiHabitGroupIdGetRequest {
@@ -45,7 +51,7 @@ export interface ApiHabitGroupIdGetRequest {
 
 export interface ApiHabitUpdateGroupIdPutRequest {
     groupId: string;
-    request: HabitsHabitDto;
+    request: HabitsUpdateHabitDto;
 }
 
 export interface ApiHabitVersionIdDatePatchRequest {
@@ -78,7 +84,7 @@ export interface HabitsApiInterface {
     /**
      * 
      * @summary Создать новую привычку
-     * @param {HabitsHabitDto} request HabitDto
+     * @param {HabitsCreateHabitDto} request CreateHabitDto
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HabitsApiInterface
@@ -121,7 +127,7 @@ export interface HabitsApiInterface {
      * 
      * @summary Обновить привычку
      * @param {string} groupId ID группы привычки
-     * @param {HabitsHabitDto} request HabitDto
+     * @param {HabitsUpdateHabitDto} request UpdateHabitDto
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HabitsApiInterface
@@ -219,7 +225,7 @@ export class HabitsApi extends runtime.BaseAPI implements HabitsApiInterface {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: HabitsHabitDtoToJSON(requestParameters['request']),
+            body: HabitsCreateHabitDtoToJSON(requestParameters['request']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => HabitsHabitDtoFromJSON(jsonValue));
@@ -332,7 +338,7 @@ export class HabitsApi extends runtime.BaseAPI implements HabitsApiInterface {
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
-            body: HabitsHabitDtoToJSON(requestParameters['request']),
+            body: HabitsUpdateHabitDtoToJSON(requestParameters['request']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => HabitsHabitDtoFromJSON(jsonValue));

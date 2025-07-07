@@ -23,7 +23,7 @@
   "scripts": {
     "start": "vite dev",
     "dev": "vite dev",
-    "build": "vite build && npm run build:api",
+    "build": "npm run build:api && npx tsc --noEmit && vite build",
     "build:api": "cd ./api-client && npm run build",
     "preview": "vite preview",
     "lint": "eslint",
