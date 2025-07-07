@@ -7,24 +7,27 @@ import { habitsOnDateQueryKey } from './queryKey'
 import { useEmulateSlowConnection } from '../../stores/featureFlagsStores'
 import type { DateApiString } from '../../types/DateFormat'
 import { NavLink } from 'react-router'
+import { useCallback } from 'react'
+import { TelegramWebApp } from '../../telegram'
 
 type HabitOnDateRowProps = {
   completed: boolean
   habit: HabitsHabitCompletionDto['habit']
   date: DateApiString
+  flippedProps: object
 }
 
-export function HabitOnDateRow({ completed, habit, date }: HabitOnDateRowProps) {
+export const HabitOnDateRow = ({ completed, habit, date, flippedProps }: HabitOnDateRowProps) => {
   const queryClient = useQueryClient()
   const emulateSlowConnection = useEmulateSlowConnection((state) => state.active)
 
-  const { mutate: updateHabitCompletion, isPending } = useMutation({
+  const mutation = useMutation({
     mutationFn: async (newCompleted: boolean) => {
-      if (emulateSlowConnection) {
-        await delay(1500)
-      }
       if (!habit.versionId) {
         throw new Error('versionId is required')
+      }
+      if (emulateSlowConnection) {
+        await delay(1500)
       }
       await habitsApi.apiHabitVersionIdDatePatch({
         date: date,
@@ -38,33 +41,43 @@ export function HabitOnDateRow({ completed, habit, date }: HabitOnDateRowProps) 
         completed: newCompleted,
       }
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({
+    onSettled: () => {
+      return queryClient.invalidateQueries({
         queryKey: habitsOnDateQueryKey(date),
-      }),
+      })
+    },
   })
+
+  const { mutate, isPending } = mutation
+  const updateCompletionStatus = useCallback(() => {
+    TelegramWebApp.HapticFeedback.selectionChanged()
+    mutate(!completed)
+  }, [mutate, completed])
+
+  const optimisticCompleted = mutation.isPending ? mutation.variables : completed
 
   return (
     <li
-      key={habit.versionId}
+      {...flippedProps}
       className={classNames(
-        'flex gap-2 rounded-xl p-3',
-        isPending && 'pointer-events-none animate-pulse',
-        completed && 'opacity-50',
+        'flex gap-2 rounded-xl px-3',
+        isPending ? 'pointer-events-none animate-pulse' : 'cursor-pointer',
+        !isPending && completed && 'opacity-50',
       )}
       style={{
         backgroundColor: `color-mix(in srgb, ${habit.color}, transparent 40%)`,
+        viewTransitionName: 'match-element',
       }}
     >
       <div
-        onClick={() => updateHabitCompletion(!completed)}
-        className={classNames('relative flex min-w-0 grow flex-row items-center justify-stretch')}
+        onClick={updateCompletionStatus}
+        className={classNames('relative flex min-w-0 grow flex-row items-center justify-stretch py-3')}
       >
         <span>{habit.icon}</span>
         <span className="min-w-0 overflow-x-clip text-nowrap text-ellipsis">{habit.name}</span>
-        {completed && <div className="bg-tg-text absolute top-1/2 box-border h-[1px] w-full px-11" />}
+        {optimisticCompleted && <div className="bg-tg-text absolute top-1/2 box-border h-[1px] w-full px-11" />}
       </div>
-      <NavLink to={`/habit/${habit.id}`} className="flex">
+      <NavLink to={`/habit/${habit.id}`} className="flex items-center">
         <span className="material-icons">edit</span>
       </NavLink>
     </li>
