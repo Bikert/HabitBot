@@ -13,7 +13,6 @@ type Repository interface {
 	GetActiveHabitsByUserID(userID int64) *[]Habit
 	GetActiveHabitsByUserIDByDate(id int64, date time.Time) *[]Habit
 	GetCompletedHabitsByUserIdAndDate(userId int64, date time.Time) []*HabitCompletion
-	GetCompletedHabitByHabitIdAndDate(id int64, date time.Time) (*HabitCompletion, error)
 
 	SaveHabit(h *Habit) error
 	UpdateHabit(h *Habit) error

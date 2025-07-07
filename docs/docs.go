@@ -183,12 +183,12 @@ const docTemplate = `{
                 "summary": "Создать новую привычку",
                 "parameters": [
                     {
-                        "description": "HabitDto",
+                        "description": "CreateHabitDto",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/habits.HabitDto"
+                            "$ref": "#/definitions/habits.CreateHabitDto"
                         }
                     }
                 ],
@@ -235,12 +235,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "HabitDto",
+                        "description": "UpdateHabitDto",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/habits.HabitDto"
+                            "$ref": "#/definitions/habits.UpdateHabitDto"
                         }
                     }
                 ],
@@ -466,6 +466,40 @@ const docTemplate = `{
                 }
             }
         },
+        "habits.CreateHabitDto": {
+            "type": "object",
+            "required": [
+                "color",
+                "firstDate",
+                "icon",
+                "name",
+                "repeatType"
+            ],
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "daysOfWeek": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "firstDate": {
+                    "description": "\"2025-06-28T00:00:00Z\"",
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repeatType": {
+                    "type": "string"
+                }
+            }
+        },
         "habits.HabitCompletionDto": {
             "type": "object",
             "required": [
@@ -490,8 +524,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "color",
-                "daysOfWeek",
-                "desc",
                 "firstDate",
                 "icon",
                 "id",
@@ -527,6 +559,44 @@ const docTemplate = `{
                 },
                 "versionId": {
                     "type": "integer"
+                }
+            }
+        },
+        "habits.UpdateHabitDto": {
+            "type": "object",
+            "required": [
+                "color",
+                "firstDate",
+                "icon",
+                "id",
+                "name",
+                "repeatType"
+            ],
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "daysOfWeek": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "firstDate": {
+                    "description": "\"2025-06-28T00:00:00Z\"",
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repeatType": {
+                    "type": "string"
                 }
             }
         },

@@ -38,6 +38,30 @@ definitions:
       completed:
         type: boolean
     type: object
+  habits.CreateHabitDto:
+    properties:
+      color:
+        type: string
+      daysOfWeek:
+        type: string
+      desc:
+        type: string
+      firstDate:
+        description: '"2025-06-28T00:00:00Z"'
+        type: string
+      icon:
+        type: string
+      name:
+        type: string
+      repeatType:
+        type: string
+    required:
+    - color
+    - firstDate
+    - icon
+    - name
+    - repeatType
+    type: object
   habits.HabitCompletionDto:
     properties:
       completed:
@@ -75,14 +99,39 @@ definitions:
         type: integer
     required:
     - color
-    - daysOfWeek
-    - desc
     - firstDate
     - icon
     - id
     - name
     - repeatType
     - versionId
+    type: object
+  habits.UpdateHabitDto:
+    properties:
+      color:
+        type: string
+      daysOfWeek:
+        type: string
+      desc:
+        type: string
+      firstDate:
+        description: '"2025-06-28T00:00:00Z"'
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      repeatType:
+        type: string
+    required:
+    - color
+    - firstDate
+    - icon
+    - id
+    - name
+    - repeatType
     type: object
   users.User:
     properties:
@@ -261,12 +310,12 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: HabitDto
+      - description: CreateHabitDto
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/habits.HabitDto'
+          $ref: '#/definitions/habits.CreateHabitDto'
       produces:
       - application/json
       responses:
@@ -295,12 +344,12 @@ paths:
         name: groupId
         required: true
         type: string
-      - description: HabitDto
+      - description: UpdateHabitDto
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/habits.HabitDto'
+          $ref: '#/definitions/habits.UpdateHabitDto'
       produces:
       - application/json
       responses:
