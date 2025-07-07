@@ -13,4 +13,5 @@ export const PATHS = Object.freeze({
     if (isValidDateString(date)) return `/day/${date}`
     return '/day'
   },
+  bodyMeasurements: '/body-measurements',
 })

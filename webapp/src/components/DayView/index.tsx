@@ -1,7 +1,7 @@
 import { type LoaderFunction, NavLink, redirect, useNavigate, useParams } from 'react-router'
 import { getCurrentDateApiString, getRelativeDate, isValidDateString, toDate } from '../../utils/date'
 import classNames from 'classnames'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { HabitOnDateRow } from './HabitOnDateRow'
 import { useEmulateSlowConnection } from '../../stores/featureFlagsStores'
@@ -10,6 +10,7 @@ import { habitsOnDateQueryOptions } from './habitsOnDateQueryOptions'
 import { delay } from '../../utils/delay'
 import { queryClient } from '../../api/queryClient'
 import { AddHabitButton } from '../NavigationButtons'
+import { Flipped, Flipper } from 'react-flip-toolkit'
 
 interface DayViewInternalProps {
   date: DateApiString
@@ -33,7 +34,9 @@ function HabitDateNavLink({ date: dateApiString }: { date: DateApiString }) {
       className={({ isActive, isPending }) =>
         classNames(
           'rounded-xl px-2 py-1',
-          isActive ? 'bg-tg-accent-text pointer-events-none' : 'bg-tg-button',
+          isActive
+            ? 'bg-md-primary text-md-on-primary pointer-events-none'
+            : 'bg-md-primary-container text-md-on-primary-container',
           isPending && 'pointer-events-none',
         )
       }
@@ -45,7 +48,7 @@ function HabitDateNavLink({ date: dateApiString }: { date: DateApiString }) {
           <div className="absolute right-0 left-0">{dayOfWeek}</div>
           <div className="invisible">Mon</div>
         </div>
-        <div className="bg-tg-bg flex h-8 w-8 items-center justify-center rounded-full">
+        <div className="bg-md-surface text-md-on-surface flex h-8 w-8 items-center justify-center rounded-full">
           <p>{dayOfMonth}</p>
         </div>
       </div>
@@ -64,7 +67,17 @@ export const dayViewLoader: LoaderFunction = async ({ params }) => {
 
 export const DayViewInternal = ({ date }: DayViewInternalProps) => {
   const emulateSlowConnection = useEmulateSlowConnection((state) => state.active)
-  const { data: habitsOnDate, isFetching } = useSuspenseQuery(habitsOnDateQueryOptions(date, emulateSlowConnection))
+  const { data: habitsOnDate } = useSuspenseQuery(habitsOnDateQueryOptions(date, emulateSlowConnection))
+
+  const orderedHabits = useMemo(
+    () => [...habitsOnDate].sort((a, b) => Number(a.completed) - Number(b.completed)),
+    [habitsOnDate],
+  )
+
+  const flipKey = useMemo(
+    () => orderedHabits?.map((habitOnDate) => habitOnDate.habit.versionId).join(','),
+    [orderedHabits],
+  )
 
   return (
     <>
@@ -74,16 +87,21 @@ export const DayViewInternal = ({ date }: DayViewInternalProps) => {
           return <HabitDateNavLink key={relativeDate} date={relativeDate} />
         })}
       </div>
-      <ul className={classNames('m-4 flex list-none flex-col gap-2', isFetching && '*:opacity-50')}>
-        {habitsOnDate.map((habitOnDate) => (
-          <HabitOnDateRow
-            key={`${date}:${habitOnDate.habit.versionId}`}
-            date={date}
-            habit={habitOnDate.habit}
-            completed={habitOnDate.completed}
-          />
+      <Flipper flipKey={flipKey} element="ul" className={classNames('m-4 flex list-none flex-col gap-2')}>
+        {orderedHabits.map((habitOnDate) => (
+          <Flipped flipId={habitOnDate.habit.versionId} key={`${date}:${habitOnDate.habit.versionId}`}>
+            {(flippedProps) => (
+              <HabitOnDateRow
+                key={`${date}:${habitOnDate.habit.versionId}`}
+                date={date}
+                habit={habitOnDate.habit}
+                completed={habitOnDate.completed}
+                flippedProps={flippedProps}
+              />
+            )}
+          </Flipped>
         ))}
-      </ul>
+      </Flipper>
       <AddHabitButton />
     </>
   )
