@@ -1,10 +1,10 @@
 package bot
 
 import (
+	"HabitMuse/internal/bot/constants"
 	"HabitMuse/internal/bot/scenaries"
 	"HabitMuse/internal/bot/utils"
 	"HabitMuse/internal/config"
-	"HabitMuse/internal/constants"
 	"HabitMuse/internal/habits"
 	"HabitMuse/internal/session"
 	"HabitMuse/internal/users"

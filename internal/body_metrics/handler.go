@@ -76,10 +76,11 @@ func (h *Handler) GetReport(ctx *gin.Context) {
 		return
 	}
 
-	str, err := h.service.GetReport(user.UserID)
+	str, err := h.service.GenerationReport(user.UserID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
+	log.Println(str)
 	ctx.JSON(http.StatusOK, str)
 }
 
