@@ -55,7 +55,7 @@ jobs:
         env:
           SECRETS: ${{ toJson(secrets) }}
         run: |
-          echo "$SECRETS" | jq -r 'to_entries[] | select( .key | test("^APP_") ) | ( .key | sub("^APP_"; "") ) + "=" + ( .value|@sh )' >> .env
+          echo "$SECRETS" | jq -r 'to_entries[] | select( .key | test("^APP_") ) | ( .key | sub("^APP_"; "") ) + "=" + ( .value|@json )' >> .env
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
