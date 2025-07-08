@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    environment: production
+    environment: poc
     runs-on: ubuntu-latest
     steps:
       - name: Generate some files
