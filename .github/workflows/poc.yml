@@ -37,7 +37,11 @@ jobs:
           SSH_USER: ${{ secrets.VPS_USERNAME }}
           SSH_KEY: ${{ secrets.VPS_KEY }}
       - name: Clear target temp folder
-        run: ssh vps 'rm -rf ~/PocApp.new'
+        run: |
+          ssh vps << EOF
+            rm -rf ~/PocApp.new 
+            mkdir ~/PocApp.new
+          EOF
       - name: Upload everything
         run: scp -r ./. vps:~/PocApp.new/
       - name: Ensure app dir exits
