@@ -39,7 +39,7 @@ jobs:
       - name: Clear target temp folder
         run: ssh vps 'rm -rf ~/PocApp.new'
       - name: Upload everything
-        run: scp -r ./* vps:~/PocApp.new/
+        run: scp -r ./. vps:~/PocApp.new/
       - name: Ensure app dir exits
         run: ssh vps 'mkdir -p ~/PocApp/.'
       - name: Take backup
