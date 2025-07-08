@@ -1,0 +1,48 @@
+name: poc.yml
+on:
+  push:
+    branches:
+      - 'poc'
+
+jobs:
+  deploy:
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate some files
+        run: |
+          echo 'Executable' > executable
+          chmod +x ./executable
+          mkdir static
+          echo 'Static' > ./static/index.html
+      - name: Create .env
+        env:
+          SECRETS: ${{ toJson(secrets) }}
+        run: |
+          echo "$SECRETS" | jq -r 'to_entries[] | select( .key | test("^APP_") ) | ( .key | sub("^APP_"; "") ) + "=" + ( .value|@sh )' >> .env
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/vps.key
+          chmod 600 ~/.ssh/vps.key
+          cat >>~/.ssh/config <<END
+          Host vps
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/vps.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+          SSH_USER: ${{ secrets.VPS_USERNAME }}
+          SSH_KEY: ${{ secrets.VPS_KEY }}
+      - name: Clear target temp folder
+        run: ssh vps 'rm -rf ~/PocApp.new'
+      - name: Upload everything
+        run: scp -r ./* vps:~/PocApp.new/
+      - name: Take backup
+        run: ssh vps 'cp -r ~/PocApp/. ~/PocApp.old'
+      - name: Clear deployment directory
+        run: ssh vps 'rm -rf ./PocApp/static ./PocApp/HabitMuse'
+      - name: Update with new version
+        run: ssh vps 'cp -r ~/PocApp.new/. ~/PocApp'

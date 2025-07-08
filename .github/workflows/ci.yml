@@ -4,6 +4,7 @@ on:
     branches:
       - '**'
       - '!main'
+      - '!poc'
   pull_request:
     branches:
       - main
