@@ -3,12 +3,13 @@ on:
   push:
     branches:
       - 'poc'
+      - 'poc/**'
 
 jobs:
   deploy:
     environment: poc
     env:
-      TARGET: PoCApp2
+      TARGET_DIR: PoCApp2
     runs-on: ubuntu-latest
     steps:
       - name: Generate some files
@@ -41,24 +42,17 @@ jobs:
       - name: Clear target upload folder
         run: |
           ssh vps << EOF
-            rm -rf ~/$TARGET.new 
-            mkdir ~/$TARGET.new
+            rm -rf ~/$TARGET_DIR.new 
+            mkdir ~/$TARGET_DIR.new
           EOF
       - name: Upload everything
-        run: scp -r ./. vps:~/$TARGET.new/
+        run: scp -r ./. vps:~/$TARGET_DIR.new/
       - name: Rotate deployment folders
         run: |
           ssh vps <<EOF
-            mkdir -p ~/$TARGET/
-            cp -r ~/$TARGET/. ~/TARGET.old
-            rm -rf ./$TARGET/static ./$TARGET/HabitMuse
-            cp -r ~/$TARGET.new/. ~/$TARGET
+            rm -rf ~/$TARGET_DIR.old 
+            mkdir -p ~/$TARGET_DIR/
+            cp -r ~/$TARGET_DIR/. ~/$TARGET_DIR.old
+            rm -rf ~/$TARGET_DIR/HabitMuse ~/$TARGET_DIR 
+            cp -r ~/$TARGET_DIR.new/. ~/$TARGET_DIR
           EOF
-#      - name: Ensure app dir exits
-#        run: ssh vps 'mkdir -p ~/$TARGET/.'
-#      - name: Take backup
-#        run: ssh vps 'cp -r ~/$TARGET/. ~/$TARGET.old'
-#      - name: Clear deployment directory
-#        run: ssh vps 'rm -rf ./$TARGET/static ./$TARGET/HabitMuse'
-#      - name: Update with new version
-#        run: ssh vps 'cp -r ~/$TARGET.new/. ~/$TARGET'
