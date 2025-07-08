@@ -40,6 +40,8 @@ jobs:
         run: ssh vps 'rm -rf ~/PocApp.new'
       - name: Upload everything
         run: scp -r ./* vps:~/PocApp.new/
+      - name: Ensure app dir exits
+        run: ssh vps 'mkdir -p ~/PocApp/.'
       - name: Take backup
         run: ssh vps 'cp -r ~/PocApp/. ~/PocApp.old'
       - name: Clear deployment directory
