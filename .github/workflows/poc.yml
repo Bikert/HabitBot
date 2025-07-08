@@ -8,7 +8,7 @@ jobs:
   deploy:
     environment: poc
     env:
-      TARGET: PocApp
+      TARGET: PoCApp2
     runs-on: ubuntu-latest
     steps:
       - name: Generate some files
@@ -38,20 +38,27 @@ jobs:
           SSH_HOST: ${{ secrets.VPS_HOST }}
           SSH_USER: ${{ secrets.VPS_USERNAME }}
           SSH_KEY: ${{ secrets.VPS_KEY }}
-      - name: Clear target temp folder
+      - name: Clear target upload folder
         run: |
           ssh vps << EOF
-            rm -rf ~/PocApp.new 
-            mkdir ~/PocApp.new
+            rm -rf ~/$TARGET.new 
             mkdir ~/$TARGET.new
           EOF
       - name: Upload everything
-        run: scp -r ./. vps:~/PocApp.new/
-      - name: Ensure app dir exits
-        run: ssh vps 'mkdir -p ~/PocApp/.'
-      - name: Take backup
-        run: ssh vps 'cp -r ~/PocApp/. ~/PocApp.old'
-      - name: Clear deployment directory
-        run: ssh vps 'rm -rf ./PocApp/static ./PocApp/HabitMuse'
-      - name: Update with new version
-        run: ssh vps 'cp -r ~/PocApp.new/. ~/PocApp'
+        run: scp -r ./. vps:~/$TARGET.new/
+      - name: Rotate deployment folders
+        run: |
+          ssh vps <<EOF
+            mkdir -p ~/$TARGET/
+            cp -r ~/$TARGET/. ~/TARGET.old
+            rm -rf ./$TARGET/static ./$TARGET/HabitMuse
+            cp -r ~/$TARGET.new/. ~/$TARGET
+          EOF
+#      - name: Ensure app dir exits
+#        run: ssh vps 'mkdir -p ~/$TARGET/.'
+#      - name: Take backup
+#        run: ssh vps 'cp -r ~/$TARGET/. ~/$TARGET.old'
+#      - name: Clear deployment directory
+#        run: ssh vps 'rm -rf ./$TARGET/static ./$TARGET/HabitMuse'
+#      - name: Update with new version
+#        run: ssh vps 'cp -r ~/$TARGET.new/. ~/$TARGET'
