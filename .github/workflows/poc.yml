@@ -7,6 +7,8 @@ on:
 jobs:
   deploy:
     environment: poc
+    env:
+      TARGET: PocApp
     runs-on: ubuntu-latest
     steps:
       - name: Generate some files
@@ -41,6 +43,7 @@ jobs:
           ssh vps << EOF
             rm -rf ~/PocApp.new 
             mkdir ~/PocApp.new
+            mkdir ~/$TARGET.new
           EOF
       - name: Upload everything
         run: scp -r ./. vps:~/PocApp.new/
