@@ -4,6 +4,7 @@ import { Picker } from 'emoji-mart'
 import { TelegramWebApp } from '../telegram'
 import data from '@emoji-mart/data'
 import { init } from 'emoji-mart'
+import { useTelegramTheme } from '../stores/useTelegramTheme'
 
 // noinspection JSIgnoredPromiseFromCall
 init(data)
@@ -58,6 +59,7 @@ function EmojiPicker(props: { close: () => void; onSelect: EmojiSelector } & Rec
   const initialProps = useRef(props)
   const ref = useRef<HTMLDivElement>(null)
   const instance = useRef<Picker>(null)
+  const colorScheme = useTelegramTheme((state) => state.theme)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -102,12 +104,8 @@ function EmojiPicker(props: { close: () => void; onSelect: EmojiSelector } & Rec
   }, [onSelect])
 
   useEffect(() => {
-    const onThemeChanged = () => instance.current?.update({ theme: TelegramWebApp.colorScheme })
-    TelegramWebApp.onEvent('themeChanged', onThemeChanged)
-    return () => {
-      TelegramWebApp.offEvent('themeChanged', onThemeChanged)
-    }
-  }, [])
+    instance.current?.update({ theme: colorScheme })
+  }, [colorScheme])
 
   return (
     <>
