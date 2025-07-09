@@ -11,6 +11,8 @@ import { Suspense } from 'react'
 import { queryClient } from './api/queryClient'
 import { useViewportHeight } from './utils/useViewportHeight'
 import { PATHS } from './constants/paths'
+import { Toaster } from 'sonner'
+import { useTelegramTheme } from './stores/useTelegramTheme'
 
 function AppHeader() {
   const showHeader = useShowHeader((state) => state.active)
@@ -32,6 +34,7 @@ function AppFooter() {
 }
 
 function App() {
+  const theme = useTelegramTheme((state) => state.theme)
   const showDemoButtons = useShowDemoButtons((state) => state.active)
   useTelegramInit()
   const goBack = useNavigateBackOrClose()
@@ -49,11 +52,12 @@ function App() {
       {showDemoButtons && <SecondaryButton text="secondary" />}
       {/* Layout container */}
       <div className="pl-tg-safe-left pr-tg-safe-right pt-tg-safe-top relative box-border flex h-full flex-col">
+        <Toaster theme={theme} richColors position="top-right" swipeDirections={['left', 'right']} />
         {fixedLayoutElements && <AppHeader />}
         {/* Non-scrollable positioned container for absolute elements */}
         <div className="relative flex min-h-0 shrink grow">
           {/* Scrollable container */}
-          <div className="scrollbar scrollbar-thumb-tg-secondary-bg flex min-w-0 grow flex-col overflow-y-auto">
+          <div className="flex min-w-0 grow flex-col overflow-y-auto">
             {!fixedLayoutElements && <AppHeader />}
             {/* Content goes here */}
             <div className="w-full max-w-xl grow self-center py-4">

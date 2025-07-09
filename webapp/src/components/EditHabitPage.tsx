@@ -18,6 +18,7 @@ import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-que
 import type { HabitsCreateHabitDto, HabitsUpdateHabitDto } from '@habit-bot/api-client'
 import { useEmulateSlowConnection } from '../stores/featureFlagsStores'
 import { randomElement } from '../utils/randomElement'
+import { toast } from 'sonner'
 
 function habitQueryOptions(id?: string) {
   return queryOptions({
@@ -64,7 +65,10 @@ export default function EditHabitPage() {
     setSelectedDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]))
   }
   const editMutation = useMutation({
-    mutationFn: (habit: HabitsCreateHabitDto | HabitsUpdateHabitDto) => {
+    mutationFn: async (habit: HabitsCreateHabitDto | HabitsUpdateHabitDto) => {
+      if (emulateSlowConnection) {
+        await delay(1500)
+      }
       if ('id' in habit && habit.id) {
         return habitsApi.apiHabitUpdateGroupIdPut({
           groupId: habit.id,
@@ -74,6 +78,18 @@ export default function EditHabitPage() {
       return habitsApi.apiHabitCreatePost({
         request: habit,
       })
+    },
+    onSuccess: (habitResponse, habitRequest) => {
+      if ('id' in habitRequest && habitRequest.id) {
+        toast.success(`Habit ${habitResponse.name} updated`)
+      } else {
+        toast.success(`Habit ${habitResponse.name} created`)
+      }
+      navigate(-1)
+    },
+    onError: (error) => {
+      console.error(error)
+      toast.error('Failed to save habit', { description: error.message })
     },
   })
 
@@ -103,14 +119,7 @@ export default function EditHabitPage() {
         repeatType,
         color,
       }
-      await editMutation.mutateAsync(data)
-
-      if (emulateSlowConnection) {
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-      }
-
-      TelegramWebApp.HapticFeedback.selectionChanged()
-      navigate(-1)
+      editMutation.mutate(data)
       return data
     },
     {} as Partial<HabitsCreateHabitDto>,
@@ -213,7 +222,7 @@ export default function EditHabitPage() {
         </div>
 
         <button
-          disabled={pending}
+          disabled={editMutation.isPending}
           type="submit"
           className="bg-tg-button text-tg-button-text w-full cursor-pointer rounded-3xl py-3.5 text-lg font-bold transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50"
         >

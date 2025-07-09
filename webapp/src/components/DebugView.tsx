@@ -1,5 +1,6 @@
 import { TelegramWebApp } from '../telegram'
 import { useShowDebugInformation } from '../stores/featureFlagsStores'
+import { toast } from 'sonner'
 
 export function DebugView() {
   const user = TelegramWebApp.initDataUnsafe?.user
@@ -13,9 +14,10 @@ export function DebugView() {
       <div className="flex gap-4">
         <button
           className="bg-tg-button cursor-pointer rounded-xl"
-          onClick={() => {
+          onClick={async () => {
             if (user?.id) {
-              return navigator.clipboard.writeText(user.id.toString())
+              await navigator.clipboard.writeText(user.id.toString())
+              toast.info('Copied user ID')
             }
           }}
         >
@@ -26,7 +28,10 @@ export function DebugView() {
       <div className="flex gap-4">
         <button
           className="bg-tg-button cursor-pointer rounded-xl"
-          onClick={() => navigator.clipboard.writeText(TelegramWebApp.initData)}
+          onClick={async () => {
+            await navigator.clipboard.writeText(TelegramWebApp.initData)
+            toast.info('Copied init data')
+          }}
         >
           📋Init data📋
         </button>
@@ -35,7 +40,10 @@ export function DebugView() {
       <div className="flex gap-4">
         <button
           className="bg-tg-button cursor-pointer rounded-xl"
-          onClick={() => navigator.clipboard.writeText(currentLocation)}
+          onClick={async () => {
+            await navigator.clipboard.writeText(currentLocation)
+            toast.info('Copied current location')
+          }}
         >
           📋Location📋
         </button>
@@ -44,7 +52,10 @@ export function DebugView() {
       <div className="flex gap-4">
         <button
           className="bg-tg-button cursor-pointer rounded-xl"
-          onClick={() => navigator.clipboard.writeText(initialLocation ?? '')}
+          onClick={async () => {
+            await navigator.clipboard.writeText(initialLocation ?? '')
+            toast.info('Copied initial location')
+          }}
         >
           📋Initial location📋
         </button>
