@@ -14,7 +14,7 @@ function ConfigButton({ active, toggle, children }: PropsWithChildren<{ active: 
     <button
       className={classNames(
         'ring-tg-button ring-2',
-        active ? 'bg-tg-secondary-bg text-tg-button' : 'bg-tg-button text-tg-button-text',
+        active ? 'bg-tg-button text-tg-button-text' : 'bg-tg-secondary-bg text-tg-button',
       )}
       onClick={toggle}
     >
