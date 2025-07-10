@@ -1,4 +1,4 @@
-import type { HabitsCreateHabitDto, HabitsHabitDto, HabitsUpdateHabitDto } from '@habit-bot/api-client'
+import type { HabitsCreateHabitDto, HabitsHabitDto } from '@habit-bot/api-client'
 import { type FormEvent, useActionState, useCallback, useState } from 'react'
 import {
   colors,
