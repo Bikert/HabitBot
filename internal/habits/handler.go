@@ -154,7 +154,7 @@ func (h *Handler) CreateNewVersion(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param versionId path int true "ID версии привычки"
-// @Param groupId path int true "ID привычки"
+// @Param groupId path string true "ID привычки"
 // @Param request body UpdateHabitDto true "Обновлённые данные привычки"
 // @Success 200 {object} HabitDto
 // @Failure 400 {object} dto.ErrorResponse

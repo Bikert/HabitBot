@@ -54,12 +54,6 @@ export interface HabitsUpdateHabitDto {
      * @type {string}
      * @memberof HabitsUpdateHabitDto
      */
-    id: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof HabitsUpdateHabitDto
-     */
     name: string;
     /**
      * 
@@ -76,7 +70,6 @@ export function instanceOfHabitsUpdateHabitDto(value: object): value is HabitsUp
     if (!('color' in value) || value['color'] === undefined) return false;
     if (!('firstDate' in value) || value['firstDate'] === undefined) return false;
     if (!('icon' in value) || value['icon'] === undefined) return false;
-    if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('repeatType' in value) || value['repeatType'] === undefined) return false;
     return true;
@@ -97,7 +90,6 @@ export function HabitsUpdateHabitDtoFromJSONTyped(json: any, ignoreDiscriminator
         'desc': json['desc'] == null ? undefined : json['desc'],
         'firstDate': json['firstDate'],
         'icon': json['icon'],
-        'id': json['id'],
         'name': json['name'],
         'repeatType': json['repeatType'],
     };
@@ -119,7 +111,6 @@ export function HabitsUpdateHabitDtoToJSONTyped(value?: HabitsUpdateHabitDto | n
         'desc': value['desc'],
         'firstDate': value['firstDate'],
         'icon': value['icon'],
-        'id': value['id'],
         'name': value['name'],
         'repeatType': value['repeatType'],
     };

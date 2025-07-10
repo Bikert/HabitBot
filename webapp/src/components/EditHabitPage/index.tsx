@@ -61,7 +61,6 @@ function CreateHabit() {
 
 function EditHabit({ id }: { id: string }) {
   const { data: existing } = useSuspenseQuery(habitQueryOptions(id))
-  console.log(existing)
   const navigate = useNavigate()
 
   const submitDataRef = useRef<HabitsCreateHabitDto>(existing)
@@ -73,9 +72,9 @@ function EditHabit({ id }: { id: string }) {
 
   const newVersionMutation = useMutation({
     mutationFn: async () => {
-      return habitsApi.apiHabitUpdateGroupIdPut({
+      return habitsApi.apiHabitGroupIdPost({
         groupId: id,
-        request: { ...submitDataRef.current, id },
+        request: submitDataRef.current,
       })
     },
     onSuccess: (habitResponse) => {
@@ -90,10 +89,10 @@ function EditHabit({ id }: { id: string }) {
 
   const updateVersionMutation = useMutation({
     mutationFn: async () => {
-      // TODO: use new endpoint
-      return habitsApi.apiHabitUpdateGroupIdPut({
+      return habitsApi.apiHabitGroupIdVersionIdPut({
+        versionId: existing.versionId,
         groupId: id,
-        request: { ...submitDataRef.current, id },
+        request: submitDataRef.current,
       })
     },
     onSuccess: (habitResponse) => {
@@ -136,7 +135,7 @@ function EditHabit({ id }: { id: string }) {
                     Cancel
                   </Button>
                   <div className="flex justify-end gap-2">
-                    <Button variant="secondary" onPress={chain(newVersionMutation.mutate, close)}>
+                    <Button variant="secondary" onPress={chain(updateVersionMutation.mutate, close)}>
                       Change all
                     </Button>
                     <Button variant="primary" autoFocus onPress={chain(newVersionMutation.mutate, close)}>

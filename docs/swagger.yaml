@@ -291,7 +291,7 @@ paths:
         in: path
         name: groupId
         required: true
-        type: integer
+        type: string
       - description: Обновлённые данные привычки
         in: body
         name: request

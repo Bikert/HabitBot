@@ -16,6 +16,7 @@
 import * as runtime from '../runtime';
 import type {
   DtoErrorResponse,
+  DtoSuccessResponse,
   HabitsCompletionRequest,
   HabitsCreateHabitDto,
   HabitsHabitCompletionDto,
@@ -25,6 +26,8 @@ import type {
 import {
     DtoErrorResponseFromJSON,
     DtoErrorResponseToJSON,
+    DtoSuccessResponseFromJSON,
+    DtoSuccessResponseToJSON,
     HabitsCompletionRequestFromJSON,
     HabitsCompletionRequestToJSON,
     HabitsCreateHabitDtoFromJSON,
@@ -45,6 +48,10 @@ export interface ApiHabitCreatePostRequest {
     request: HabitsCreateHabitDto;
 }
 
+export interface ApiHabitGroupIdDisablePutRequest {
+    groupId: string;
+}
+
 export interface ApiHabitGroupIdGetRequest {
     groupId: string;
 }
@@ -56,7 +63,7 @@ export interface ApiHabitGroupIdPostRequest {
 
 export interface ApiHabitGroupIdVersionIdPutRequest {
     versionId: number;
-    groupId: number;
+    groupId: string;
     request: HabitsUpdateHabitDto;
 }
 
@@ -116,6 +123,21 @@ export interface HabitsApiInterface {
     apiHabitGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<HabitsHabitDto>>;
 
     /**
+     * 
+     * @summary Скрыть (отключить) привычку
+     * @param {string} groupId ID привычки
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HabitsApiInterface
+     */
+    apiHabitGroupIdDisablePutRaw(requestParameters: ApiHabitGroupIdDisablePutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DtoSuccessResponse>>;
+
+    /**
+     * Скрыть (отключить) привычку
+     */
+    apiHabitGroupIdDisablePut(requestParameters: ApiHabitGroupIdDisablePutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DtoSuccessResponse>;
+
+    /**
      * Returns a single active habit by group ID
      * @param {string} groupId Habit group ID
      * @param {*} [options] Override http request option.
@@ -149,7 +171,7 @@ export interface HabitsApiInterface {
      * 
      * @summary Обновить привычку по версии
      * @param {number} versionId ID версии привычки
-     * @param {number} groupId ID привычки
+     * @param {string} groupId ID привычки
      * @param {HabitsUpdateHabitDto} request Обновлённые данные привычки
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -288,6 +310,43 @@ export class HabitsApi extends runtime.BaseAPI implements HabitsApiInterface {
      */
     async apiHabitGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<HabitsHabitDto>> {
         const response = await this.apiHabitGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Скрыть (отключить) привычку
+     */
+    async apiHabitGroupIdDisablePutRaw(requestParameters: ApiHabitGroupIdDisablePutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DtoSuccessResponse>> {
+        if (requestParameters['groupId'] == null) {
+            throw new runtime.RequiredError(
+                'groupId',
+                'Required parameter "groupId" was null or undefined when calling apiHabitGroupIdDisablePut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/habit/{groupId}/disable`;
+        urlPath = urlPath.replace(`{${"groupId"}}`, encodeURIComponent(String(requestParameters['groupId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DtoSuccessResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Скрыть (отключить) привычку
+     */
+    async apiHabitGroupIdDisablePut(requestParameters: ApiHabitGroupIdDisablePutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DtoSuccessResponse> {
+        const response = await this.apiHabitGroupIdDisablePutRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
