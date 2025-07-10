@@ -1,5 +1,5 @@
+import type { HabitsCreateHabitDto, HabitsHabitDto } from '@habit-bot/api-client'
 import { type FormEvent, useActionState, useCallback, useState } from 'react'
-import { TelegramWebApp } from '../telegram'
 import {
   colors,
   type DayOfWeek,
@@ -8,46 +8,20 @@ import {
   type HabitColor,
   type RepeatType,
   repeatTypes,
-} from '../constants/HabitOptions'
-import { EmojiInput } from './EmojiInput'
-import { type LoaderFunction, replace, useNavigate, useParams } from 'react-router'
-import { delay } from '../utils/delay'
-import { queryClient } from '../api/queryClient'
-import { habitsApi } from '../api/habitsApi'
-import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-query'
-import type { HabitsCreateHabitDto, HabitsUpdateHabitDto } from '@habit-bot/api-client'
-import { useEmulateSlowConnection } from '../stores/featureFlagsStores'
-import { randomElement } from '../utils/randomElement'
+} from '../../constants/HabitOptions'
+import { randomElement } from '../../utils/randomElement'
 import { toast } from 'sonner'
+import { EmojiInput } from '../EmojiInput'
+import { TelegramWebApp } from '../../telegram'
 
-function habitQueryOptions(id?: string) {
-  return queryOptions({
-    queryKey: ['habit', id],
-    queryFn: () => {
-      if (!id) return Promise.resolve(null)
-      return habitsApi.apiHabitGroupIdGet({ groupId: id })
-    },
-    staleTime: 10_000,
-  })
+interface EditHabitFormProps {
+  existing?: HabitsHabitDto
+  submit: (habit: HabitsCreateHabitDto) => void
+  submitButtonLabel: string
+  loading: boolean
 }
 
-export const editHabitLoader: LoaderFunction = async ({ params }) => {
-  const { id } = params
-  if (!id) {
-    return await delay(1)
-  }
-  try {
-    const habit = await queryClient.fetchQuery(habitQueryOptions(id))
-    if (!habit) return replace('/habit')
-  } catch (e) {
-    console.error(e)
-    return replace('/habit')
-  }
-}
-
-export default function EditHabitPage() {
-  const id = useParams()['id']
-  const { data: existing } = useSuspenseQuery(habitQueryOptions(id))
+export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: EditHabitFormProps) {
   const [title, setTitle] = useState(existing?.name ?? '')
   const [description, setDescription] = useState(existing?.desc ?? '')
   const [emoji, setEmoji] = useState(existing?.icon ?? '⭐')
@@ -59,45 +33,16 @@ export default function EditHabitPage() {
     (existing?.daysOfWeek?.split(',').filter((d) => d) as DayOfWeek[]) ?? [],
   )
 
-  const navigate = useNavigate()
-  const emulateSlowConnection = useEmulateSlowConnection((state) => state.active)
   const toggleDay = (day: DayOfWeek) => {
     setSelectedDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]))
   }
-  const editMutation = useMutation({
-    mutationFn: async (habit: HabitsCreateHabitDto | HabitsUpdateHabitDto) => {
-      if (emulateSlowConnection) {
-        await delay(1500)
-      }
-      if ('id' in habit && habit.id) {
-        return habitsApi.apiHabitUpdateGroupIdPut({
-          groupId: habit.id,
-          request: habit,
-        })
-      }
-      return habitsApi.apiHabitCreatePost({
-        request: habit,
-      })
-    },
-    onSuccess: (habitResponse, habitRequest) => {
-      if ('id' in habitRequest && habitRequest.id) {
-        toast.success(`Habit ${habitResponse.name} updated`)
-      } else {
-        toast.success(`Habit ${habitResponse.name} created`)
-      }
-      navigate(-1)
-    },
-    onError: (error) => {
-      console.error(error)
-      toast.error('Failed to save habit', { description: error.message })
-    },
-  })
 
   const handleSubmit = useCallback(
     (e: FormEvent) => {
       if (repeatType === 'weekly' && selectedDays.length === 0) {
+        e.stopPropagation()
         e.preventDefault()
-        TelegramWebApp.showAlert('Please select at least one day')
+        toast.error('Please select at least one day')
       }
     },
     [repeatType, selectedDays],
@@ -107,8 +52,7 @@ export default function EditHabitPage() {
     async (previousState: Partial<HabitsCreateHabitDto>, formData: FormData) => {
       const title = formData.get('title') as string
       const description = (formData.get('description') ?? '') as string
-      const data: HabitsUpdateHabitDto | HabitsCreateHabitDto = {
-        id: id,
+      const data: HabitsCreateHabitDto = {
         icon: emoji,
         desc: description,
         name: title,
@@ -119,7 +63,7 @@ export default function EditHabitPage() {
         repeatType,
         color,
       }
-      editMutation.mutate(data)
+      submit(data)
       return data
     },
     {} as Partial<HabitsCreateHabitDto>,
@@ -222,11 +166,11 @@ export default function EditHabitPage() {
         </div>
 
         <button
-          disabled={editMutation.isPending}
+          disabled={loading}
           type="submit"
           className="bg-tg-button text-tg-button-text w-full cursor-pointer rounded-3xl py-3.5 text-lg font-bold transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {id ? 'Update' : 'Add'}
+          {submitButtonLabel}
         </button>
       </div>
     </form>

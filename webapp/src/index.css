@@ -3,6 +3,8 @@
 @import './light.css';
 @import './dark.css';
 @plugin 'tailwind-scrollbar';
+@plugin "tailwindcss-react-aria-components";
+@plugin 'tailwindcss-animate';
 
 html {
     --tg-color-scheme: dark;
@@ -110,6 +112,37 @@ html {
     --spacing-tg-content-safe-bottom: calc(var(--tg-content-safe-area-inset-bottom) + var(--tg-safe-area-inset-bottom));
     --spacing-tg-content-safe-left: calc(var(--tg-content-safe-area-inset-left) + var(--tg-safe-area-inset-left));
     --spacing-tg-content-safe-right: calc(var(--tg-content-safe-area-inset-right) + var(--tg-safe-area-inset-right));
+}
+
+@theme {
+    --color-primary: var(--md-sys-color-primary);
+    --color-on-primary: var(--md-sys-color-on-primary);
+    --color-primary-hover: color-mix(in srgb, var(--color-primary), var(--color-on-primary) 8%);
+    --color-primary-focus: color-mix(in srgb, var(--color-primary), var(--color-on-primary) 10%);
+    --color-primary-press: color-mix(in srgb, var(--color-primary), var(--color-on-primary) 10%);
+    --color-primary-drag: color-mix(in srgb, var(--color-primary), var(--color-on-primary) 16%);
+
+    --color-primary-container: var(--md-sys-color-primary-container);
+    --color-on-primary-container: var(--md-sys-color-on-primary-container);
+    --color-primary-container-hover: color-mix(in srgb, var(--color-primary-container), var(--color-on-primary-container) 8%);
+    --color-primary-container-focus: color-mix(in srgb, var(--color-primary-container), var(--color-on-primary-container) 10%);
+    --color-primary-container-press: color-mix(in srgb, var(--color-primary-container), var(--color-on-primary-container) 10%);
+    --color-primary-container-drag: color-mix(in srgb, var(--color-primary-container), var(--color-on-primary-container) 16%);
+
+    --color-secondary: var(--md-sys-color-secondary);
+    --color-on-secondary: var(--md-sys-color-on-secondary);
+    --color-secondary-hover: color-mix(in srgb, var(--color-secondary), var(--color-on-secondary) 8%);
+    --color-secondary-focus: color-mix(in srgb, var(--color-secondary), var(--color-on-secondary) 10%);
+    --color-secondary-press: color-mix(in srgb, var(--color-secondary), var(--color-on-secondary) 10%);
+    --color-secondary-drag: color-mix(in srgb, var(--color-secondary), var(--color-on-secondary) 16%);
+
+
+    --color-error: var(--md-sys-color-error);
+    --color-on-error: var(--md-sys-color-on-error);
+    --color-error-hover: color-mix(in srgb, var(--color-error), var(--color-on-error) 8%);
+    --color-error-focus: color-mix(in srgb, var(--color-error), var(--color-on-error) 10%);
+    --color-error-press: color-mix(in srgb, var(--color-error), var(--color-on-error) 10%);
+    --color-error-drag: color-mix(in srgb, var(--color-error), var(--color-on-error) 16%);
 }
 
 body {

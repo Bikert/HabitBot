@@ -4,7 +4,7 @@ var (
 	StepsHabit = CreateHabitDto{
 		BaseHabitDto: BaseHabitDto{
 			Name:       "Норма шагов",
-			Desc:       "Пройти 10 000 шагов за день",
+			Desc:       "Пройти 7 000 шагов за день",
 			Icon:       "👣",
 			Color:      "#b2f2bb",
 			RepeatType: "daily",
@@ -17,7 +17,7 @@ var (
 			Name:       "Зарядка",
 			Desc:       "Сделать утреннюю зарядку",
 			Icon:       "🏃",
-			Color:      "#c77dff",
+			Color:      "#ffc09f",
 			RepeatType: "daily",
 			DaysOfWeek: "",
 		},
@@ -28,7 +28,7 @@ var (
 			Name:       "Соблюдение КБЖУ",
 			Desc:       "Соблюдать нормы калорий, белков, жиров и углеводов",
 			Icon:       "🥗",
-			Color:      "#ffa94d",
+			Color:      "#adf7b6",
 			RepeatType: "daily",
 			DaysOfWeek: "",
 		},
@@ -39,9 +39,8 @@ var (
 			Name:       "Сон до 23:00",
 			Desc:       "Ложиться спать до 23:00",
 			Icon:       "🛌",
-			Color:      "#63e6be",
-			RepeatType: "weekly",
-			DaysOfWeek: "wed,fri",
+			Color:      "#f3c4fb",
+			RepeatType: "daily",
 		},
 	}
 
@@ -50,9 +49,9 @@ var (
 			Name:       "Тренировка",
 			Desc:       "Провести полноценную тренировку",
 			Icon:       "💪",
-			Color:      "#fa5252",
+			Color:      "#bde0fe",
 			RepeatType: "weekly",
-			DaysOfWeek: "mon,wed,fri",
+			DaysOfWeek: "tue, thu, sat",
 		},
 	}
 )

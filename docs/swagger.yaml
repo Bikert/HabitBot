@@ -33,6 +33,11 @@ definitions:
       error:
         type: string
     type: object
+  dto.SuccessResponse:
+    properties:
+      message:
+        type: string
+    type: object
   habits.CompletionRequest:
     properties:
       completed:
@@ -119,8 +124,6 @@ definitions:
         type: string
       icon:
         type: string
-      id:
-        type: string
       name:
         type: string
       repeatType:
@@ -129,7 +132,6 @@ definitions:
     - color
     - firstDate
     - icon
-    - id
     - name
     - repeatType
     type: object
@@ -242,6 +244,112 @@ paths:
             $ref: '#/definitions/habits.HabitDto'
       tags:
       - habits
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID группы привычки
+        in: path
+        name: groupId
+        required: true
+        type: string
+      - description: UpdateHabitDto
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/habits.UpdateHabitDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/habits.HabitDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Обновить привычку
+      tags:
+      - habits
+  /api/habit/{groupId}/{versionId}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID версии привычки
+        in: path
+        name: versionId
+        required: true
+        type: integer
+      - description: ID привычки
+        in: path
+        name: groupId
+        required: true
+        type: string
+      - description: Обновлённые данные привычки
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/habits.UpdateHabitDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/habits.HabitDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Обновить привычку по версии
+      tags:
+      - habits
+  /api/habit/{groupId}/disable:
+    put:
+      parameters:
+      - description: ID привычки
+        in: path
+        name: groupId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Скрыть (отключить) привычку
+      tags:
+      - habits
   /api/habit/{versionId}/{date}:
     patch:
       consumes:
@@ -332,40 +440,6 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Создать новую привычку
-      tags:
-      - habits
-  /api/habit/update/{groupId}:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: ID группы привычки
-        in: path
-        name: groupId
-        required: true
-        type: string
-      - description: UpdateHabitDto
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/habits.UpdateHabitDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/habits.HabitDto'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Обновить привычку
       tags:
       - habits
   /api/user/:

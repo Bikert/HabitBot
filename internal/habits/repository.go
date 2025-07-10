@@ -20,6 +20,8 @@ type Repository interface {
 	HasCompletions(habitID int64) bool
 	SaveOrUpdateCompletion(id int64, date time.Time) error
 	DeleteCompletion(id int64, date time.Time) error
+	GetHabitByVersionIdAndUserID(versionId int64, userID int64) (*Habit, error)
+	GetActiveHabitByGroupIDAndUserId(groupId string, userId int64) (*Habit, error)
 }
 
 type repository struct {
@@ -30,6 +32,16 @@ func NewRepository(db *sqlx.DB) Repository {
 	return &repository{
 		db: db,
 	}
+}
+
+func (r *repository) GetHabitByVersionIdAndUserID(versionId int64, userID int64) (*Habit, error) {
+	var h Habit
+	err := r.db.Get(&h, `SELECT * FROM habits WHERE version_id = ? AND user_id = ?`, versionId, userID)
+	if err != nil {
+		log.Printf("GetHabitByVersionIdAndUserID: failed to get habit with versionId = %d and userId = %d: %v", versionId, userID, err)
+		return nil, err
+	}
+	return &h, err
 }
 
 func (r *repository) GetHabitByVersionID(versionId int64) *Habit {
@@ -46,10 +58,20 @@ func (r *repository) GetActiveHabitByGroupID(groupId string) *Habit {
 	var h Habit
 	err := r.db.Get(&h, `SELECT * FROM habits WHERE group_id = ? AND is_active = 1`, groupId)
 	if err != nil {
-		log.Printf("GetHabitByVersionID: failed to get habit with group_id=%d: %v", groupId, err)
+		log.Printf("GetActiveHabitByGroupID: failed to get habit with group_id=%d: %v", groupId, err)
 		return nil
 	}
 	return &h
+}
+
+func (r *repository) GetActiveHabitByGroupIDAndUserId(groupId string, userId int64) (*Habit, error) {
+	var h Habit
+	err := r.db.Get(&h, `SELECT * FROM habits WHERE group_id = ? AND user_id = ? AND is_active = 1`, groupId, userId)
+	if err != nil {
+		log.Printf("GetActiveHabitByGroupIDAndUserId: failed to get habit with group_id=%d: %v", groupId, err)
+		return nil, err
+	}
+	return &h, nil
 }
 
 func (r *repository) GetActiveHabitsByUserID(userID int64) *[]Habit {
@@ -120,7 +142,7 @@ func (r *repository) UpdateHabit(h *Habit) error {
 	`
 	_, err := r.db.NamedExec(query, h)
 	if err != nil {
-		log.Printf("UpdateHabit: failed to update habit: %v", err)
+		log.Printf("CreateNewVersionHabit: failed to update habit: %v", err)
 		return err
 	}
 	return nil
@@ -148,7 +170,7 @@ func (r *repository) GetCompletedHabitByHabitIdAndDate(id int64, date time.Time)
 	query := `
         SELECT habit_version_id, date, completed
         FROM habit_completions
-        WHERE habit_version_id = ? AND AND date(date) = date(?)
+        WHERE habit_version_id = ? AND date(date) = date(?)
     `
 	err := r.db.Get(&completions, query, id, date)
 	if err != nil {

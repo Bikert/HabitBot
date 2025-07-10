@@ -10,6 +10,7 @@ src/apis/index.ts
 src/index.ts
 src/models/BodyMetricsBodyMetricDTO.ts
 src/models/DtoErrorResponse.ts
+src/models/DtoSuccessResponse.ts
 src/models/HabitsCompletionRequest.ts
 src/models/HabitsCreateHabitDto.ts
 src/models/HabitsHabitCompletionDto.ts
