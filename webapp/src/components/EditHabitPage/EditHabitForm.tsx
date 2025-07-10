@@ -71,7 +71,7 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
 
   return (
     <form autoComplete="off" className="m-5 overflow-y-auto" onSubmit={handleSubmit} action={formAction}>
-      <div className="bg-tg-secondary-bg mx-auto max-w-md rounded-3xl p-5 shadow-lg">
+      <div className="mx-auto max-w-md rounded-3xl bg-tg-secondary-bg p-5 shadow-lg">
         <div className="mb-5 text-center">
           <div
             className={`${pending ? 'animate-spin [animation-duration:1000ms]' : ''} cursor-pointer text-5xl duration-75`}
@@ -89,7 +89,7 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="bg-tg-bg outline-tg-accent-text mb-3 w-full rounded-xl p-3 text-base"
+          className="mb-3 w-full rounded-xl bg-tg-bg p-3 text-base outline-tg-accent-text"
         />
 
         <input
@@ -98,7 +98,7 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
           placeholder="Describe it"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="outline-tg-accent-text bg-tg-bg mb-3 w-full rounded-xl p-3 text-base"
+          className="mb-3 w-full rounded-xl bg-tg-bg p-3 text-base outline-tg-accent-text"
         />
 
         <div className="mb-5">
@@ -111,7 +111,7 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
                   setColor(c)
                   TelegramWebApp.HapticFeedback.selectionChanged()
                 }}
-                className={`border-tg-secondary-bg outline-tg-accent-text box-border h-7 w-7 cursor-pointer rounded-full ${color === c ? 'outline-4' : 'border-2'}`}
+                className={`box-border h-7 w-7 cursor-pointer rounded-full border-tg-secondary-bg outline-tg-accent-text ${color === c ? 'outline-4' : 'border-2'}`}
                 style={{
                   backgroundColor: c,
                 }}
@@ -154,8 +154,8 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
                   }}
                   className={`cursor-pointer rounded-full px-2 py-0.5 font-medium select-none ${
                     selectedDays.includes(day)
-                      ? 'bg-tg-button border-transparent text-white'
-                      : 'bg-tg-bg border-gray-400 text-gray-600'
+                      ? 'border-transparent bg-tg-button text-white'
+                      : 'border-gray-400 bg-tg-bg text-gray-600'
                   }`}
                 >
                   {daysOfWeekLabels[day]}
@@ -168,7 +168,7 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
         <button
           disabled={loading}
           type="submit"
-          className="bg-tg-button text-tg-button-text w-full cursor-pointer rounded-3xl py-3.5 text-lg font-bold transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full cursor-pointer rounded-3xl bg-tg-button py-3.5 text-lg font-bold text-tg-button-text transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitButtonLabel}
         </button>

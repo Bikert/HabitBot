@@ -13,7 +13,7 @@ function ConfigButton({ active, toggle, children }: PropsWithChildren<{ active: 
   return (
     <button
       className={classNames(
-        'ring-tg-button ring-2',
+        'ring-2 ring-tg-button',
         active ? 'bg-tg-button text-tg-button-text' : 'bg-tg-secondary-bg text-tg-button',
       )}
       onClick={toggle}
@@ -43,7 +43,7 @@ export function ConfigPage() {
   const emulateSlowConnectionActive = useEmulateSlowConnection((state) => state.active)
 
   return (
-    <div className="text-tg-button-text fl flex w-full flex-wrap justify-center gap-3 *:rounded-xl *:p-2">
+    <div className="fl flex w-full flex-wrap justify-center gap-3 text-tg-button-text *:rounded-xl *:p-2">
       <ConfigButton active={demoButtonsActive} toggle={toggleDemoButtons}>
         Demo buttons
       </ConfigButton>

@@ -122,10 +122,10 @@ function EditHabit({ id }: { id: string }) {
           <Dialog>
             {({ close }) => (
               <>
-                <Heading slot="title" className="text-tg-section-header-text my-0 text-xl leading-6 font-semibold">
+                <Heading slot="title" className="my-0 text-xl leading-6 font-semibold text-tg-section-header-text">
                   How to apply the changes?
                 </Heading>
-                <div className="text-tg-section-header-text absolute top-6 right-6 h-6 w-6 stroke-2">
+                <div className="absolute top-6 right-6 h-6 w-6 stroke-2 text-tg-section-header-text">
                   <InfoIcon aria-hidden />
                 </div>
                 <p className="mt-3">Change all: both future and past habits will be updated.</p>

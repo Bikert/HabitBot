@@ -13,7 +13,7 @@ export function DebugView() {
       <div>Version: {TelegramWebApp.version}</div>
       <div className="flex gap-4">
         <button
-          className="bg-tg-button cursor-pointer rounded-xl"
+          className="cursor-pointer rounded-xl bg-tg-button"
           onClick={async () => {
             if (user?.id) {
               await navigator.clipboard.writeText(user.id.toString())
@@ -27,7 +27,7 @@ export function DebugView() {
       </div>
       <div className="flex gap-4">
         <button
-          className="bg-tg-button cursor-pointer rounded-xl"
+          className="cursor-pointer rounded-xl bg-tg-button"
           onClick={async () => {
             await navigator.clipboard.writeText(TelegramWebApp.initData)
             toast.info('Copied init data')
@@ -39,7 +39,7 @@ export function DebugView() {
       </div>
       <div className="flex gap-4">
         <button
-          className="bg-tg-button cursor-pointer rounded-xl"
+          className="cursor-pointer rounded-xl bg-tg-button"
           onClick={async () => {
             await navigator.clipboard.writeText(currentLocation)
             toast.info('Copied current location')
@@ -51,7 +51,7 @@ export function DebugView() {
       </div>
       <div className="flex gap-4">
         <button
-          className="bg-tg-button cursor-pointer rounded-xl"
+          className="cursor-pointer rounded-xl bg-tg-button"
           onClick={async () => {
             await navigator.clipboard.writeText(initialLocation ?? '')
             toast.info('Copied initial location')

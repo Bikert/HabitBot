@@ -136,6 +136,26 @@ html {
     --color-secondary-press: color-mix(in srgb, var(--color-secondary), var(--color-on-secondary) 10%);
     --color-secondary-drag: color-mix(in srgb, var(--color-secondary), var(--color-on-secondary) 16%);
 
+    --color-secondary-container: var(--md-sys-color-secondary-container);
+    --color-on-secondary-container: var(--md-sys-color-on-secondary-container);
+    --color-secondary-container-hover: color-mix(in srgb, var(--color-secondary-container), var(--color-on-secondary-container) 8%);
+    --color-secondary-container-focus: color-mix(in srgb, var(--color-secondary-container), var(--color-on-secondary-container) 10%);
+    --color-secondary-container-press: color-mix(in srgb, var(--color-secondary-container), var(--color-on-secondary-container) 10%);
+    --color-secondary-container-drag: color-mix(in srgb, var(--color-secondary-container), var(--color-on-secondary-container) 16%);
+
+    --color-tertiary: var(--md-sys-color-tertiary);
+    --color-on-tertiary: var(--md-sys-color-on-tertiary);
+    --color-tertiary-hover: color-mix(in srgb, var(--color-tertiary), var(--color-on-tertiary) 8%);
+    --color-tertiary-focus: color-mix(in srgb, var(--color-tertiary), var(--color-on-tertiary) 10%);
+    --color-tertiary-press: color-mix(in srgb, var(--color-tertiary), var(--color-on-tertiary) 10%);
+    --color-tertiary-drag: color-mix(in srgb, var(--color-tertiary), var(--color-on-tertiary) 16%);
+
+    --color-tertiary-container: var(--md-sys-color-tertiary-container);
+    --color-on-tertiary-container: var(--md-sys-color-on-tertiary-container);
+    --color-tertiary-container-hover: color-mix(in srgb, var(--color-tertiary-container), var(--color-on-tertiary-container) 8%);
+    --color-tertiary-container-focus: color-mix(in srgb, var(--color-tertiary-container), var(--color-on-tertiary-container) 10%);
+    --color-tertiary-container-press: color-mix(in srgb, var(--color-tertiary-container), var(--color-on-tertiary-container) 10%);
+    --color-tertiary-container-drag: color-mix(in srgb, var(--color-tertiary-container), var(--color-on-tertiary-container) 16%);
 
     --color-error: var(--md-sys-color-error);
     --color-on-error: var(--md-sys-color-on-error);
@@ -143,6 +163,13 @@ html {
     --color-error-focus: color-mix(in srgb, var(--color-error), var(--color-on-error) 10%);
     --color-error-press: color-mix(in srgb, var(--color-error), var(--color-on-error) 10%);
     --color-error-drag: color-mix(in srgb, var(--color-error), var(--color-on-error) 16%);
+
+    --color-error-container: var(--md-sys-color-error-container);
+    --color-on-error-container: var(--md-sys-color-on-error-container);
+    --color-error-container-hover: color-mix(in srgb, var(--color-error-container), var(--color-on-error-container) 8%);
+    --color-error-container-focus: color-mix(in srgb, var(--color-error-container), var(--color-on-error-container) 10%);
+    --color-error-container-press: color-mix(in srgb, var(--color-error-container), var(--color-on-error-container) 10%);
+    --color-error-container-drag: color-mix(in srgb, var(--color-error-container), var(--color-on-error-container) 16%);
 }
 
 body {

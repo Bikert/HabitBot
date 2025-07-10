@@ -109,7 +109,7 @@ function EmojiPicker(props: { close: () => void; onSelect: EmojiSelector } & Rec
 
   return (
     <>
-      <div className="pt-tg-content-safe-top pb-tg-content-safe-bottom pl-tg-content-safe-left pr-tg-content-safe-right fixed top-0 right-0 bottom-0 left-0 z-20 overflow-hidden backdrop-blur-xl">
+      <div className="fixed top-0 right-0 bottom-0 left-0 z-20 overflow-hidden pt-tg-content-safe-top pr-tg-content-safe-right pb-tg-content-safe-bottom pl-tg-content-safe-left backdrop-blur-xl">
         <div className="mx-auto w-10/12 max-w-md overflow-auto overscroll-none opacity-100 *:w-full" ref={ref}></div>
       </div>
     </>
