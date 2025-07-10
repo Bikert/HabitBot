@@ -66,7 +66,7 @@ export default function EditHabitPage() {
   const editMutation = useMutation({
     mutationFn: (habit: HabitsCreateHabitDto | HabitsUpdateHabitDto) => {
       if ('id' in habit && habit.id) {
-        return habitsApi.apiHabitUpdateGroupIdPut({
+        return habitsApi.apiHabitGroupIdPost({
           groupId: habit.id,
           request: habit,
         })

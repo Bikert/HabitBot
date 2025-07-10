@@ -4,6 +4,8 @@ import (
 	"HabitMuse/internal/constants"
 	"HabitMuse/internal/dto"
 	"HabitMuse/internal/utils"
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -28,8 +30,10 @@ func (h *Handler) RegisterRoutes(auth gin.IRouter) {
 		api.GET("/:groupId", h.GetActiveHabitByGroupId)
 		api.GET("/completion/:date", h.GetCompletionHabitsByDate)
 		api.POST("/create", h.CreateHabit)
-		api.PUT("/update/:groupId", h.Update)
+		api.POST("/:groupId", h.CreateNewVersion)
+		api.PUT("/:groupId/:versionId", h.UpdateVersion)
 		api.PATCH("/:versionId/:date", h.ToggleHabitCompletion)
+		api.PUT("/:groupId/disable", h.DisableHabit)
 	}
 }
 
@@ -117,7 +121,7 @@ func (h *Handler) CreateHabit(c *gin.Context) {
 	c.JSON(http.StatusCreated, created)
 }
 
-// Update godoc
+// CreateNewVersion godoc
 // @Summary Обновить привычку
 // @Tags habits
 // @Accept json
@@ -127,8 +131,8 @@ func (h *Handler) CreateHabit(c *gin.Context) {
 // @Success 200 {object} HabitDto
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /api/habit/update/{groupId} [put]
-func (h *Handler) Update(c *gin.Context) {
+// @Router /api/habit/{groupId} [post]
+func (h *Handler) CreateNewVersion(c *gin.Context) {
 	var habitDto *UpdateHabitDto
 	if err := c.ShouldBindJSON(&habitDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -136,7 +140,40 @@ func (h *Handler) Update(c *gin.Context) {
 	}
 	groupId := c.Param("groupId")
 	user := utils.GetUserByCtx(c)
-	updated, err := h.service.UpdateHabit(groupId, habitDto, user)
+	updated, err := h.service.CreateNewVersionHabit(groupId, habitDto, user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not update habit"})
+		return
+	}
+	c.JSON(http.StatusOK, updated)
+}
+
+// UpdateVersion godoc
+// @Summary Обновить привычку по версии
+// @Tags habits
+// @Accept json
+// @Produce json
+// @Param versionId path int true "ID версии привычки"
+// @Param groupId path int true "ID привычки"
+// @Param request body UpdateHabitDto true "Обновлённые данные привычки"
+// @Success 200 {object} HabitDto
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/habit/{groupId}/{versionId} [put]
+func (h *Handler) UpdateVersion(c *gin.Context) {
+	var habitDto *UpdateHabitDto
+	if err := c.ShouldBindJSON(&habitDto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	versionId, err := strconv.ParseInt(c.Param("versionId"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "invalid versionId"})
+		return
+	}
+	user := utils.GetUserByCtx(c)
+	updated, err := h.service.UpdateHabit(versionId, habitDto, user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not update habit"})
 		return
@@ -183,4 +220,29 @@ func (h *Handler) ToggleHabitCompletion(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
+// DisableHabit godoc
+// @Summary Скрыть (отключить) привычку
+// @Tags habits
+// @Produce json
+// @Param groupId path string true "ID привычки"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 409 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/habit/{groupId}/disable [put]
+func (h *Handler) DisableHabit(c *gin.Context) {
+	groupId := c.Param("groupId")
+	user := utils.GetUserByCtx(c)
+	err := h.service.DisableHabit(groupId, user)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusConflict, dto.ErrorResponse{Error: "habit already disabled"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "could not update habit"})
+		return
+	}
+	c.JSON(http.StatusOK, dto.SuccessResponse{Message: "habit disabled"})
 }

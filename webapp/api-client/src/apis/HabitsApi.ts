@@ -49,8 +49,14 @@ export interface ApiHabitGroupIdGetRequest {
     groupId: string;
 }
 
-export interface ApiHabitUpdateGroupIdPutRequest {
+export interface ApiHabitGroupIdPostRequest {
     groupId: string;
+    request: HabitsUpdateHabitDto;
+}
+
+export interface ApiHabitGroupIdVersionIdPutRequest {
+    versionId: number;
+    groupId: number;
     request: HabitsUpdateHabitDto;
 }
 
@@ -132,12 +138,29 @@ export interface HabitsApiInterface {
      * @throws {RequiredError}
      * @memberof HabitsApiInterface
      */
-    apiHabitUpdateGroupIdPutRaw(requestParameters: ApiHabitUpdateGroupIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HabitsHabitDto>>;
+    apiHabitGroupIdPostRaw(requestParameters: ApiHabitGroupIdPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HabitsHabitDto>>;
 
     /**
      * Обновить привычку
      */
-    apiHabitUpdateGroupIdPut(requestParameters: ApiHabitUpdateGroupIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HabitsHabitDto>;
+    apiHabitGroupIdPost(requestParameters: ApiHabitGroupIdPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HabitsHabitDto>;
+
+    /**
+     * 
+     * @summary Обновить привычку по версии
+     * @param {number} versionId ID версии привычки
+     * @param {number} groupId ID привычки
+     * @param {HabitsUpdateHabitDto} request Обновлённые данные привычки
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HabitsApiInterface
+     */
+    apiHabitGroupIdVersionIdPutRaw(requestParameters: ApiHabitGroupIdVersionIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HabitsHabitDto>>;
+
+    /**
+     * Обновить привычку по версии
+     */
+    apiHabitGroupIdVersionIdPut(requestParameters: ApiHabitGroupIdVersionIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HabitsHabitDto>;
 
     /**
      * 
@@ -308,18 +331,18 @@ export class HabitsApi extends runtime.BaseAPI implements HabitsApiInterface {
     /**
      * Обновить привычку
      */
-    async apiHabitUpdateGroupIdPutRaw(requestParameters: ApiHabitUpdateGroupIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HabitsHabitDto>> {
+    async apiHabitGroupIdPostRaw(requestParameters: ApiHabitGroupIdPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HabitsHabitDto>> {
         if (requestParameters['groupId'] == null) {
             throw new runtime.RequiredError(
                 'groupId',
-                'Required parameter "groupId" was null or undefined when calling apiHabitUpdateGroupIdPut().'
+                'Required parameter "groupId" was null or undefined when calling apiHabitGroupIdPost().'
             );
         }
 
         if (requestParameters['request'] == null) {
             throw new runtime.RequiredError(
                 'request',
-                'Required parameter "request" was null or undefined when calling apiHabitUpdateGroupIdPut().'
+                'Required parameter "request" was null or undefined when calling apiHabitGroupIdPost().'
             );
         }
 
@@ -330,7 +353,62 @@ export class HabitsApi extends runtime.BaseAPI implements HabitsApiInterface {
         headerParameters['Content-Type'] = 'application/json';
 
 
-        let urlPath = `/api/habit/update/{groupId}`;
+        let urlPath = `/api/habit/{groupId}`;
+        urlPath = urlPath.replace(`{${"groupId"}}`, encodeURIComponent(String(requestParameters['groupId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: HabitsUpdateHabitDtoToJSON(requestParameters['request']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => HabitsHabitDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Обновить привычку
+     */
+    async apiHabitGroupIdPost(requestParameters: ApiHabitGroupIdPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HabitsHabitDto> {
+        const response = await this.apiHabitGroupIdPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Обновить привычку по версии
+     */
+    async apiHabitGroupIdVersionIdPutRaw(requestParameters: ApiHabitGroupIdVersionIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HabitsHabitDto>> {
+        if (requestParameters['versionId'] == null) {
+            throw new runtime.RequiredError(
+                'versionId',
+                'Required parameter "versionId" was null or undefined when calling apiHabitGroupIdVersionIdPut().'
+            );
+        }
+
+        if (requestParameters['groupId'] == null) {
+            throw new runtime.RequiredError(
+                'groupId',
+                'Required parameter "groupId" was null or undefined when calling apiHabitGroupIdVersionIdPut().'
+            );
+        }
+
+        if (requestParameters['request'] == null) {
+            throw new runtime.RequiredError(
+                'request',
+                'Required parameter "request" was null or undefined when calling apiHabitGroupIdVersionIdPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/habit/{groupId}/{versionId}`;
+        urlPath = urlPath.replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId'])));
         urlPath = urlPath.replace(`{${"groupId"}}`, encodeURIComponent(String(requestParameters['groupId'])));
 
         const response = await this.request({
@@ -345,10 +423,10 @@ export class HabitsApi extends runtime.BaseAPI implements HabitsApiInterface {
     }
 
     /**
-     * Обновить привычку
+     * Обновить привычку по версии
      */
-    async apiHabitUpdateGroupIdPut(requestParameters: ApiHabitUpdateGroupIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HabitsHabitDto> {
-        const response = await this.apiHabitUpdateGroupIdPutRaw(requestParameters, initOverrides);
+    async apiHabitGroupIdVersionIdPut(requestParameters: ApiHabitGroupIdVersionIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HabitsHabitDto> {
+        const response = await this.apiHabitGroupIdVersionIdPutRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

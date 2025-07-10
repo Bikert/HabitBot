@@ -214,8 +214,34 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/habit/update/{groupId}": {
-            "put": {
+        "/api/habit/{groupId}": {
+            "get": {
+                "description": "Returns a single active habit by group ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "habits"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Habit group ID",
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/habits.HabitDto"
+                        }
+                    }
+                }
+            },
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
@@ -266,19 +292,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/habit/{groupId}": {
-            "get": {
-                "description": "Returns a single active habit by group ID",
+        "/api/habit/{groupId}/disable": {
+            "put": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "habits"
                 ],
+                "summary": "Скрыть (отключить) привычку",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Habit group ID",
+                        "description": "ID привычки",
                         "name": "groupId",
                         "in": "path",
                         "required": true
@@ -288,7 +314,90 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
+                            "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/habit/{groupId}/{versionId}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "habits"
+                ],
+                "summary": "Обновить привычку по версии",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID версии привычки",
+                        "name": "versionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID привычки",
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Обновлённые данные привычки",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/habits.UpdateHabitDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
                             "$ref": "#/definitions/habits.HabitDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -458,6 +567,14 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "habits.CompletionRequest": {
             "type": "object",
             "properties": {
@@ -568,7 +685,6 @@ const docTemplate = `{
                 "color",
                 "firstDate",
                 "icon",
-                "id",
                 "name",
                 "repeatType"
             ],
@@ -587,9 +703,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "icon": {
-                    "type": "string"
-                },
-                "id": {
                     "type": "string"
                 },
                 "name": {

@@ -61,7 +61,6 @@ type CreateHabitDto struct {
 
 type UpdateHabitDto struct {
 	BaseHabitDto
-	GroupId string `json:"id" binding:"required"`
 }
 
 type HabitCompletionDto struct {

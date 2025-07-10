@@ -19,10 +19,12 @@ type Service interface {
 	GetHabitByVersionId(versionId int64) *HabitDto
 
 	CreateHabit(dto *CreateHabitDto, user *users.User) (*HabitDto, error)
-	UpdateHabit(groupId string, dto *UpdateHabitDto, user *users.User) (*HabitDto, error)
+	CreateNewVersionHabit(groupId string, dto *UpdateHabitDto, user *users.User) (*HabitDto, error)
+	UpdateHabit(versionId int64, dto *UpdateHabitDto, user *users.User) (*HabitDto, error)
 	CreateBaseHabitsForNewUser(userId int64)
 	GetCompletionHabitsForUserByDate(user *users.User, date time.Time) ([]*HabitCompletionDto, error)
 	ToggleHabitCompletion(user *users.User, id int64, date time.Time, completed bool) error
+	DisableHabit(groupId string, user *users.User) error
 }
 
 type service struct {
@@ -79,6 +81,9 @@ func (s *service) GetHabitsByUser(userId int64) ([]*HabitDto, error) {
 	for i, habit := range *habits {
 		habitsDto[i] = buildHabitDtoByModel(habit)
 	}
+	sort.Slice(habitsDto, func(i, j int) bool {
+		return habitsDto[i].Name < habitsDto[j].Name
+	})
 	return habitsDto, nil
 }
 
@@ -171,7 +176,7 @@ func (s *service) CreateHabit(dto *CreateHabitDto, user *users.User) (*HabitDto,
 	return buildHabitDtoByModel(*habit), nil
 }
 
-func (s *service) UpdateHabit(habitGroupId string, dto *UpdateHabitDto, user *users.User) (*HabitDto, error) {
+func (s *service) CreateNewVersionHabit(habitGroupId string, dto *UpdateHabitDto, user *users.User) (*HabitDto, error) {
 	habit := s.repo.GetActiveHabitByGroupID(habitGroupId)
 	if habit == nil {
 		return nil, errors.New("Habit not found")
@@ -181,7 +186,7 @@ func (s *service) UpdateHabit(habitGroupId string, dto *UpdateHabitDto, user *us
 	if !isHabitChanged(dto, habit) {
 		return &HabitDto{
 			BaseHabitDto: dto.BaseHabitDto,
-			GroupId:      dto.GroupId,
+			GroupId:      habitGroupId,
 			VersionId:    habit.VersionId,
 		}, nil
 	}
@@ -196,6 +201,7 @@ func (s *service) UpdateHabit(habitGroupId string, dto *UpdateHabitDto, user *us
 	}
 
 	newHabit := *habit
+	newHabit.Version = habit.Version + 1
 	updateModelFromDTO(&dto.BaseHabitDto, &newHabit)
 
 	habit.IsActive = false
@@ -209,6 +215,39 @@ func (s *service) UpdateHabit(habitGroupId string, dto *UpdateHabitDto, user *us
 		return nil, err
 	}
 	return buildHabitDtoByModel(newHabit), nil
+}
+
+func (s *service) UpdateHabit(versionId int64, dto *UpdateHabitDto, user *users.User) (*HabitDto, error) {
+	habit, err := s.repo.GetHabitByVersionIdAndUserID(versionId, user.UserID)
+	if err != nil {
+		return nil, err
+	}
+	err = validateHabit(dto.BaseHabitDto)
+	if err != nil {
+		return nil, err
+	}
+	updateModelFromDTO(&dto.BaseHabitDto, habit)
+	err = s.repo.UpdateHabit(habit)
+	if err != nil {
+		return nil, err
+	}
+	return buildHabitDtoByModel(*habit), nil
+
+}
+
+func (s *service) DisableHabit(groupId string, user *users.User) error {
+	habit, err := s.repo.GetActiveHabitByGroupIDAndUserId(groupId, user.UserID)
+	if err != nil {
+		log.Printf("Error geting habit groupId = %s err = %s: \n", groupId, err.Error())
+		return err
+	}
+	habit.IsActive = false
+	err = s.repo.UpdateHabit(habit)
+	if err != nil {
+		log.Printf("Error disabling habit groupId = %s err = %s: \n", groupId, err.Error())
+		return err
+	}
+	return nil
 }
 
 func buildNewModelFromCreateDTO(dto *CreateHabitDto) *Habit {
@@ -228,7 +267,6 @@ func buildNewModelFromCreateDTO(dto *CreateHabitDto) *Habit {
 }
 
 func updateModelFromDTO(dto *BaseHabitDto, habit *Habit) {
-	habit.Version = habit.Version + 1
 	habit.Name = dto.Name
 	habit.Description = dto.Desc
 	habit.Color = dto.Color
