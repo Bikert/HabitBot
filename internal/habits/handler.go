@@ -33,7 +33,7 @@ func (h *Handler) RegisterRoutes(auth gin.IRouter) {
 		api.POST("/:groupId", h.CreateNewVersion)
 		api.PUT("/:groupId/:versionId", h.UpdateVersion)
 		api.PATCH("/:versionId/:date", h.ToggleHabitCompletion)
-		api.PUT("/:groupId/disable", h.DisableHabit)
+		api.POST("/:groupId/disable", h.DisableHabit)
 	}
 }
 
@@ -231,7 +231,7 @@ func (h *Handler) ToggleHabitCompletion(c *gin.Context) {
 // @Failure 404 {object} dto.ErrorResponse
 // @Failure 409 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /api/habit/{groupId}/disable [put]
+// @Router /api/habit/{groupId}/disable [post]
 func (h *Handler) DisableHabit(c *gin.Context) {
 	groupId := c.Param("groupId")
 	user := utils.GetUserByCtx(c)

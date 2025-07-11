@@ -48,7 +48,7 @@ export interface ApiHabitCreatePostRequest {
     request: HabitsCreateHabitDto;
 }
 
-export interface ApiHabitGroupIdDisablePutRequest {
+export interface ApiHabitGroupIdDisablePostRequest {
     groupId: string;
 }
 
@@ -130,12 +130,12 @@ export interface HabitsApiInterface {
      * @throws {RequiredError}
      * @memberof HabitsApiInterface
      */
-    apiHabitGroupIdDisablePutRaw(requestParameters: ApiHabitGroupIdDisablePutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DtoSuccessResponse>>;
+    apiHabitGroupIdDisablePostRaw(requestParameters: ApiHabitGroupIdDisablePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DtoSuccessResponse>>;
 
     /**
      * Скрыть (отключить) привычку
      */
-    apiHabitGroupIdDisablePut(requestParameters: ApiHabitGroupIdDisablePutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DtoSuccessResponse>;
+    apiHabitGroupIdDisablePost(requestParameters: ApiHabitGroupIdDisablePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DtoSuccessResponse>;
 
     /**
      * Returns a single active habit by group ID
@@ -316,11 +316,11 @@ export class HabitsApi extends runtime.BaseAPI implements HabitsApiInterface {
     /**
      * Скрыть (отключить) привычку
      */
-    async apiHabitGroupIdDisablePutRaw(requestParameters: ApiHabitGroupIdDisablePutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DtoSuccessResponse>> {
+    async apiHabitGroupIdDisablePostRaw(requestParameters: ApiHabitGroupIdDisablePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DtoSuccessResponse>> {
         if (requestParameters['groupId'] == null) {
             throw new runtime.RequiredError(
                 'groupId',
-                'Required parameter "groupId" was null or undefined when calling apiHabitGroupIdDisablePut().'
+                'Required parameter "groupId" was null or undefined when calling apiHabitGroupIdDisablePost().'
             );
         }
 
@@ -334,7 +334,7 @@ export class HabitsApi extends runtime.BaseAPI implements HabitsApiInterface {
 
         const response = await this.request({
             path: urlPath,
-            method: 'PUT',
+            method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         }, initOverrides);
@@ -345,8 +345,8 @@ export class HabitsApi extends runtime.BaseAPI implements HabitsApiInterface {
     /**
      * Скрыть (отключить) привычку
      */
-    async apiHabitGroupIdDisablePut(requestParameters: ApiHabitGroupIdDisablePutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DtoSuccessResponse> {
-        const response = await this.apiHabitGroupIdDisablePutRaw(requestParameters, initOverrides);
+    async apiHabitGroupIdDisablePost(requestParameters: ApiHabitGroupIdDisablePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DtoSuccessResponse> {
+        const response = await this.apiHabitGroupIdDisablePostRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
