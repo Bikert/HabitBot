@@ -285,7 +285,7 @@
             }
         },
         "/api/habit/{groupId}/disable": {
-            "put": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],

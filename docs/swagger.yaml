@@ -321,7 +321,7 @@ paths:
       tags:
       - habits
   /api/habit/{groupId}/disable:
-    put:
+    post:
       parameters:
       - description: ID привычки
         in: path
