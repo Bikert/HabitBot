@@ -37,7 +37,7 @@ export const BodyMeasurementsPage = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         {measurementFields.map(({ value, label, unit }) => (
           <div key={value} className="flex items-center gap-4">
-            <label htmlFor={value} className="min-w-[80px] text-sm text-tg-text">
+            <label htmlFor={value} className="min-w-[80px] text-sm text-on-surface">
               {label}
             </label>
             <div className="flex grow items-center">
@@ -47,17 +47,17 @@ export const BodyMeasurementsPage = () => {
                 step="0.1"
                 value={measurements[value] || ''}
                 onChange={(e) => handleInputChange(value, e.target.value)}
-                className="grow rounded-lg bg-tg-secondary-bg px-3 py-2 text-tg-text focus:ring-2 focus:ring-tg-accent-text focus:outline-none"
+                className="grow rounded-lg bg-surface-container-low px-3 py-2 text-on-surface-variant focus:ring-2 focus:ring-secondary focus:outline-none"
                 placeholder={`Enter ${label.toLowerCase()}`}
               />
-              <span className="ml-2 min-w-[30px] text-tg-hint">{unit}</span>
+              <span className="ml-2 min-w-[30px]">{unit}</span>
             </div>
           </div>
         ))}
 
         <button
           type="submit"
-          className="mt-6 w-full rounded-lg bg-tg-button px-4 py-2 text-tg-button-text transition-opacity hover:opacity-90"
+          className="mt-6 w-full rounded-lg bg-primary px-4 py-2 text-on-primary transition-opacity hover:opacity-90"
         >
           Save Measurements
         </button>

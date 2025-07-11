@@ -10,7 +10,7 @@ export function NavigationButton({ to, children }: PropsWithChildren<{ to: To }>
       className={({ isActive, isPending }) =>
         classNames(
           'flex h-14 w-14 items-center justify-center rounded-full text-2xl',
-          isActive ? 'pointer-events-none bg-tg-bg' : 'bg-tg-secondary-bg',
+          isActive ? 'pointer-events-none bg-surface-variant' : 'bg-tg-bottom-bar-bg',
           isPending && 'pointer-events-none animate-spin',
         )
       }
@@ -22,7 +22,7 @@ export function NavigationButton({ to, children }: PropsWithChildren<{ to: To }>
 
 export function AddHabitButton() {
   return (
-    <div className="absolute right-1/12 bottom-1/12 rounded-full shadow-xl ring-2 shadow-tg-bg ring-tg-bg select-none">
+    <div className="absolute right-1/12 bottom-1/12 rounded-full shadow-xl ring-2 shadow-tg-bottom-bar-bg ring-surface select-none">
       <NavigationButton to={PATHS.editHabit()}>
         <span className="material-icons">add</span>
       </NavigationButton>

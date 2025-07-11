@@ -75,7 +75,7 @@ export const HabitOnDateRow = ({ completed, habit, date, flippedProps }: HabitOn
       >
         <span>{habit.icon}</span>
         <span className="min-w-0 overflow-x-clip text-nowrap text-ellipsis">{habit.name}</span>
-        {optimisticCompleted && <div className="absolute top-1/2 box-border h-[1px] w-full bg-tg-text px-11" />}
+        {optimisticCompleted && <div className="absolute top-1/2 box-border h-[1px] w-full bg-surface px-11" />}
       </div>
       <NavLink to={`/habit/${habit.id}`} className="flex items-center">
         <span className="material-icons">edit</span>

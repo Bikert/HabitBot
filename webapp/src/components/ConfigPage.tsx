@@ -12,10 +12,7 @@ import classNames from 'classnames'
 function ConfigButton({ active, toggle, children }: PropsWithChildren<{ active: boolean; toggle: { (): void } }>) {
   return (
     <button
-      className={classNames(
-        'ring-2 ring-tg-button',
-        active ? 'bg-tg-button text-tg-button-text' : 'bg-tg-secondary-bg text-tg-button',
-      )}
+      className={classNames(active ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant')}
       onClick={toggle}
     >
       {children}
@@ -43,7 +40,7 @@ export function ConfigPage() {
   const emulateSlowConnectionActive = useEmulateSlowConnection((state) => state.active)
 
   return (
-    <div className="fl flex w-full flex-wrap justify-center gap-3 text-tg-button-text *:rounded-xl *:p-2">
+    <div className="fl flex w-full flex-wrap justify-center gap-3 *:rounded-xl *:p-2">
       <ConfigButton active={demoButtonsActive} toggle={toggleDemoButtons}>
         Demo buttons
       </ConfigButton>

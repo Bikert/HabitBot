@@ -4,11 +4,12 @@ import { focusRing } from './utils'
 
 export interface ButtonProps extends RACButtonProps {
   variant?: 'primary' | 'secondary' | 'destructive' | 'icon'
+  size?: 'sm' | 'md' | 'xs'
 }
 
 const button = tv({
   extend: focusRing,
-  base: 'cursor-default rounded-lg border border-black/10 px-5 py-2 text-center text-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition dark:border-white/10 dark:shadow-none',
+  base: 'cursor-default rounded-lg border border-black/10 text-center shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition dark:border-white/10 dark:shadow-none',
   variants: {
     variant: {
       primary: 'bg-primary text-on-primary hover:bg-primary-hover pressed:bg-primary-press',
@@ -16,12 +17,18 @@ const button = tv({
       destructive: 'bg-error text-on-error hover:bg-error-hover pressed:bg-error-press',
       icon: 'flex items-center justify-center border-0 p-1 text-gray-600 hover:bg-black/[5%] disabled:bg-transparent dark:text-zinc-400 dark:hover:bg-white/10 pressed:bg-black/10 dark:pressed:bg-white/20',
     },
+    size: {
+      xs: 'px-2 py-1 text-xs',
+      sm: 'px-5 py-2 text-sm',
+      md: 'text-md px-5 py-2',
+    },
     isDisabled: {
       true: 'border-black/5 bg-gray-100 text-gray-300 dark:border-white/5 dark:bg-zinc-800 dark:text-zinc-600 forced-colors:text-[GrayText]',
     },
   },
   defaultVariants: {
     variant: 'primary',
+    size: 'sm',
   },
 })
 
@@ -30,7 +37,7 @@ export function Button(props: ButtonProps) {
     <RACButton
       {...props}
       className={composeRenderProps(props.className, (className, renderProps) =>
-        button({ ...renderProps, variant: props.variant, className }),
+        button({ ...renderProps, variant: props.variant, size: props.size, className }),
       )}
     />
   )

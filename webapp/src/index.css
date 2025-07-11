@@ -116,56 +116,90 @@ html {
 
 @theme {
     --color-primary: var(--md-sys-color-primary);
+    --color-surface-tint: var(--md-sys-color-surface-tint);
     --color-on-primary: var(--md-sys-color-on-primary);
+    --color-primary-container: var(--md-sys-color-primary-container);
+    --color-on-primary-container: var(--md-sys-color-on-primary-container);
+    --color-secondary: var(--md-sys-color-secondary);
+    --color-on-secondary: var(--md-sys-color-on-secondary);
+    --color-secondary-container: var(--md-sys-color-secondary-container);
+    --color-on-secondary-container: var(--md-sys-color-on-secondary-container);
+    --color-tertiary: var(--md-sys-color-tertiary);
+    --color-on-tertiary: var(--md-sys-color-on-tertiary);
+    --color-tertiary-container: var(--md-sys-color-tertiary-container);
+    --color-on-tertiary-container: var(--md-sys-color-on-tertiary-container);
+    --color-error: var(--md-sys-color-error);
+    --color-on-error: var(--md-sys-color-on-error);
+    --color-error-container: var(--md-sys-color-error-container);
+    --color-on-error-container: var(--md-sys-color-on-error-container);
+    --color-background: var(--md-sys-color-background);
+    --color-on-background: var(--md-sys-color-on-background);
+    --color-surface: var(--md-sys-color-surface);
+    --color-on-surface: var(--md-sys-color-on-surface);
+    --color-surface-variant: var(--md-sys-color-surface-variant);
+    --color-on-surface-variant: var(--md-sys-color-on-surface-variant);
+    --color-outline: var(--md-sys-color-outline);
+    --color-outline-variant: var(--md-sys-color-outline-variant);
+    --color-shadow: var(--md-sys-color-shadow);
+    --color-scrim: var(--md-sys-color-scrim);
+    --color-inverse-surface: var(--md-sys-color-inverse-surface);
+    --color-inverse-on-surface: var(--md-sys-color-inverse-on-surface);
+    --color-inverse-primary: var(--md-sys-color-inverse-primary);
+    --color-primary-fixed: var(--md-sys-color-primary-fixed);
+    --color-on-primary-fixed: var(--md-sys-color-on-primary-fixed);
+    --color-primary-fixed-dim: var(--md-sys-color-primary-fixed-dim);
+    --color-on-primary-fixed-variant: var(--md-sys-color-on-primary-fixed-variant);
+    --color-secondary-fixed: var(--md-sys-color-secondary-fixed);
+    --color-on-secondary-fixed: var(--md-sys-color-on-secondary-fixed);
+    --color-secondary-fixed-dim: var(--md-sys-color-secondary-fixed-dim);
+    --color-on-secondary-fixed-variant: var(--md-sys-color-on-secondary-fixed-variant);
+    --color-tertiary-fixed: var(--md-sys-color-tertiary-fixed);
+    --color-on-tertiary-fixed: var(--md-sys-color-on-tertiary-fixed);
+    --color-tertiary-fixed-dim: var(--md-sys-color-tertiary-fixed-dim);
+    --color-on-tertiary-fixed-variant: var(--md-sys-color-on-tertiary-fixed-variant);
+    --color-surface-dim: var(--md-sys-color-surface-dim);
+    --color-surface-bright: var(--md-sys-color-surface-bright);
+    --color-surface-container-lowest: var(--md-sys-color-surface-container-lowest);
+    --color-surface-container-low: var(--md-sys-color-surface-container-low);
+    --color-surface-container: var(--md-sys-color-surface-container);
+    --color-surface-container-high: var(--md-sys-color-surface-container-high);
+    --color-surface-container-highest: var(--md-sys-color-surface-container-highest);
+
     --color-primary-hover: color-mix(in srgb, var(--color-primary), var(--color-on-primary) 8%);
     --color-primary-focus: color-mix(in srgb, var(--color-primary), var(--color-on-primary) 10%);
     --color-primary-press: color-mix(in srgb, var(--color-primary), var(--color-on-primary) 10%);
     --color-primary-drag: color-mix(in srgb, var(--color-primary), var(--color-on-primary) 16%);
 
-    --color-primary-container: var(--md-sys-color-primary-container);
-    --color-on-primary-container: var(--md-sys-color-on-primary-container);
     --color-primary-container-hover: color-mix(in srgb, var(--color-primary-container), var(--color-on-primary-container) 8%);
     --color-primary-container-focus: color-mix(in srgb, var(--color-primary-container), var(--color-on-primary-container) 10%);
     --color-primary-container-press: color-mix(in srgb, var(--color-primary-container), var(--color-on-primary-container) 10%);
     --color-primary-container-drag: color-mix(in srgb, var(--color-primary-container), var(--color-on-primary-container) 16%);
 
-    --color-secondary: var(--md-sys-color-secondary);
-    --color-on-secondary: var(--md-sys-color-on-secondary);
     --color-secondary-hover: color-mix(in srgb, var(--color-secondary), var(--color-on-secondary) 8%);
     --color-secondary-focus: color-mix(in srgb, var(--color-secondary), var(--color-on-secondary) 10%);
     --color-secondary-press: color-mix(in srgb, var(--color-secondary), var(--color-on-secondary) 10%);
     --color-secondary-drag: color-mix(in srgb, var(--color-secondary), var(--color-on-secondary) 16%);
 
-    --color-secondary-container: var(--md-sys-color-secondary-container);
-    --color-on-secondary-container: var(--md-sys-color-on-secondary-container);
     --color-secondary-container-hover: color-mix(in srgb, var(--color-secondary-container), var(--color-on-secondary-container) 8%);
     --color-secondary-container-focus: color-mix(in srgb, var(--color-secondary-container), var(--color-on-secondary-container) 10%);
     --color-secondary-container-press: color-mix(in srgb, var(--color-secondary-container), var(--color-on-secondary-container) 10%);
     --color-secondary-container-drag: color-mix(in srgb, var(--color-secondary-container), var(--color-on-secondary-container) 16%);
 
-    --color-tertiary: var(--md-sys-color-tertiary);
-    --color-on-tertiary: var(--md-sys-color-on-tertiary);
     --color-tertiary-hover: color-mix(in srgb, var(--color-tertiary), var(--color-on-tertiary) 8%);
     --color-tertiary-focus: color-mix(in srgb, var(--color-tertiary), var(--color-on-tertiary) 10%);
     --color-tertiary-press: color-mix(in srgb, var(--color-tertiary), var(--color-on-tertiary) 10%);
     --color-tertiary-drag: color-mix(in srgb, var(--color-tertiary), var(--color-on-tertiary) 16%);
 
-    --color-tertiary-container: var(--md-sys-color-tertiary-container);
-    --color-on-tertiary-container: var(--md-sys-color-on-tertiary-container);
     --color-tertiary-container-hover: color-mix(in srgb, var(--color-tertiary-container), var(--color-on-tertiary-container) 8%);
     --color-tertiary-container-focus: color-mix(in srgb, var(--color-tertiary-container), var(--color-on-tertiary-container) 10%);
     --color-tertiary-container-press: color-mix(in srgb, var(--color-tertiary-container), var(--color-on-tertiary-container) 10%);
     --color-tertiary-container-drag: color-mix(in srgb, var(--color-tertiary-container), var(--color-on-tertiary-container) 16%);
 
-    --color-error: var(--md-sys-color-error);
-    --color-on-error: var(--md-sys-color-on-error);
     --color-error-hover: color-mix(in srgb, var(--color-error), var(--color-on-error) 8%);
     --color-error-focus: color-mix(in srgb, var(--color-error), var(--color-on-error) 10%);
     --color-error-press: color-mix(in srgb, var(--color-error), var(--color-on-error) 10%);
     --color-error-drag: color-mix(in srgb, var(--color-error), var(--color-on-error) 16%);
 
-    --color-error-container: var(--md-sys-color-error-container);
-    --color-on-error-container: var(--md-sys-color-on-error-container);
     --color-error-container-hover: color-mix(in srgb, var(--color-error-container), var(--color-on-error-container) 8%);
     --color-error-container-focus: color-mix(in srgb, var(--color-error-container), var(--color-on-error-container) 10%);
     --color-error-container-press: color-mix(in srgb, var(--color-error-container), var(--color-on-error-container) 10%);

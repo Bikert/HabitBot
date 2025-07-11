@@ -17,7 +17,7 @@ import { useTelegramTheme } from './stores/useTelegramTheme'
 function AppHeader() {
   const showHeader = useShowHeader((state) => state.active)
   return (
-    <div className="bg-tg-bg backdrop-opacity-50">
+    <div className="bg-background backdrop-opacity-50">
       <div className="min-h-tg-content-safe-top-inset">
         {showHeader && <h1 className="p-2 text-center text-3xl font-bold">HabitBot {location.pathname}</h1>}
       </div>
@@ -27,7 +27,7 @@ function AppHeader() {
 
 function AppFooter() {
   return (
-    <div className="rounded-t-4xl bg-tg-secondary-bg pb-tg-safe-bottom">
+    <div className="rounded-t-4xl bg-tg-bottom-bar-bg pb-tg-safe-bottom">
       <NavigationButtons />
     </div>
   )
