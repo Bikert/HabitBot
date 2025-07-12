@@ -1,17 +1,28 @@
-export function throttle<TV, T extends TV[]>(fn: (...args: T) => void, delay: number) {
+function noop() {}
+
+export function throttle<TV, T extends TV[]>(fn: (...args: T) => void, delay: number, triggerImmediately = true) {
   let timer = 0
-  let delayedArgs = [] as unknown as T
-  const callback = () => {
-    fn(...delayedArgs)
+  let scheduledAction = noop
+  const actionAndClear = () => {
+    scheduledAction()
+    timer = 0
+    scheduledAction = noop
   }
 
   return function (...args: T) {
-    delayedArgs = args
-    if (!timer) {
-      timer = window.setTimeout(() => {
-        callback()
-        timer = 0
-      }, delay)
+    const action = () => fn(...args)
+    if (timer) {
+      scheduledAction = action
+      return
+    }
+
+    timer = window.setTimeout(actionAndClear, delay)
+
+    if (triggerImmediately) {
+      scheduledAction = noop
+      action()
+    } else {
+      scheduledAction = action
     }
   }
 }
