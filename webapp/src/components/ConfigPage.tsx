@@ -7,19 +7,13 @@ import {
   useVerticalSwipes,
 } from '../stores/featureFlagsStores'
 import type { PropsWithChildren } from 'react'
-import classNames from 'classnames'
+import { ToggleButton } from './common/ToggleButton'
 
 function ConfigButton({ active, toggle, children }: PropsWithChildren<{ active: boolean; toggle: { (): void } }>) {
   return (
-    <button
-      className={classNames(
-        'ring-tg-button ring-2',
-        active ? 'bg-tg-button text-tg-button-text' : 'bg-tg-secondary-bg text-tg-button',
-      )}
-      onClick={toggle}
-    >
+    <ToggleButton isSelected={active} onClick={toggle} size="sm">
       {children}
-    </button>
+    </ToggleButton>
   )
 }
 
@@ -43,7 +37,7 @@ export function ConfigPage() {
   const emulateSlowConnectionActive = useEmulateSlowConnection((state) => state.active)
 
   return (
-    <div className="text-tg-button-text fl flex w-full flex-wrap justify-center gap-3 *:rounded-xl *:p-2">
+    <div className="fl flex w-full flex-wrap justify-center gap-2">
       <ConfigButton active={demoButtonsActive} toggle={toggleDemoButtons}>
         Demo buttons
       </ConfigButton>

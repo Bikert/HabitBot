@@ -33,11 +33,11 @@ export const BodyMeasurementsPage = () => {
 
   return (
     <div className="mx-auto max-w-md p-4">
-      <h1 className="text-tg-text mb-6 text-2xl font-bold">Body Measurements</h1>
+      <h1 className="mb-6 text-2xl font-bold text-tg-text">Body Measurements</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         {measurementFields.map(({ value, label, unit }) => (
           <div key={value} className="flex items-center gap-4">
-            <label htmlFor={value} className="text-tg-text min-w-[80px] text-sm">
+            <label htmlFor={value} className="min-w-[80px] text-sm text-on-surface">
               {label}
             </label>
             <div className="flex grow items-center">
@@ -47,17 +47,17 @@ export const BodyMeasurementsPage = () => {
                 step="0.1"
                 value={measurements[value] || ''}
                 onChange={(e) => handleInputChange(value, e.target.value)}
-                className="bg-tg-secondary-bg text-tg-text focus:ring-tg-accent-text grow rounded-lg px-3 py-2 focus:ring-2 focus:outline-none"
+                className="grow rounded-lg bg-surface-container-low px-3 py-2 text-on-surface-variant focus:ring-2 focus:ring-secondary focus:outline-none"
                 placeholder={`Enter ${label.toLowerCase()}`}
               />
-              <span className="text-tg-hint ml-2 min-w-[30px]">{unit}</span>
+              <span className="ml-2 min-w-[30px]">{unit}</span>
             </div>
           </div>
         ))}
 
         <button
           type="submit"
-          className="bg-tg-button text-tg-button-text mt-6 w-full rounded-lg px-4 py-2 transition-opacity hover:opacity-90"
+          className="mt-6 w-full rounded-lg bg-primary px-4 py-2 text-on-primary transition-opacity hover:opacity-90"
         >
           Save Measurements
         </button>

@@ -5,5 +5,9 @@ singleQuote: true
 jsxSingleQuote: false
 endOfLine: auto
 printWidth: 120
+tailwindStylesheet: "./src/index.css"
+tailwindFunctions:
+  - tv
+  - twMerge
 plugins:
   - prettier-plugin-tailwindcss
