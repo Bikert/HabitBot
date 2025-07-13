@@ -1,5 +1,5 @@
 import type { HabitsCreateHabitDto, HabitsHabitDto } from '@habit-bot/api-client'
-import { type FormEvent, Fragment, useActionState, useCallback, useState } from 'react'
+import { type FormEvent, useActionState, useCallback, useState } from 'react'
 import { colors, type DayOfWeek, daysOfWeek, daysOfWeekLabels, repeatTypes } from '../../constants/HabitOptions'
 import { randomElement } from '../../utils/randomElement'
 import { toast } from 'sonner'
