@@ -29,7 +29,6 @@ export function Description(props: TextProps) {
 }
 
 export function FieldError(props: FieldErrorProps) {
-  console.log(props, 'field error props')
   return (
     <RACFieldError
       {...props}
