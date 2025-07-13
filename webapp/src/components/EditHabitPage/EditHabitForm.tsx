@@ -16,6 +16,9 @@ import { TelegramWebApp } from '../../telegram'
 import { TextField } from '../common/TextField'
 import { Form } from '../common/Form'
 import { Button } from '../common/Button'
+import { ColorSwatchPicker, ColorSwatchPickerItem } from '../common/ColorSwatchPicker'
+import { parseColor } from 'react-aria-components'
+import { Label } from '../common/Field'
 
 interface EditHabitFormProps {
   existing?: HabitsHabitDto
@@ -28,9 +31,7 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
   const [title, setTitle] = useState(existing?.name ?? '')
   const [description, setDescription] = useState(existing?.desc ?? '')
   const [emoji, setEmoji] = useState(existing?.icon ?? '⭐')
-  const [color, setColor] = useState<HabitColor>(
-    (existing?.color as HabitColor) ?? randomElement(colors as unknown as HabitColor[]),
-  )
+  const [color, setColor] = useState(parseColor(existing?.color ?? randomElement(colors as unknown as string[])))
   const [repeatType, setRepeatType] = useState<RepeatType>(existing?.repeatType === 'weekly' ? 'weekly' : 'daily')
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>(
     (existing?.daysOfWeek?.split(',').filter((d) => d) as DayOfWeek[]) ?? [],
@@ -50,6 +51,7 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
     },
     [repeatType, selectedDays],
   )
+  console.log(color)
 
   const [, formAction, pending] = useActionState(
     async (previousState: Partial<HabitsCreateHabitDto>, formData: FormData) => {
@@ -64,7 +66,7 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
         // firstDate: getCurrentDateApiString(),
         firstDate: new Date().toISOString(),
         repeatType,
-        color,
+        color: color.toString('hex'),
       }
       submit(data)
       return data
@@ -75,8 +77,8 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
   return (
     <>
       <div className="mx-auto max-w-md rounded-3xl bg-surface-container-low p-5 shadow-lg">
-        <Form autoComplete="off" className="m-5 overflow-y-auto" onSubmit={handleSubmit} action={formAction}>
-          <div className="mb-5 text-center">
+        <Form autoComplete="off" className="overflow-y-auto" onSubmit={handleSubmit} action={formAction}>
+          <div className="text-center">
             <div
               className={`${pending ? 'animate-spin [animation-duration:1000ms]' : ''} cursor-pointer text-5xl duration-75`}
             >
@@ -87,15 +89,12 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
 
           <TextField
             autoFocus
-            // type="text"
             name="title"
             label="Title"
             description="Name your new task"
-            // placeholder="Name your new task"
             value={title}
             onChange={setTitle}
             isRequired
-            // className="mb-3 w-full rounded-xl bg-tg-bg p-3 text-base outline-tg-accent-text"
           />
 
           <TextField
@@ -105,30 +104,27 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
             description="Describe it"
             value={description}
             onChange={setDescription}
-            // className="mb-3 w-full rounded-xl bg-tg-bg p-3 text-base outline-tg-accent-text"
           />
 
-          <div className="mb-5">
-            <b>Card Color</b>
-            <div className="mt-2 flex justify-center-safe gap-2">
-              {colors.map((c) => (
-                <div
-                  key={c}
-                  onClick={() => {
-                    setColor(c)
-                    TelegramWebApp.HapticFeedback.selectionChanged()
-                  }}
-                  className={`box-border h-7 w-7 cursor-pointer rounded-full border-tg-secondary-bg outline-tg-accent-text ${color === c ? 'outline-4' : 'border-2'}`}
-                  style={{
-                    backgroundColor: c,
-                  }}
-                />
-              ))}
+          <div className="flex flex-col gap-1">
+            <Label>Card Color</Label>
+            <div className="flex justify-center-safe">
+              <ColorSwatchPicker
+                value={color}
+                onChange={(c) => {
+                  setColor(c)
+                  TelegramWebApp.HapticFeedback.selectionChanged()
+                }}
+              >
+                {colors.map((c) => (
+                  <ColorSwatchPickerItem key={c} color={c} />
+                ))}
+              </ColorSwatchPicker>
             </div>
           </div>
 
-          <div className="mb-5">
-            <b>Repeat</b>
+          <div>
+            <Label>Repeat</Label>
 
             <div className="mt-2 flex overflow-hidden rounded-xl select-none">
               {repeatTypes.map((type) => (
@@ -174,7 +170,7 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
 
           <Button
             isPending={loading}
-            // disabled={loading}
+            isDisabled={loading}
             type="submit"
             className="w-full cursor-pointer rounded-3xl py-3.5 text-lg font-bold transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50"
           >

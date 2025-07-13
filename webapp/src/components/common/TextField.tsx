@@ -23,7 +23,6 @@ export interface TextFieldProps extends AriaTextFieldProps {
 }
 
 export function TextField({ label, description, errorMessage, ...props }: TextFieldProps) {
-  console.log(errorMessage, 'error message')
   return (
     <AriaTextField {...props} className={composeTailwindRenderProps(props.className, 'flex flex-col gap-1')}>
       {({ isInvalid }) => (
