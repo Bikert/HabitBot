@@ -56,15 +56,6 @@ const MEASUREMENTS_MAP = {
 export function BodyMeasurementsForm() {
   const [measurements, setMeasurements] = useState<BodyMetricsBodyMetricDTO>({ date: new Date().toISOString() })
 
-  const handleSubmit = useCallback((e: FormEvent) => {
-    e.preventDefault()
-    const result: BodyMetricsBodyMetricDTO = {
-      ...measurements,
-      date: new Date().toISOString(),
-    }
-    mutation.mutate(result)
-  }, [])
-
   const mutation = useMutation({
     mutationFn: (data: BodyMetricsBodyMetricDTO) => bodyMetricApi.apiBodyMetricCreatePost({ metric: data }),
     onSuccess: () => {
@@ -74,6 +65,18 @@ export function BodyMeasurementsForm() {
       toast.error('Возникла ошибка ', { description: error.message })
     },
   })
+
+  const handleSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault()
+      const result: BodyMetricsBodyMetricDTO = {
+        ...measurements,
+        date: new Date().toISOString(),
+      }
+      mutation.mutate(result)
+    },
+    [measurements, mutation],
+  )
 
   return (
     <form className="m-5 overflow-y-auto" onSubmit={handleSubmit}>
