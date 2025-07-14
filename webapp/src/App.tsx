@@ -52,7 +52,7 @@ function App() {
       {showDemoButtons && <SecondaryButton text="secondary" />}
       {/* Layout container */}
       <div className="relative box-border flex h-full flex-col pt-tg-safe-top pr-tg-safe-right pl-tg-safe-left">
-        <Toaster theme={theme} richColors position="top-right" swipeDirections={['left', 'right']} />
+        <Toaster theme={theme} position="top-right" swipeDirections={['left', 'right']} />
         {fixedLayoutElements && <AppHeader />}
         {/* Non-scrollable positioned container for absolute elements */}
         <div className="relative flex min-h-0 shrink grow">
