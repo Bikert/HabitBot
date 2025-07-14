@@ -207,7 +207,7 @@ func (bot *Bot) mainMenu(update tgbotapi.Update, sess *session.Session) error {
 			tgbotapi.InlineKeyboardButton{
 				Text: "Пора измеряться!",
 				WebApp: &tgbotapi.WebAppInfo{
-					URL: config.Get().WebBaseUrl,
+					URL: config.Get().WebBaseUrl + "body-measurements",
 				},
 			},
 		},
