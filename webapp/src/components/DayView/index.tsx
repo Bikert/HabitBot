@@ -35,7 +35,7 @@ function HabitDateNavLink({ date: dateApiString }: { date: DateApiString }) {
         classNames(
           'rounded-xl px-2 py-1',
           isActive
-            ? 'bg-md-primary text-md-on-primary pointer-events-none'
+            ? 'pointer-events-none bg-md-primary text-md-on-primary'
             : 'bg-md-primary-container text-md-on-primary-container',
           isPending && 'pointer-events-none',
         )
@@ -48,7 +48,7 @@ function HabitDateNavLink({ date: dateApiString }: { date: DateApiString }) {
           <div className="absolute right-0 left-0">{dayOfWeek}</div>
           <div className="invisible">Mon</div>
         </div>
-        <div className="bg-md-surface text-md-on-surface flex h-8 w-8 items-center justify-center rounded-full">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-md-surface text-md-on-surface">
           <p>{dayOfMonth}</p>
         </div>
       </div>

@@ -17,7 +17,7 @@ import { useTelegramTheme } from './stores/useTelegramTheme'
 function AppHeader() {
   const showHeader = useShowHeader((state) => state.active)
   return (
-    <div className="bg-tg-bg backdrop-opacity-50">
+    <div className="bg-background backdrop-opacity-50">
       <div className="min-h-tg-content-safe-top-inset">
         {showHeader && <h1 className="p-2 text-center text-3xl font-bold">HabitBot {location.pathname}</h1>}
       </div>
@@ -27,7 +27,7 @@ function AppHeader() {
 
 function AppFooter() {
   return (
-    <div className="pb-tg-safe-bottom bg-tg-secondary-bg rounded-t-4xl">
+    <div className="rounded-t-4xl bg-tg-bottom-bar-bg pb-tg-safe-bottom">
       <NavigationButtons />
     </div>
   )
@@ -51,7 +51,7 @@ function App() {
       {showDemoButtons && <MainButton text="submit" />}
       {showDemoButtons && <SecondaryButton text="secondary" />}
       {/* Layout container */}
-      <div className="pl-tg-safe-left pr-tg-safe-right pt-tg-safe-top relative box-border flex h-full flex-col">
+      <div className="relative box-border flex h-full flex-col pt-tg-safe-top pr-tg-safe-right pl-tg-safe-left">
         <Toaster theme={theme} richColors position="top-right" swipeDirections={['left', 'right']} />
         {fixedLayoutElements && <AppHeader />}
         {/* Non-scrollable positioned container for absolute elements */}

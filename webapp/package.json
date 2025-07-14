@@ -35,6 +35,7 @@
     "build:api": "cd ./api-client && npm run build",
     "preview": "vite preview",
     "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "generate:api": "openapi-generator-cli generate -i ../docs/swagger.yaml -g typescript-fetch -o api-client --additional-properties=npmName=@habit-bot/api-client,supportsES6=true,withInterfaces=true && npm run build:api",
     "postinstall": "npm run build:api"
   },
@@ -52,7 +53,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^16.2.0",
     "prettier": "^3.5.3",
-    "prettier-plugin-tailwindcss": "^0.6.13",
+    "prettier-plugin-tailwindcss": "^0.6.14",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.1",
     "vite": "^6.3.5"
