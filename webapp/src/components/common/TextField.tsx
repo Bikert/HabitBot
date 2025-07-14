@@ -1,6 +1,8 @@
 import {
   TextField as AriaTextField,
+  NumberField as AriaNumberField,
   TextFieldProps as AriaTextFieldProps,
+  NumberFieldProps as AriaNumberFieldProps,
   ValidationResult,
 } from 'react-aria-components'
 import { tv } from 'tailwind-variants'
@@ -16,11 +18,15 @@ const inputStyles = tv({
   },
 })
 
-export interface TextFieldProps extends AriaTextFieldProps {
+interface AdditionalFieldProps {
   label?: string
   description?: string
   errorMessage?: string | ((validation: ValidationResult) => string)
 }
+
+export type TextFieldProps = AriaTextFieldProps & AdditionalFieldProps
+
+export type NumberFieldProps = AriaNumberFieldProps & AdditionalFieldProps
 
 export function TextField({ label, description, errorMessage, ...props }: TextFieldProps) {
   return (
@@ -34,5 +40,20 @@ export function TextField({ label, description, errorMessage, ...props }: TextFi
         </>
       )}
     </AriaTextField>
+  )
+}
+
+export function NumberField({ label, description, errorMessage, ...props }: NumberFieldProps) {
+  return (
+    <AriaNumberField {...props} className={composeTailwindRenderProps(props.className, 'flex flex-col gap-1')}>
+      {({ isInvalid }) => (
+        <>
+          {label && <Label>{label}</Label>}
+          <Input className={inputStyles} />
+          {!isInvalid && description && <Description>{description}</Description>}
+          <FieldError>{errorMessage}</FieldError>
+        </>
+      )}
+    </AriaNumberField>
   )
 }
