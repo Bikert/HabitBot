@@ -131,14 +131,14 @@ function EditHabit({ id }: { id: string }) {
                 <p className="mt-3 text-on-surface-variant">Change all: both future and past habits will be updated.</p>
                 <p className="mt-3 text-on-surface-variant">Change only future: only future habits will be updated.</p>
                 <div className="mt-4 flex justify-between gap-2">
-                  <Button variant="destructive" onPress={close}>
+                  <Button color="destructive" onPress={close}>
                     Cancel
                   </Button>
                   <div className="flex justify-end gap-2">
-                    <Button variant="secondary" onPress={chain(updateVersionMutation.mutate, close)}>
+                    <Button color="secondary" onPress={chain(updateVersionMutation.mutate, close)}>
                       Change all
                     </Button>
-                    <Button variant="primary" autoFocus onPress={chain(newVersionMutation.mutate, close)}>
+                    <Button autoFocus onPress={chain(newVersionMutation.mutate, close)}>
                       Change only future
                     </Button>
                   </div>

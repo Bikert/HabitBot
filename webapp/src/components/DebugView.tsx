@@ -15,7 +15,7 @@ export function DebugView() {
       <div className="flex items-baseline gap-4">
         <Button
           size="xs"
-          variant="secondary"
+          variant="tonal"
           className="cursor-pointer"
           onClick={async () => {
             if (user?.id) {
@@ -31,7 +31,7 @@ export function DebugView() {
       <div className="flex items-baseline gap-4">
         <Button
           size="xs"
-          variant="secondary"
+          variant="tonal"
           className="cursor-pointer"
           onClick={async () => {
             await navigator.clipboard.writeText(TelegramWebApp.initData)
@@ -45,7 +45,7 @@ export function DebugView() {
       <div className="flex items-baseline gap-4">
         <Button
           size="xs"
-          variant="secondary"
+          variant="tonal"
           className="cursor-pointer"
           onClick={async () => {
             await navigator.clipboard.writeText(currentLocation)
@@ -59,7 +59,7 @@ export function DebugView() {
       <div className="flex items-baseline gap-4">
         <Button
           size="xs"
-          variant="secondary"
+          variant="tonal"
           className="cursor-pointer"
           onClick={async () => {
             await navigator.clipboard.writeText(initialLocation ?? '')
