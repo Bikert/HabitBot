@@ -1,4 +1,4 @@
-import { BlockerFunction, type LoaderFunction, replace, useBlocker, useNavigate, useParams } from 'react-router'
+import { type LoaderFunction, replace, useNavigate, useParams } from 'react-router'
 import { delay } from '../../utils/delay'
 import { queryClient } from '../../api/queryClient'
 import { habitsApi } from '../../api/habitsApi'
@@ -6,13 +6,14 @@ import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-que
 import type { HabitsCreateHabitDto } from '@habit-bot/api-client'
 import { DialogTrigger, Heading } from 'react-aria-components'
 import { EditHabitForm } from './EditHabitForm'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { InfoIcon } from 'lucide-react'
 import { chain } from 'react-aria'
 import { Modal } from '../common/Modal'
 import { Button } from '../common/Button'
 import { Dialog } from '../common/Dialog'
 import { toast } from '../common/Toast'
+import { useRegisterBlockerCallback } from '../../utils/useRegisterBlockerCallback'
 
 function habitQueryOptions(id: string) {
   return queryOptions({
@@ -105,15 +106,10 @@ function EditHabit({ id }: { id: string }) {
     },
   })
 
-  const blocker = useBlocker(
-    useCallback<BlockerFunction>(({ historyAction }) => historyAction === 'POP' && dialogOpened, [dialogOpened]),
-  )
-  useEffect(() => {
-    if (blocker.state === 'blocked') {
-      setDialogOpened(false)
-      blocker.reset()
-    }
-  }, [blocker])
+  useRegisterBlockerCallback({
+    blockerCallback: useCallback(() => setDialogOpened(false), []),
+    isBlocked: dialogOpened,
+  })
 
   return (
     <>

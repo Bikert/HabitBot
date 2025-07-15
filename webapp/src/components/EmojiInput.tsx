@@ -1,10 +1,9 @@
 import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
-import { BlockerFunction, useBlocker } from 'react-router'
-import { Picker } from 'emoji-mart'
+import { init, Picker } from 'emoji-mart'
 import { TelegramWebApp } from '../telegram'
 import data from '@emoji-mart/data'
-import { init } from 'emoji-mart'
 import { useTelegramTheme } from '../stores/useTelegramTheme'
+import { useRegisterBlockerCallback } from '../utils/useRegisterBlockerCallback'
 
 // noinspection JSIgnoredPromiseFromCall
 init(data)
@@ -26,15 +25,10 @@ export function EmojiInput(props: { value: string; setValue: Dispatch<SetStateAc
     setOpened(false)
   }, [])
 
-  const blocker = useBlocker(
-    useCallback<BlockerFunction>(({ historyAction }) => historyAction === 'POP' && opened, [opened]),
-  )
-  useEffect(() => {
-    if (blocker.state === 'blocked') {
-      setOpened(false)
-      blocker.reset()
-    }
-  }, [blocker])
+  useRegisterBlockerCallback({
+    blockerCallback: useCallback(() => setOpened(false), []),
+    isBlocked: opened,
+  })
 
   return (
     <>

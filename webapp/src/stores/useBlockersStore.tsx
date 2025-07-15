@@ -6,7 +6,7 @@ export interface BlockerState {
   removeBlocker: (blocker: () => void) => void
 }
 
-export const useBlockers = create<BlockerState>()((set) => ({
+export const useBlockersStore = create<BlockerState>()((set) => ({
   blockers: new Set<() => void>(),
   addBlocker: (blocker: () => void) =>
     set((state) => ({

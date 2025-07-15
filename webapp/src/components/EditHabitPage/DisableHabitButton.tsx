@@ -1,14 +1,15 @@
-import { BlockerFunction, useBlocker, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { useMutation } from '@tanstack/react-query'
 import { habitsApi } from '../../api/habitsApi'
 import { toast } from '../common/Toast'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Button, type ButtonProps } from '../common/Button'
 import { DialogTrigger, Heading } from 'react-aria-components'
 import { Modal } from '../common/Modal'
 import { Dialog } from '../common/Dialog'
 import { InfoIcon } from 'lucide-react'
 import { chain } from 'react-aria'
+import { useRegisterBlockerCallback } from '../../utils/useRegisterBlockerCallback'
 
 type DisableHabitButtonProps = Omit<ButtonProps, 'onPress'> & { habitId: string }
 
@@ -30,16 +31,12 @@ export function DisableHabitButton({ habitId, ...buttonProps }: DisableHabitButt
     },
   })
   const [dialogOpened, setDialogOpened] = useState(false)
-  const blocker = useBlocker(
-    useCallback<BlockerFunction>(({ historyAction }) => historyAction === 'POP' && dialogOpened, [dialogOpened]),
-  )
-  useEffect(() => {
-    console.log(blocker.state, 'blocker state')
-    if (blocker.state === 'blocked') {
-      setDialogOpened(false)
-      blocker.reset()
-    }
-  }, [blocker])
+
+  useRegisterBlockerCallback({
+    blockerCallback: useCallback(() => setDialogOpened(false), []),
+    isBlocked: dialogOpened,
+  })
+
   return (
     <>
       <Button
