@@ -1,7 +1,7 @@
 import { TelegramWebApp } from '../telegram'
 import { useShowDebugInformation } from '../stores/featureFlagsStores'
-import { toast } from 'sonner'
 import { Button } from './common/Button'
+import { toast } from './common/Toast'
 
 export function DebugView() {
   const user = TelegramWebApp.initDataUnsafe?.user
@@ -20,7 +20,7 @@ export function DebugView() {
           onClick={async () => {
             if (user?.id) {
               await navigator.clipboard.writeText(user.id.toString())
-              toast.info('Copied user ID')
+              toast.success('Copied user ID')
             }
           }}
         >
@@ -35,7 +35,7 @@ export function DebugView() {
           className="cursor-pointer"
           onClick={async () => {
             await navigator.clipboard.writeText(TelegramWebApp.initData)
-            toast.info('Copied init data')
+            toast.success('Copied init data')
           }}
         >
           📋Init data
@@ -49,7 +49,7 @@ export function DebugView() {
           className="cursor-pointer"
           onClick={async () => {
             await navigator.clipboard.writeText(currentLocation)
-            toast.info('Copied current location')
+            toast.success('Copied current location')
           }}
         >
           📋Location
@@ -63,7 +63,7 @@ export function DebugView() {
           className="cursor-pointer"
           onClick={async () => {
             await navigator.clipboard.writeText(initialLocation ?? '')
-            toast.info('Copied initial location')
+            toast.success('Copied initial location')
           }}
         >
           📋Initial location

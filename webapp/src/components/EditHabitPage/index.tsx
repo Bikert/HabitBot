@@ -4,7 +4,6 @@ import { queryClient } from '../../api/queryClient'
 import { habitsApi } from '../../api/habitsApi'
 import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-query'
 import type { HabitsCreateHabitDto } from '@habit-bot/api-client'
-import { toast } from 'sonner'
 import { DialogTrigger, Heading } from 'react-aria-components'
 import { EditHabitForm } from './EditHabitForm'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -13,6 +12,7 @@ import { chain } from 'react-aria'
 import { Modal } from '../common/Modal'
 import { Button } from '../common/Button'
 import { Dialog } from '../common/Dialog'
+import { toast } from '../common/Toast'
 
 function habitQueryOptions(id: string) {
   return queryOptions({

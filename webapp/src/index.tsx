@@ -12,7 +12,7 @@ import { DayView, dayViewLoader } from './components/DayView'
 import { delay } from './utils/delay'
 import { PATHS } from './constants/paths'
 import { HabitsListPage } from './components/HabitsListPage'
-import { BodyMeasurementsPage } from './components/BodyMeasurementsPage'
+import { BodyMeasurementsPage } from './components/BodyMeasurements/BodyMeasurementsPage'
 import { TelegramWebApp } from './telegram'
 
 if (!sessionStorage['initialLocation']) {

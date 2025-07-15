@@ -2,7 +2,6 @@ import type { HabitsCreateHabitDto, HabitsHabitDto } from '@habit-bot/api-client
 import { type FormEvent, useActionState, useCallback, useState } from 'react'
 import { colors, type DayOfWeek, daysOfWeek, daysOfWeekLabels, repeatTypes } from '../../constants/HabitOptions'
 import { randomElement } from '../../utils/randomElement'
-import { toast } from 'sonner'
 import { EmojiInput } from '../EmojiInput'
 import { TelegramWebApp } from '../../telegram'
 import { TextField } from '../common/TextField'
@@ -13,6 +12,7 @@ import { Key, parseColor } from 'react-aria-components'
 import { Label } from '../common/Field'
 import { ToggleButtonGroup } from '../common/ToggleButtonGroup'
 import { ToggleButton } from '../common/ToggleButton'
+import { toast } from '../common/Toast'
 
 interface EditHabitFormProps {
   existing?: HabitsHabitDto
@@ -67,7 +67,7 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
   return (
     <>
       <div className="mx-auto max-w-md rounded-3xl bg-surface-container-low p-5 shadow-lg">
-        <Form autoComplete="off" className="gap-5 overflow-y-auto p-2" onSubmit={handleSubmit} action={formAction}>
+        <Form autoComplete="off" className="" onSubmit={handleSubmit} action={formAction}>
           <div className="flex flex-col text-center">
             <div
               className={`${pending ? 'animate-spin [animation-duration:1000ms]' : ''} cursor-pointer text-5xl duration-75`}
