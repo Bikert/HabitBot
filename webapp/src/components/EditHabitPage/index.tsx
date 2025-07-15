@@ -131,7 +131,7 @@ function EditHabit({ id }: { id: string }) {
                 <p className="mt-3 text-on-surface-variant">Change all: both future and past habits will be updated.</p>
                 <p className="mt-3 text-on-surface-variant">Change only future: only future habits will be updated.</p>
                 <div className="mt-4 flex justify-between gap-2">
-                  <Button color="destructive" onPress={close}>
+                  <Button variant="tonal" onPress={close}>
                     Cancel
                   </Button>
                   <div className="flex justify-end gap-2">

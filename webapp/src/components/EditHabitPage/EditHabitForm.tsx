@@ -13,6 +13,7 @@ import { Label } from '../common/Field'
 import { ToggleButtonGroup } from '../common/ToggleButtonGroup'
 import { ToggleButton } from '../common/ToggleButton'
 import { toast } from '../common/Toast'
+import { DisableHabitButton } from './DisableHabitButton'
 
 interface EditHabitFormProps {
   existing?: HabitsHabitDto
@@ -160,15 +161,22 @@ export function EditHabitForm({ existing, submit, submitButtonLabel, loading }: 
             </div>
           </div>
 
-          <Button
-            isPending={loading}
-            isDisabled={loading}
-            type="submit"
-            size="lg"
-            className="w-full cursor-pointer select-none disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {submitButtonLabel}
-          </Button>
+          <div className="mt-4 flex justify-center gap-2">
+            {!!existing?.id && (
+              <DisableHabitButton habitId={existing.id} className="align-text-top">
+                <span className="material-icons">delete</span>
+              </DisableHabitButton>
+            )}
+            <Button
+              isPending={loading}
+              isDisabled={loading}
+              type="submit"
+              size="lg"
+              className="w-full cursor-pointer select-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitButtonLabel}
+            </Button>
+          </div>
         </Form>
       </div>
     </>
