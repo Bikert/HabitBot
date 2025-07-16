@@ -211,6 +211,60 @@ html {
     --color-surface-container-drag: color-mix(in srgb, var(--color-surface-container), var(--color-on-surface-variant) 16%);
 }
 
+@utility override-color-secondary {
+    --color-primary:var(--color-secondary);
+    --color-on-primary:var(--color-on-secondary);
+    --color-primary-container:var(--color-secondary-container);
+    --color-on-primary-container:var(--color-on-secondary-container);
+    --color-primary-fixed:var(--color-secondary-fixed);
+    --color-on-primary-fixed:var(--color-on-secondary-fixed);
+    --color-primary-fixed-dim:var(--color-secondary-fixed-dim);
+    --color-on-primary-fixed-variant:var(--color-on-secondary-fixed-variant);
+    --color-primary-hover:var(--color-secondary-hover);
+    --color-primary-focus:var(--color-secondary-focus);
+    --color-primary-press:var(--color-secondary-press);
+    --color-primary-drag:var(--color-secondary-drag);
+    --color-primary-container-hover:var(--color-secondary-container-hover);
+    --color-primary-container-focus:var(--color-secondary-container-focus);
+    --color-primary-container-press:var(--color-secondary-container-press);
+    --color-primary-container-drag:var(--color-secondary-container-drag);
+}
+
+
+@utility override-color-tertiary {
+    --color-primary:var(--color-tertiary);
+    --color-on-primary:var(--color-on-tertiary);
+    --color-primary-container:var(--color-tertiary-container);
+    --color-on-primary-container:var(--color-on-tertiary-container);
+    --color-primary-fixed:var(--color-tertiary-fixed);
+    --color-on-primary-fixed:var(--color-on-tertiary-fixed);
+    --color-primary-fixed-dim:var(--color-tertiary-fixed-dim);
+    --color-on-primary-fixed-variant:var(--color-on-tertiary-fixed-variant);
+    --color-primary-hover:var(--color-tertiary-hover);
+    --color-primary-focus:var(--color-tertiary-focus);
+    --color-primary-press:var(--color-tertiary-press);
+    --color-primary-drag:var(--color-tertiary-drag);
+    --color-primary-container-hover:var(--color-tertiary-container-hover);
+    --color-primary-container-focus:var(--color-tertiary-container-focus);
+    --color-primary-container-press:var(--color-tertiary-container-press);
+    --color-primary-container-drag:var(--color-tertiary-container-drag);
+}
+
+@utility override-color-destructive {
+    --color-primary:var(--color-error);
+    --color-on-primary:var(--color-on-error);
+    --color-primary-container:var(--color-error-container);
+    --color-on-primary-container:var(--color-on-error-container);
+    --color-primary-hover:var(--color-error-hover);
+    --color-primary-focus:var(--color-error-focus);
+    --color-primary-press:var(--color-error-press);
+    --color-primary-drag:var(--color-error-drag);
+    --color-primary-container-hover:var(--color-error-container-hover);
+    --color-primary-container-focus:var(--color-error-container-focus);
+    --color-primary-container-press:var(--color-error-container-press);
+    --color-primary-container-drag:var(--color-error-container-drag);
+}
+
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

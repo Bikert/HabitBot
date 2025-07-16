@@ -13,6 +13,7 @@ import { useViewportHeight } from './utils/useViewportHeight'
 import { PATHS } from './constants/paths'
 import { Toaster } from 'sonner'
 import { useTelegramTheme } from './stores/useTelegramTheme'
+import { useSharedNavigationBlocker } from './utils/useSharedNavigationBlocker'
 
 function AppHeader() {
   const showHeader = useShowHeader((state) => state.active)
@@ -42,6 +43,8 @@ function App() {
 
   const viewportHeight = useViewportHeight()
   const fixedLayoutElements = viewportHeight && viewportHeight > 560
+
+  useSharedNavigationBlocker()
 
   return (
     <QueryClientProvider client={queryClient}>

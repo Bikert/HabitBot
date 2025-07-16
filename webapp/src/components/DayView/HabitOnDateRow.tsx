@@ -66,7 +66,6 @@ export const HabitOnDateRow = ({ completed, habit, date, flippedProps }: HabitOn
       )}
       style={{
         backgroundColor: `color-mix(in srgb, ${habit.color}, transparent 40%)`,
-        viewTransitionName: 'match-element',
       }}
     >
       <div
