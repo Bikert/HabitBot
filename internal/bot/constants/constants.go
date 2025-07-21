@@ -5,4 +5,5 @@ const OpenApp = "open"
 const (
 	ScenarioWelcome      = "welcome"
 	ScenarioRegistration = "registration"
+	ScenarioDefault      = "default"
 )

@@ -85,16 +85,25 @@ func (bot *Bot) onStart() {
 			message := utils.GetMessage(&update)
 			sess := bot.sessionService.GetOrCreateSessionForUser(user.UserID)
 
-			if message.IsCommand() {
-				bot.commandStepResolver(update, sess)
+			if sess.Scenario == constants.ScenarioWelcome {
+				bot.sendWelcomeMessage(update, message)
+				sess.Scenario = constants.ScenarioDefault
+				bot.sessionService.Save(*sess)
 				continue
 			}
 
-			if update.CallbackQuery != nil {
-				bot.callbackStepResolver(sess, update)
-				continue
-			}
-			bot.scenarioResolver(sess, update)
+			bot.sendDefaultMessage(message)
+
+			//if message.IsCommand() {
+			//	bot.commandStepResolver(update, sess)
+			//	continue
+			//}
+			//
+			//if update.CallbackQuery != nil {
+			//	bot.callbackStepResolver(sess, update)
+			//	continue
+			//}
+			//bot.scenarioResolver(sess, update)
 		}
 	}()
 }
@@ -230,4 +239,41 @@ func (bot *Bot) sendErrorMessage(update tgbotapi.Update, err error) {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func (bot *Bot) sendWelcomeMessage(update tgbotapi.Update, message *tgbotapi.Message) {
+	text := "💁‍♀️ Привет, богиня самодисциплины (ну или на пути к ней)!\n\nТы только что сделала первый шаг к телу мечты — или хотя бы к тому, чтобы не есть чизкейк каждый день 🧁😉\n\n👇 Жми кнопку ниже — там тебя ждёт наше уютное приложение, где ты сможешь следить за своими привычками и становиться лучше день за днём.\n\n⚠️ Приложение ещё в разработке, так что если что-то покажется странным — просто напиши всё сюда: @BikertE 💌\n\nГотова? Ведь красота требует не жертв, а дисциплины — мягкой, но регулярной ✨"
+	buttons := [][]tgbotapi.InlineKeyboardButton{
+		{
+			tgbotapi.InlineKeyboardButton{
+				Text: "Трекать, а не страдать 🧘‍♀️",
+				WebApp: &tgbotapi.WebAppInfo{
+					URL: config.Get().WebBaseUrl,
+				},
+			},
+		},
+	}
+	markup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
+	msg := tgbotapi.NewMessage(message.Chat.ID, text)
+	msg.ReplyMarkup = markup
+	bot.api.Send(msg)
+}
+
+func (bot *Bot) sendDefaultMessage(message *tgbotapi.Message) {
+	text := "🤷‍♀️ Ой! Кажется, я не поняла, что ты хотела сказать.\nМожет, это секретная команда, которую ещё не придумали? 🕵️‍♀️✨\n\nЕсли что-то не работает или есть идея получше — пиши сюда: @BikertE 💌\nА пока можешь просто нажать кнопку ниже и продолжить путь к супер-версии себя 💪💖"
+	buttons := [][]tgbotapi.InlineKeyboardButton{
+		{
+			tgbotapi.InlineKeyboardButton{
+				Text: "К лучшей версии себя 💖",
+				WebApp: &tgbotapi.WebAppInfo{
+					URL: config.Get().WebBaseUrl,
+				},
+			},
+		},
+	}
+	markup := tgbotapi.NewInlineKeyboardMarkup(buttons...)
+	msg := tgbotapi.NewMessage(message.Chat.ID, text)
+	msg.ReplyMarkup = markup
+	bot.api.Send(msg)
+
 }
