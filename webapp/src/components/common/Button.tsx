@@ -3,7 +3,8 @@ import { tv } from 'tailwind-variants'
 import { focusRing } from './utils'
 
 export interface ButtonVariants {
-  variant?: 'primary' | 'secondary' | 'destructive' | 'icon'
+  variant?: 'filled' | 'elevated' | 'tonal' | 'outlined' | 'text'
+  color?: 'primary' | 'secondary' | 'tertiary' | 'destructive'
   size?: 'sm' | 'md' | 'xs' | 'lg'
 }
 
@@ -11,15 +12,22 @@ export type ButtonProps = RACButtonProps & ButtonVariants
 
 export const buttonStyles = tv({
   extend: focusRing,
-  // TODO
-  base: 'cursor-default rounded-full border border-black/10 text-center font-medium shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition dark:border-white/10 dark:shadow-none',
+  base: 'relative cursor-default rounded-full text-center font-medium transition',
   variants: {
     variant: {
-      primary: 'bg-primary text-on-primary hover:bg-primary-hover pressed:bg-primary-press',
-      secondary: 'bg-secondary text-on-secondary hover:bg-secondary-hover pressed:bg-secondary-press',
-      destructive: 'bg-error text-on-error hover:bg-error-hover pressed:bg-error-press',
-      // TODO
-      icon: 'flex items-center justify-center border-0 p-1 text-gray-600 hover:bg-black/[5%] disabled:bg-transparent dark:text-zinc-400 dark:hover:bg-white/10 pressed:bg-black/10 dark:pressed:bg-white/20',
+      filled: 'bg-primary text-on-primary hover:bg-primary-hover pressed:bg-primary-press',
+      elevated: 'bg-surface-container-low text-primary shadow shadow-shadow',
+      tonal:
+        'bg-secondary-container text-on-secondary-container hover:bg-secondary-container-hover disabled:text-on-surface pressed:bg-secondary-container-press',
+      outlined:
+        'border border-outline-variant bg-outline-variant text-on-surface-variant selected:bg-inverse-surface selected:text-inverse-on-surface',
+      text: 'text-primary hover:bg-primary/10 disabled:bg-on-background/10 disabled:text-on-surface/40 pressed:bg-primary/10',
+    },
+    color: {
+      primary: '',
+      secondary: 'override-color-secondary',
+      tertiary: 'override-color-tertiary',
+      destructive: 'override-color-destructive',
     },
     size: {
       xs: 'px-2 py-1 text-xs',
@@ -36,7 +44,8 @@ export const buttonStyles = tv({
     },
   },
   defaultVariants: {
-    variant: 'primary',
+    variant: 'filled',
+    color: 'primary',
     size: 'sm',
   },
 })
@@ -46,7 +55,7 @@ export function Button(props: ButtonProps) {
     <RACButton
       {...props}
       className={composeRenderProps(props.className, (className, renderProps) =>
-        buttonStyles({ ...renderProps, variant: props.variant, size: props.size, className }),
+        buttonStyles({ ...renderProps, variant: props.variant, size: props.size, color: props.color, className }),
       )}
     />
   )

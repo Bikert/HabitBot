@@ -18,7 +18,7 @@ const styles = tv({
   },
   compoundVariants: [
     {
-      variant: 'primary',
+      variant: 'filled',
       isSelected: false,
       class:
         'focus-within::bg-surface-container-focus bg-surface-container text-on-surface-variant hover:bg-surface-container-hover pressed:bg-surface-container-press',
